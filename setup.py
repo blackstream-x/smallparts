@@ -80,7 +80,7 @@ setup(
 
     # This should be a valid email address corresponding to the author listed
     # above.
-    author_email='rainer@blackstream.de,  # Optional
+    author_email='rainer@blackstream.de',  # Optional
 
     # Classifiers help users find your project by categorizing it.
     #
