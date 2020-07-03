@@ -2,7 +2,7 @@
 
 """
 
-markup - markup (HTML, XML) generation
+smallparts.markup - markup (HTML, XML) generation
 
 """
 
@@ -13,9 +13,11 @@ import re
 import unicodedata
 import xml.sax.saxutils
 
-from . import constants
-from . import textutils
-from .namespaces import Namespace, InstantNames
+from smallparts import constants
+from smallparts import textutils
+from smallparts import transcode
+
+from smallparts.namespaces import Namespace, InstantNames
 
 
 
@@ -176,7 +178,7 @@ def make_html5_attributes_string(attributes=None, **kwargs):
     Attributes with False or None values are ignored,
     attributes with True values or with the name as value
     are rendered as empty attributes. All other attributes
-    are rendered normally."""
+    are rendered normally, including those with an empty string."""
     if attributes is None:
         attributes = {}
     attributes.update(kwargs)
@@ -184,7 +186,8 @@ def make_html5_attributes_string(attributes=None, **kwargs):
     for (attr_name, attr_value) in attributes.items():
         if attr_value is None or attr_value is False:
             continue
-        elif attr_value is True or attr_value == attr_name:
+        #
+        if attr_value is True or attr_value == attr_name:
             tag_attributes_list.append(attr_name)
         else:
             tag_attributes_list.append(xml_attribute(attr_name,
@@ -243,14 +246,13 @@ def resolve_matched_charref(match_object):
 #
 
 
-INVALID_XML_CODEPOINTS = [codepoint for codepoint in range(0, 9)] + \
-                         [codepoint for codepoint in range(11, 32)] + [127]
+INVALID_XML_CODEPOINTS = list(range(0, 9)) + list(range(11, 32)) + [127]
 XML_REPLACEMENTS = dict((chr(codepoint),
-                         textutils.to_unicode(entity(codepoint)))
+                         entity(codepoint))
                         for codepoint in [34, 39, 60, 62, 91, 93])
 XML_REPLACEMENTS.update(dict.fromkeys(
     [chr(codepoint) for codepoint in INVALID_XML_CODEPOINTS],
-    textutils.to_unicode(constants.EMPTY)))
+    constants.EMPTY))
 
 
 #
@@ -261,7 +263,7 @@ XML_REPLACEMENTS.update(dict.fromkeys(
 # pylint: disable=too-few-public-methods; not suitable for the element classes
 
 
-class XmlElement(object):
+class XmlElement():
 
     """Callable XML element"""
 
@@ -400,14 +402,13 @@ class XmlGenerator(Namespace):
         """
         if name in type(self).visible_attributes:
             return object.__getattribute__(self, name)
-        else:
-            try:
-                return self[name]
-            except KeyError:
-                new_function = type(self).element_factory(name)
-                setattr(self, name, new_function)
-                return new_function
-            #
+        #
+        try:
+            return self[name]
+        except KeyError:
+            new_function = type(self).element_factory(name)
+            setattr(self, name, new_function)
+            return new_function
         #
 
 
@@ -454,22 +455,22 @@ class HTMLTagStripper(html.parser.HTMLParser):
     def __add_body_content(self, content):
         """Add content if self.__in_body"""
         if self.__in_body:
-            self.__content_list.append(textutils.to_unicode(content))
+            self.__content_list.append(content)
         #
 
     @property
     def content(self):
         """Return the result"""
         _content = PRX_MULTI_SPACE.sub(
-            textutils.to_unicode(constants.BLANK),
-            textutils.to_unicode(constants.EMPTY).join(self.__content_list))
-        return PRX_NEWLINE_AND_WHITESPACE.sub(
-            textutils.to_unicode(constants.NEWLINE), _content).strip()
+            constants.BLANK,
+            constants.EMPTY.join(self.__content_list))
+        return PRX_NEWLINE_AND_WHITESPACE.sub(constants.NEWLINE,
+                                              _content).strip()
 
     @property
     def image_descriptions(self):
         """Return the saved image descriptions"""
-        return [description for description in self.__image_descriptions]
+        return list(self.__image_descriptions)
 
     def feed_html_body_only(self, dangerous_html_data):
         """Feed self the given HTML <body> section only
@@ -486,7 +487,7 @@ class HTMLTagStripper(html.parser.HTMLParser):
 
     def handle_data(self, data):
         """Collect content"""
-        self.__add_body_content(data)
+        self.__add_body_content(transcode.anything_to_unicode(data))
 
     def handle_charref(self, name):
         """Resolve numeric character reference"""
@@ -531,11 +532,11 @@ class HTMLTagStripper(html.parser.HTMLParser):
         #
 
 
-class Translation(object):
+class Translation():
 
     """Translations class, providing some standard classmethods"""
 
-    amp_text = textutils.to_unicode(constants.AMPERSAND)
+    amp_text = constants.AMPERSAND
     amp_xml = escape(amp_text)
     prx_named_entity = re.compile(FS_ENTITY.format(r'([a-z]\w+?)'))
     prx_numeric_entity = \
@@ -543,44 +544,36 @@ class Translation(object):
     # staticmethod attached to the class
     defuse_to_xml = textutils.MakeTranslationFunction(XML_REPLACEMENTS)
 
-    def __init__(self):
-        """Provide a staticmethod translating the replaceable codepoints
-        to matching numeric entity references"""
-        pass
-
     @classmethod
     def ampersand_to_xml(cls, input_string):
         """Encode ampersand to named entity"""
-        return textutils.to_unicode(input_string).replace(cls.amp_text,
-                                                          cls.amp_xml)
+        return input_string.replace(constants.AMPERSAND, cls.amp_xml)
 
     @classmethod
     def ampersand_from_xml(cls, input_string):
         """Decode ampersand from named entity"""
-        return textutils.to_unicode(input_string).replace(cls.amp_xml,
-                                                          cls.amp_text)
+        return input_string.replace(cls.amp_xml, constants.AMPERSAND, )
 
     @classmethod
     def to_xmlentities_encoded(cls, input_string):
         """Return the result of ascii encoding the input string,
         with all non-ascii characters replaced by numeric entities.
         """
-        return textutils.to_unicode(input_string).encode(
-            KEY.ascii, KEY.xmlcharrefreplace)
+        return input_string.encode(KEY.ascii, KEY.xmlcharrefreplace)
 
     @classmethod
     def to_xmlentities(cls, input_string):
         """Replace non-ascii characters by numeric entities,
         return unicode
         """
-        return textutils.to_unicode(
+        return transcode.to_unicode(
             cls.to_xmlentities_encoded(input_string))
 
     @classmethod
     def from_xmlentities(cls, input_string):
         """Resolve numeric XML entities only"""
         return cls.prx_numeric_entity.sub(resolve_matched_charref,
-                                          textutils.to_unicode(input_string))
+                                          input_string)
 
     @classmethod
     def full_xml_encode(cls, input_string):

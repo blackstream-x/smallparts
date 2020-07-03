@@ -2,7 +2,7 @@
 
 """
 
-universal_transcoder
+smallparts.transcode
 
 Universal text decoding and encoding functions,
 with additional functions to read and write text files.
@@ -11,6 +11,7 @@ with additional functions to read and write text files.
 
 
 import codecs
+import re
 
 
 # Encodings
@@ -54,8 +55,7 @@ def to_unicode_and_encoding_name(
         input_fallback_codec=DEFAULT_INPUT_FALLBACK_CODEC):
     """Try to decode the input object to a unicode string
     and return a tuple containing the conversion result
-    (which will always a be unicode string) and the
-    source encoding name.
+    and the source encoding name.
 
     Any conversion errors will raise the original exception
     (probably a UnicodeDecodeError).
@@ -63,7 +63,9 @@ def to_unicode_and_encoding_name(
     If the input object is already a string, the returned tuple will contain
     the original input object and the str class name (i.e. 'str').
 
-    If the input object is a byte string, the following algorithm is used:
+    If the input object is not a byte string, a TypeError is raised.
+
+    Otherwise, the following algorithm is used:
         - If an explicit input codec was given, decode it using that codec.
         - Else, try each of the known encodings which use a Byte Order Mark,
           defined in the global BOM_ASSIGNMENTS list.
@@ -71,14 +73,8 @@ def to_unicode_and_encoding_name(
           using UTF-8. If that fails, use the fallback codec which is defined
           in the global DEFAULT_INPUT_FALLBACK_CODEC variable but can be
           overridden using the parameter input_fallback_codec.
-
-    If the input string is any other type, the returned tuple will contain
-    its unicode representation, i.e. str(input_object), and its class name.
     """
-    if isinstance(input_object, str):
-        return (input_object,
-                input_object.__class__.__name__)
-    elif isinstance(input_object, (bytes, bytearray)):
+    if isinstance(input_object, (bytes, bytearray)):
         if explicit_input_codec:
             return (input_object.decode(explicit_input_codec),
                     explicit_input_codec)
@@ -96,51 +92,89 @@ def to_unicode_and_encoding_name(
             return (input_object.decode(input_fallback_codec),
                     input_fallback_codec)
         #
-    else:
-        return (str(input_object),
-                input_object.__class__.__name__)
     #
+    raise TypeError('This function requires bytes or bytearray as input,'
+                    ' not {0}.'.format(input_object.__class__.__name__))
 
 
 def to_unicode(input_object,
                explicit_input_codec=None,
                input_fallback_codec=DEFAULT_INPUT_FALLBACK_CODEC):
     """Wrap to_unicode_and_encoding_name(),
-    but return the conversion result only.
-
-    This function will return a unicode string from the input object
-    or, in some rare corner cases, raise a UnicodeDecodeError.
-    """
+    but return the conversion result only."""
     return to_unicode_and_encoding_name(
         input_object,
         explicit_input_codec=explicit_input_codec,
         input_fallback_codec=input_fallback_codec)[0]
 
 
-def to_bytes(input_object,
-             encoding=DEFAULT_ENCODING,
-             explicit_input_codec=None,
-             input_fallback_codec=DEFAULT_INPUT_FALLBACK_CODEC):
+def anything_to_unicode(
+        input_object,
+        explicit_input_codec=None,
+        input_fallback_codec=DEFAULT_INPUT_FALLBACK_CODEC):
+    """Safe wrapper around to_unicode() returning the string conversion
+    of the input object if it was not a byte string
+    """
+    try:
+        return to_unicode(
+            input_object,
+            explicit_input_codec=explicit_input_codec,
+            input_fallback_codec=input_fallback_codec)
+    except TypeError:
+        return str(input_object)
+    #
+
+
+def to_bytes(
+        input_object,
+        encoding=DEFAULT_ENCODING):
+    """Encode a unicode string to a bytes representation
+    using the provided encoding
+    """
+    if isinstance(input_object, str):
+        return input_object.encode(encoding)
+    #
+    raise TypeError('This function requires a unicode string as input,'
+                    ' not {0}.'.format(input_object.__class__.__name__))
+
+
+def anything_to_bytes(
+        input_object,
+        encoding=DEFAULT_ENCODING,
+        explicit_input_codec=None,
+        input_fallback_codec=DEFAULT_INPUT_FALLBACK_CODEC):
     """Encode any given object to a bytes representation
     using the provided encoding, after decoding it to unicode
     using this modules's to_unicode() function
     """
-    return to_unicode(
+    try:
+        return to_bytes(input_object, encoding=encoding)
+    except TypeError:
+        return anything_to_unicode(
+            input_object,
+            explicit_input_codec=explicit_input_codec,
+            input_fallback_codec=input_fallback_codec).encode(encoding)
+    #
+
+
+def to_utf8(input_object):
+    """Encode the input object string to UTF-8
+    using this modules's to_bytes() function
+    """
+    return to_bytes(input_object, encoding=UTF_8)
+
+
+def anything_to_utf8(
         input_object,
-        explicit_input_codec=explicit_input_codec,
-        input_fallback_codec=input_fallback_codec).encode(encoding)
-
-
-def to_utf8(input_object,
-            explicit_input_codec=None,
-            input_fallback_codec=DEFAULT_INPUT_FALLBACK_CODEC):
+        explicit_input_codec=None,
+        input_fallback_codec=DEFAULT_INPUT_FALLBACK_CODEC):
     """Encode any given object to its UTF-8 representation
     using this modules's to_bytes() function
     """
-    return to_bytes(input_object,
-                    encoding=UTF_8,
-                    explicit_input_codec=explicit_input_codec,
-                    input_fallback_codec=input_fallback_codec)
+    return anything_to_bytes(input_object,
+                             encoding=UTF_8,
+                             explicit_input_codec=explicit_input_codec,
+                             input_fallback_codec=input_fallback_codec)
 
 
 def lines(input_object,
@@ -204,13 +238,12 @@ def prepare_file_output(input_object,
             lines_list.append(line)
         #
     else:
-        lines_list = [line for line
-                      in lines(input_object,
-                               input_fallback_codec=input_fallback_codec)]
+        lines_list = list(lines(input_object,
+                                input_fallback_codec=input_fallback_codec))
     #
-    return to_bytes(line_ending.join(lines_list),
-                    encoding=encoding,
-                    explicit_input_codec=explicit_input_codec)
+    return anything_to_bytes(line_ending.join(lines_list),
+                             encoding=encoding,
+                             explicit_input_codec=explicit_input_codec)
 
 
 # pylint: disable=too-many-arguments; required for versatility
@@ -244,7 +277,6 @@ def _splitlines(unicode_text):
     We cannot use str.splitlines() here
     because it does not preserve trailing empty lines.
     """
-    import re
     return re.split(r'(?:\r\n|\r|\n)', unicode_text)
 
 

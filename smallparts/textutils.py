@@ -2,21 +2,20 @@
 
 """
 
-textutils - text utility functions
+smallparts.textutils - text utility functions
 
 """
 
 import re
 import string
 
-from . import constants
+from smallparts import constants
 
 
 FS_0 = '{0}'
-KNOWN_CODECS = ('utf_8_sig', 'iso-8859-1')
 
 
-class MakeTranslationFunction(object):
+class MakeTranslationFunction():
 
     """Make a function for multiple replacements
     (adapted from Python Cookbook, Recipe 1.18)
@@ -194,48 +193,7 @@ def nested_enumeration(lists_list,
         last_joiner=last_joiner)
 
 
-def to_unicode_and_encoding_name(input_string):
-    """Convert any given string to unicode and return a tuple:
-    (unicode conversion result, detected encoding)
-    """
-    if isinstance(input_string, bytes):
-        last_error = ValueError
-        for current_codec in KNOWN_CODECS:
-            try:
-                return (input_string.decode(current_codec),
-                        current_codec)
-            except UnicodeDecodeError as unicode_error:
-                last_error = unicode_error
-            #
-        #
-        raise last_error
-    else:
-        return (input_string, 'unicode')
-    #
-
-
-def to_unicode(input_string):
-    """Convert any given string to unicode"""
-    if isinstance(input_string, bytes):
-        last_error = ValueError
-        for current_codec in KNOWN_CODECS:
-            try:
-                return input_string.decode(current_codec)
-            except UnicodeDecodeError as unicode_error:
-                last_error = unicode_error
-            #
-        #
-        raise last_error
-    else:
-        return input_string
-    #
-    # return to_unicode_and_encoding_name(input_string)[constants.FIRST_INDEX]
-
-
-def to_utf8(input_string):
-    """Encode any given string to UTF-8"""
-    return to_unicode(input_string).encode(constants.UTF8)
-
+# TODO: write unit tests
 
 #
 # Module testing section

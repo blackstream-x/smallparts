@@ -2,7 +2,7 @@
 
 """
 
-constants - common constants
+smallparts.constants - common constants
 
 """
 

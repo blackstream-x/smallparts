@@ -2,7 +2,7 @@
 
 """
 
-time_display - time representation functions
+smallparts.time_display - time representation functions
 
 """
 
@@ -43,7 +43,8 @@ def _as_specified(datetime_object,
     """Return the datetime object formatted as specified"""
     if with_usec:
         return datetime_object.strftime(FS_USEC.format(format_string))
-    elif with_msec:
+    #
+    if with_msec:
         msec = datetime_object.microsecond // 1000
         return FS_MSEC.format(datetime_object.strftime(format_string), msec)
     # implicit else:

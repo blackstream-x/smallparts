@@ -2,7 +2,7 @@
 
 """
 
-namespaces - simple dict-based namespaces
+smallparts.namespaces - simple dict-based namespaces
 
 ------------------------------------------------------------------------
 
@@ -55,13 +55,12 @@ class Namespace(dict):
         """
         if name in type(self).visible_attributes:
             return object.__getattribute__(self, name)
-        else:
-            try:
-                return self[name]
-            except KeyError:
-                raise AttributeError(
-                    FS_ATTRIBUTE_ERROR.format(type(self).__name__, name))
-            #
+        #
+        try:
+            return self[name]
+        except KeyError:
+            raise AttributeError(
+                FS_ATTRIBUTE_ERROR.format(type(self).__name__, name))
         #
 
     def __setattr__(self, name, value):
@@ -93,12 +92,11 @@ class DefaultNamespace(Namespace):
         """
         if name in type(self).visible_attributes:
             return object.__getattribute__(self, name)
-        else:
-            try:
-                return self[name]
-            except KeyError:
-                return dict.setdefault(self, name, self.__default)
-            #
+        #
+        try:
+            return self[name]
+        except KeyError:
+            return dict.setdefault(self, name, self.__default)
         #
 
 
