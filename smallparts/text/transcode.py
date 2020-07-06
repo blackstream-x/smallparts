@@ -2,7 +2,7 @@
 
 """
 
-smallparts.transcode
+smallparts.text.transcode
 
 Universal text decoding and encoding functions,
 with additional functions to read and write text files.

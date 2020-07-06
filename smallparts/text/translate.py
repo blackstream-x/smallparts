@@ -2,12 +2,11 @@
 
 """
 
-smallparts.textutils - text utility functions
+smallparts.text.translate - text translation functions
 
 """
 
 import re
-import string
 
 from smallparts import constants
 
@@ -21,10 +20,10 @@ class MakeTranslationFunction():
     (adapted from Python Cookbook, Recipe 1.18)
     """
 
-    def __init__(self, *args, **kwds):
+    def __init__(self, *args, **kwargs):
         """Build a mapping of strings and their replacements,
         precompile the catch-all regular expression"""
-        self.replacements = dict(*args, **kwds)
+        self.replacements = dict(*args, **kwargs)
         self.prx_catch_all = self.precompile_regex()
 
     def __call__(self, original_text):
@@ -63,9 +62,9 @@ class CaseInsensitiveTranslation(MakeTranslationFunction):
     (and case-insensitive non-ascii matches become possible).
     """
 
-    def __init__(self, *args, **kwds):
+    def __init__(self, *args, **kwargs):
         """provide an additional lookup directory"""
-        super(CaseInsensitiveTranslation, self).__init__(*args, **kwds)
+        super(CaseInsensitiveTranslation, self).__init__(*args, **kwargs)
         self.__key_lookup = dict((key.lower(), key)
                                  for key in self.replacements)
 
@@ -91,61 +90,9 @@ class CaseInsensitiveTranslation(MakeTranslationFunction):
         return replacement
 
 
-class Template(string.Template):
-
-    """string.Template subclass adding one property:
-    the list of variable names from the template
-    """
-
-    prx_placeholder = re.compile(
-        '{0}({1})|{0}{2}({1}){3}'.format(re.escape(string.Template.delimiter),
-                                         string.Template.idpattern,
-                                         re.escape(constants.BRACE_OPEN),
-                                         re.escape(constants.BRACE_CLOSE)),
-        re.I)
-
-    @property
-    def variable_names(self):
-        """Return the list of variable names in the template"""
-        return [constants.EMPTY.join(placeholder) for placeholder
-                in self.prx_placeholder.findall(self.template)]
-
-
 #
 # End of classes, start of functions
 #
-
-
-def flattened_list(input_list):
-    """Flatten the input list"""
-    flattened = []
-    for item in input_list:
-        if isinstance(item, (tuple, list)):
-            flattened.extend(item)
-        else:
-            flattened.append(item)
-        #
-    return flattened
-
-
-def blank_joined(*parts):
-    """return parts joined with a blank"""
-    return constants.BLANK.join(parts)
-
-
-def joined(*parts):
-    """return parts joined"""
-    return constants.EMPTY.join(parts)
-
-
-def line_joined(*parts):
-    """return parts joined with a newline"""
-    return constants.NEWLINE.join(parts)
-
-
-def joined_with(join_string, *parts):
-    """return parts joined with the given string"""
-    return join_string.join(parts)
 
 
 def remove_trailing_underscores(name):
@@ -153,7 +100,7 @@ def remove_trailing_underscores(name):
     return name.rstrip(constants.UNDERSCORE)
 
 
-def translate_underscores(name):
+def underscores_to_dashes(name):
     """translate underscores to dashes"""
     return name.replace(constants.UNDERSCORE, constants.DASH)
 
@@ -162,51 +109,5 @@ def underscores_to_blanks(name):
     """translate underscores to blanks"""
     return name.replace(constants.UNDERSCORE, constants.BLANK)
 
-
-def replace_all_underscores(name):
-    """Remove trailing underscores and translate underscores to dashes"""
-    return translate_underscores(remove_trailing_underscores(name))
-
-
-def enumeration(words_list,
-                joiner=constants.COMMA_BLANK,
-                last_joiner=' und '):
-    """Return the words list, enumerated"""
-    # work on a copy
-    output_list = words_list[:-2]
-    output_list.append(last_joiner.join(words_list[-2:]))
-    return joiner.join(output_list)
-
-
-def nested_enumeration(lists_list,
-                       inner_joiner=constants.COMMA_BLANK,
-                       inner_last_joiner=' und ',
-                       joiner=constants.COMMA_BLANK,
-                       last_joiner=' sowie '):
-    """Return the nested, enumerated"""
-    return enumeration(
-        [enumeration(single_list,
-                     joiner=inner_joiner,
-                     last_joiner=inner_last_joiner)
-         for single_list in lists_list],
-        joiner=joiner,
-        last_joiner=last_joiner)
-
-
-# TODO: write unit tests
-
-#
-# Module testing section
-#
-
-
-if __name__ == '__main__':
-    TEMPLATE = Template('$first fixed text ${second_variable} ...\n'
-                        '${last_variable_3} END')
-    print('Variables:')
-    print(repr(TEMPLATE.variable_names))
-    print(TEMPLATE.safe_substitute(dict(first='abc',
-                                        second_variable='def',
-                                        last_variable_3='ghi')))
 
 # vim:fileencoding=utf-8 autoindent ts=4 sw=4 sts=4 expandtab:

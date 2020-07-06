@@ -14,10 +14,11 @@ import unicodedata
 import xml.sax.saxutils
 
 from smallparts import constants
-from smallparts import textutils
-from smallparts import transcode
 
 from smallparts.namespaces import Namespace, InstantNames
+from smallparts.text import join
+from smallparts.text import transcode
+from smallparts.text import translate
 
 
 
@@ -36,7 +37,7 @@ CDATA_END = FS_CDATA_END.format(constants.EMPTY)
 # A CDATA section end string splitted up
 # into two parts in separate CDATA sections
 CDATA_END_SPLITTED_UP = FS_CDATA_END.format(
-    textutils.joined(CDATA_END, CDATA_START))
+    join.directly(CDATA_END, CDATA_START))
 
 
 FS_COMMENT = '<!-- {0} -->'
@@ -65,8 +66,8 @@ XML_VERSION = '1.0'
 #
 
 KEY = InstantNames()
-TAG = InstantNames(textutils.remove_trailing_underscores,
-                   textutils.translate_underscores)
+TAG = InstantNames(translate.remove_trailing_underscores,
+                   translate.underscores_to_dashes)
 
 INLINE_ELEMENTS = (TAG.a__, TAG.abbr, TAG.b__, TAG.bdi, TAG.bdo, TAG.cite,
                    TAG.code_, TAG.del_, TAG.dfn, TAG.em_, TAG.i__, TAG.img,
@@ -81,7 +82,7 @@ def wrap_cdata(character_data):
     if necessary use multiple CDATA sections as suggested in
     <https://en.wikipedia.org/wiki/CDATA#Nesting>
     """
-    return textutils.joined(
+    return join.directly(
         CDATA_START,
         character_data.replace(CDATA_END, CDATA_END_SPLITTED_UP),
         CDATA_END)
@@ -98,9 +99,10 @@ def unescape(data):
 
 def xml_attribute(attr_name, attr_value):
     """Make an XML attribute from the given attr_name, attr_value pair"""
-    return textutils.joined_with(
+    return join.using(
         constants.EQUALS,
-        textutils.replace_all_underscores(attr_name),
+        translate.underscores_to_dashes(
+            translate.remove_trailing_underscores(attr_name)),
         xml.sax.saxutils.quoteattr(str(attr_value)))
 
 
@@ -151,11 +153,11 @@ def js_return(function_name, *arguments):
     """Generate JavaScript code:
     return function_name(*arguments);
     """
-    return textutils.joined(JS_RETURN,
-                            constants.BLANK,
-                            js_function_call(function_name,
-                                             arguments),
-                            constants.SEMICOLON)
+    return join.directly(
+        JS_RETURN,
+        constants.BLANK,
+        js_function_call(function_name, arguments),
+        constants.SEMICOLON)
 
 
 def make_attributes_string(attributes=None, **kwargs):
@@ -167,8 +169,9 @@ def make_attributes_string(attributes=None, **kwargs):
                            for (attr_name, attr_value) in attributes.items()
                            if attr_value is not None]
     if tag_attributes_list:
-        return textutils.joined(constants.BLANK,
-                                constants.BLANK.join(tag_attributes_list))
+        return join.directly(
+            constants.BLANK,
+            constants.BLANK.join(tag_attributes_list))
     #
     return constants.EMPTY
 
@@ -195,8 +198,9 @@ def make_html5_attributes_string(attributes=None, **kwargs):
         #
     #
     if tag_attributes_list:
-        return textutils.joined(constants.BLANK,
-                                constants.BLANK.join(tag_attributes_list))
+        return join.directly(
+            constants.BLANK,
+            constants.BLANK.join(tag_attributes_list))
     #
     return constants.EMPTY
 
@@ -275,8 +279,8 @@ class XmlElement():
 
     def __init__(self, tag_name):
         """Set tag name"""
-        self.tag_name = textutils.translate_underscores(
-            textutils.remove_trailing_underscores(tag_name))
+        self.tag_name = translate.underscores_to_dashes(
+            translate.remove_trailing_underscores(tag_name))
         #
 
     def output(self,
@@ -542,7 +546,7 @@ class Translation():
     prx_numeric_entity = \
         re.compile(FS_NUMERIC_ENTITY.format(r'(\d+|x[\da-f]+)'))
     # staticmethod attached to the class
-    defuse_to_xml = textutils.MakeTranslationFunction(XML_REPLACEMENTS)
+    defuse_to_xml = translate.MakeTranslationFunction(XML_REPLACEMENTS)
 
     @classmethod
     def ampersand_to_xml(cls, input_string):
@@ -552,7 +556,7 @@ class Translation():
     @classmethod
     def ampersand_from_xml(cls, input_string):
         """Decode ampersand from named entity"""
-        return input_string.replace(cls.amp_xml, constants.AMPERSAND, )
+        return input_string.replace(cls.amp_xml, constants.AMPERSAND)
 
     @classmethod
     def to_xmlentities_encoded(cls, input_string):
@@ -623,7 +627,7 @@ def xml_document(content,
     Strip trailing whitespace from the content
     and end the document with a newline.
     """
-    return textutils.line_joined(
+    return join.by_newlines(
         xml_declaration(version=version,
                         encoding=encoding,
                         standalone=standalone),

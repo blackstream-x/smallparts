@@ -7,7 +7,7 @@ smallparts.time_display - time representation functions
 """
 
 
-from . import textutils
+from smallparts import text
 
 
 FS_DATE = '%Y-%m-%d'
@@ -139,7 +139,7 @@ def pretty_printed_timedelta(timedelta, limits=None):
     if totals.get(WEEKS):
         result.append(time_component(weeks=totals[WEEKS]))
     #
-    return textutils.enumeration(result[::-1])
+    return text.enumeration(result[::-1])
 
 
 # vim:fileencoding=utf-8 autoindent ts=4 sw=4 sts=4 expandtab:

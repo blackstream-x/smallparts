@@ -15,9 +15,6 @@ ActiveState Code » Recipes » A Simple Namespace Class (Python recipe)
 
 """
 
-__all__ = ('Namespace', 'EnhancedNamespace', 'InstantNames')
-
-
 COMMA_BLANK = ', '
 
 FS_ASSIGNMENT = '{0}={1!r}'
