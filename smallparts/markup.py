@@ -28,17 +28,12 @@ from smallparts.text import translate
 
 BASE_HEX = 16
 
-FS_CDATA_END = ']]{0}>'
-
-
 CDATA_START = '<![CDATA['
-CDATA_END = FS_CDATA_END.format(constants.EMPTY)
+CDATA_END = ']]>'
 
 # A CDATA section end string splitted up
 # into two parts in separate CDATA sections
-CDATA_END_SPLITTED_UP = FS_CDATA_END.format(
-    join.directly(CDATA_END, CDATA_START))
-
+CDATA_END_SPLITTED_UP = ']]{0}{1}>'.format(CDATA_END, CDATA_START)
 
 FS_COMMENT = '<!-- {0} -->'
 FS_CSS_PROPERTY = '{0}: {1};'
@@ -61,8 +56,9 @@ PRX_MULTI_SPACE = re.compile(r'[ \t\r\f\v]{2,}')
 
 XML = 'xml'
 XML_VERSION = '1.0'
+
 #
-# Names cache
+# Names caches
 #
 
 KEY = InstantNames()
@@ -86,6 +82,7 @@ def wrap_cdata(character_data):
         CDATA_START,
         character_data.replace(CDATA_END, CDATA_END_SPLITTED_UP),
         CDATA_END)
+
 
 def escape(data):
     """Wrap the xml.sax.saxutils.escape function"""
@@ -145,8 +142,9 @@ def js_function_call(function_name, arguments):
     """
     return FS_FUNCTION_CALL.format(
         function_name,
-        constants.COMMA_BLANK.join(FS_SINGLE_QUOTED.format(single_arg)
-                                   for single_arg in arguments))
+        constants.COMMA_BLANK.join(
+            FS_SINGLE_QUOTED.format(single_arg)
+            for single_arg in arguments))
 
 
 def js_return(function_name, *arguments):
@@ -193,8 +191,7 @@ def make_html5_attributes_string(attributes=None, **kwargs):
         if attr_value is True or attr_value == attr_name:
             tag_attributes_list.append(attr_name)
         else:
-            tag_attributes_list.append(xml_attribute(attr_name,
-                                                     attr_value))
+            tag_attributes_list.append(xml_attribute(attr_name, attr_value))
         #
     #
     if tag_attributes_list:
@@ -251,9 +248,9 @@ def resolve_matched_charref(match_object):
 
 
 INVALID_XML_CODEPOINTS = list(range(0, 9)) + list(range(11, 32)) + [127]
-XML_REPLACEMENTS = dict((chr(codepoint),
-                         entity(codepoint))
-                        for codepoint in [34, 39, 60, 62, 91, 93])
+XML_REPLACEMENTS = dict(
+    (chr(codepoint), entity(codepoint))
+    for codepoint in (34, 39, 60, 62, 91, 93))
 XML_REPLACEMENTS.update(dict.fromkeys(
     [chr(codepoint) for codepoint in INVALID_XML_CODEPOINTS],
     constants.EMPTY))
@@ -603,14 +600,15 @@ class Translation():
 def xml_declaration(version=XML_VERSION,
                     encoding=constants.UTF8,
                     standalone=None):
-    """Return an XML declaration"""
-    if standalone is None:
-        # standalone attribute omitted
-        pass
-    elif standalone:
-        standalone = constants.YES
-    else:
-        standalone = constants.NO
+    """Return an XML declaration.
+    Omit the 'standalone' attribute if not specified.
+    """
+    if standalone is not None:
+        if standalone:
+            standalone = constants.YES
+        else:
+            standalone = constants.NO
+        #
     #
     return FS_STARTTAG.format(
         tag_name=XML,
@@ -634,27 +632,6 @@ def xml_document(content,
                         standalone=standalone),
         content.rstrip(),
         constants.EMPTY)
-
-
-#
-# End of functions, start of main script
-#
-
-
-if __name__ == '__main__':
-    # Module testing section
-    import sys
-    HTML_FILE_NAME = sys.argv[constants.SECOND_INDEX]
-    print('##### Parsing {0!r} #####'.format(HTML_FILE_NAME))
-    HTML_TAG_STRIPPER = HTMLTagStripper()
-    with open(HTML_FILE_NAME, constants.MODE_READ) as html_file:
-        HTML_TAG_STRIPPER.feed_html_body_only(html_file.read())
-    print('## Image descriptions: ##')
-    print(constants.NEWLINE.join(description for description in
-                                 HTML_TAG_STRIPPER.image_descriptions))
-    print('## Stripped content: ##')
-    print(HTML_TAG_STRIPPER.content)
-    #
 
 
 # vim: fileencoding=utf-8 ts=4 sts=4 sw=4 autoindent expandtab syntax=python:
