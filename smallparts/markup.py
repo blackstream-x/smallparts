@@ -481,9 +481,10 @@ class HTMLTagStripper(html.parser.HTMLParser):
         (AsciiDoc might produce a document <head> section containing
         non-escaped 'less-than' signs that confuse the Python 2.x HTMLParser)
         """
-        html.parser.HTMLParser.feed(self,
-                                    PRX_HTML_BODY.sub('\\1\n\\2',
-                                                      dangerous_html_data))
+        html.parser.HTMLParser.feed(
+            self,
+            PRX_HTML_BODY.sub('\\1\n\\2',
+                              dangerous_html_data))
 
     def error(self, message):
         """override _markupbase.ParserBase abstract method"""
@@ -491,7 +492,7 @@ class HTMLTagStripper(html.parser.HTMLParser):
 
     def handle_data(self, data):
         """Collect content"""
-        self.__add_body_content(transcode.anything_to_unicode(data))
+        self.__add_body_content(data)
 
     def handle_charref(self, name):
         """Resolve numeric character reference"""
