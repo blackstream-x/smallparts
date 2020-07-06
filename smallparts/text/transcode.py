@@ -11,6 +11,9 @@ with additional functions to read and write text files.
 
 
 import codecs
+import logging
+import os.path
+import shutil
 
 
 # Encodings
@@ -170,6 +173,18 @@ def anything_to_utf8(
                              fallback_encoding=fallback_encoding)
 
 
+def fix_double_utf8_transformation(unicode_text, wrong_encoding=CP1252):
+    """Fix duplicate UTF-8 transformation,
+    which is a frequent result of reading UTF-8 encoded text as Latin encoded
+    (CP-1252, ISO-8859-1 or similar), resulting in characters like Ã¤Ã¶Ã¼.
+    This function reverts the effect.
+    """
+    if wrong_encoding == UTF_8:
+        raise ValueError('This would not have any effect!')
+    #
+    return to_unicode(to_bytes(unicode_text, to_encoding=wrong_encoding))
+
+
 def lines(input_object,
           from_encoding=None,
           fallback_encoding=DEFAULT_FALLBACK_ENCODING,
@@ -178,8 +193,7 @@ def lines(input_object,
     for single_line in to_unicode(
             input_object,
             from_encoding=from_encoding,
-            fallback_encoding=fallback_encoding).\
-                splitlines(keepends=keepends):
+            fallback_encoding=fallback_encoding).splitlines(keepends=keepends):
         yield single_line
     #
 
@@ -261,9 +275,6 @@ def write_to_file(file_name,
     #
 
 
-# pylint: enable=too-many-arguments
-
-
 def _splitlines_for_reconstruction(unicode_text):
     """Split unicode_text using the splitlines() str method,
     but append an empty string at the end if the last line
@@ -283,22 +294,41 @@ def transcode_file(file_name,
                    to_encoding=DEFAULT_TARGET_ENCODING,
                    from_encoding=None,
                    fallback_encoding=DEFAULT_FALLBACK_ENCODING,
-                   line_ending=None):
+                   line_ending=None,
+                   write_backup_file=True):
     """Read the input file and transcode it to the specified encoding IN PLACE.
     Preserve original line endings except when specified explicitly.
+    Write a backup file unless explicitly told not to do that.
     """
-    unicode_content = read_from_file(
-        file_name,
+    with open(file_name,
+              mode=MODE_READ_BINARY) as input_file:
+        bytes_content = input_file.read()
+    #
+    unicode_content, detected_encoding = to_unicode_and_encoding_name(
+        bytes_content,
         from_encoding=from_encoding,
         fallback_encoding=fallback_encoding)
+    if detected_encoding == to_encoding:
+        logging.warning('File %r is already encoded in %r!',
+                        file_name,
+                        to_encoding)
+        return False
+    #
+    if write_backup_file:
+        file_name_root, file_extension = os.path.splitext(file_name)
+        backup_file_name = '{0}.{1}{2}'.format(
+            file_name_root, detected_encoding, file_extension)
+        shutil.move(file_name, backup_file_name)
+    #
     if line_ending in (LF, CRLF):
         unicode_content = line_ending.join(
             _splitlines_for_reconstruction(unicode_content))
     #
     with open(file_name,
-              write_mode=MODE_WRITE_BINARY) as output_file:
+              mode=MODE_WRITE_BINARY) as output_file:
         output_file.write(to_bytes(unicode_content, to_encoding=to_encoding))
     #
+    return True
 
 
 # vim:fileencoding=utf-8 autoindent ts=4 sw=4 sts=4 expandtab:
