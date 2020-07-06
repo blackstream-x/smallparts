@@ -11,7 +11,6 @@ with additional functions to read and write text files.
 
 
 import codecs
-import re
 
 
 # Encodings
@@ -39,8 +38,8 @@ MODE_WRITE_BINARY = 'wb'
 
 # Defaults
 
-DEFAULT_ENCODING = UTF_8
-DEFAULT_INPUT_FALLBACK_CODEC = CP1252
+DEFAULT_TARGET_ENCODING = UTF_8
+DEFAULT_FALLBACK_ENCODING = CP1252
 DEFAULT_LINE_ENDING = LF
 DEFAULT_WRITE_MODE = MODE_WRITE_BINARY
 
@@ -51,17 +50,11 @@ DEFAULT_WRITE_MODE = MODE_WRITE_BINARY
 
 def to_unicode_and_encoding_name(
         input_object,
-        explicit_input_codec=None,
-        input_fallback_codec=DEFAULT_INPUT_FALLBACK_CODEC):
+        from_encoding=None,
+        fallback_encoding=DEFAULT_FALLBACK_ENCODING):
     """Try to decode the input object to a unicode string
     and return a tuple containing the conversion result
     and the source encoding name.
-
-    Any conversion errors will raise the original exception
-    (probably a UnicodeDecodeError).
-
-    If the input object is already a string, the returned tuple will contain
-    the original input object and the str class name (i.e. 'str').
 
     If the input object is not a byte string, a TypeError is raised.
 
@@ -71,13 +64,13 @@ def to_unicode_and_encoding_name(
           defined in the global BOM_ASSIGNMENTS list.
           If none of these Byte Order Marks was found, try to decode it
           using UTF-8. If that fails, use the fallback codec which is defined
-          in the global DEFAULT_INPUT_FALLBACK_CODEC variable but can be
-          overridden using the parameter input_fallback_codec.
+          in the global DEFAULT_FALLBACK_ENCODING variable but can be
+          overridden using the parameter fallback_encoding.
     """
     if isinstance(input_object, (bytes, bytearray)):
-        if explicit_input_codec:
-            return (input_object.decode(explicit_input_codec),
-                    explicit_input_codec)
+        if from_encoding:
+            return (input_object.decode(from_encoding),
+                    from_encoding)
         #
         for (bom, encoding) in BOM_ASSIGNMENTS:
             if input_object.startswith(bom):
@@ -89,8 +82,8 @@ def to_unicode_and_encoding_name(
             return (input_object.decode(UTF_8),
                     UTF_8)
         except UnicodeDecodeError:
-            return (input_object.decode(input_fallback_codec),
-                    input_fallback_codec)
+            return (input_object.decode(fallback_encoding),
+                    fallback_encoding)
         #
     #
     raise TypeError('This function requires bytes or bytearray as input,'
@@ -98,28 +91,28 @@ def to_unicode_and_encoding_name(
 
 
 def to_unicode(input_object,
-               explicit_input_codec=None,
-               input_fallback_codec=DEFAULT_INPUT_FALLBACK_CODEC):
+               from_encoding=None,
+               fallback_encoding=DEFAULT_FALLBACK_ENCODING):
     """Wrap to_unicode_and_encoding_name(),
     but return the conversion result only."""
     return to_unicode_and_encoding_name(
         input_object,
-        explicit_input_codec=explicit_input_codec,
-        input_fallback_codec=input_fallback_codec)[0]
+        from_encoding=from_encoding,
+        fallback_encoding=fallback_encoding)[0]
 
 
 def anything_to_unicode(
         input_object,
-        explicit_input_codec=None,
-        input_fallback_codec=DEFAULT_INPUT_FALLBACK_CODEC):
+        from_encoding=None,
+        fallback_encoding=DEFAULT_FALLBACK_ENCODING):
     """Safe wrapper around to_unicode() returning the string conversion
     of the input object if it was not a byte string
     """
     try:
         return to_unicode(
             input_object,
-            explicit_input_codec=explicit_input_codec,
-            input_fallback_codec=input_fallback_codec)
+            from_encoding=from_encoding,
+            fallback_encoding=fallback_encoding)
     except TypeError:
         return str(input_object)
     #
@@ -127,12 +120,12 @@ def anything_to_unicode(
 
 def to_bytes(
         input_object,
-        encoding=DEFAULT_ENCODING):
+        to_encoding=DEFAULT_TARGET_ENCODING):
     """Encode a unicode string to a bytes representation
     using the provided encoding
     """
     if isinstance(input_object, str):
-        return input_object.encode(encoding)
+        return input_object.encode(to_encoding)
     #
     raise TypeError('This function requires a unicode string as input,'
                     ' not {0}.'.format(input_object.__class__.__name__))
@@ -140,20 +133,20 @@ def to_bytes(
 
 def anything_to_bytes(
         input_object,
-        encoding=DEFAULT_ENCODING,
-        explicit_input_codec=None,
-        input_fallback_codec=DEFAULT_INPUT_FALLBACK_CODEC):
+        to_encoding=DEFAULT_TARGET_ENCODING,
+        from_encoding=None,
+        fallback_encoding=DEFAULT_FALLBACK_ENCODING):
     """Encode any given object to a bytes representation
     using the provided encoding, after decoding it to unicode
     using this modules's to_unicode() function
     """
     try:
-        return to_bytes(input_object, encoding=encoding)
+        return to_bytes(input_object, to_encoding=to_encoding)
     except TypeError:
         return anything_to_unicode(
             input_object,
-            explicit_input_codec=explicit_input_codec,
-            input_fallback_codec=input_fallback_codec).encode(encoding)
+            from_encoding=from_encoding,
+            fallback_encoding=fallback_encoding).encode(to_encoding)
     #
 
 
@@ -161,72 +154,72 @@ def to_utf8(input_object):
     """Encode the input object string to UTF-8
     using this modules's to_bytes() function
     """
-    return to_bytes(input_object, encoding=UTF_8)
+    return to_bytes(input_object, to_encoding=UTF_8)
 
 
 def anything_to_utf8(
         input_object,
-        explicit_input_codec=None,
-        input_fallback_codec=DEFAULT_INPUT_FALLBACK_CODEC):
+        from_encoding=None,
+        fallback_encoding=DEFAULT_FALLBACK_ENCODING):
     """Encode any given object to its UTF-8 representation
     using this modules's to_bytes() function
     """
     return anything_to_bytes(input_object,
-                             encoding=UTF_8,
-                             explicit_input_codec=explicit_input_codec,
-                             input_fallback_codec=input_fallback_codec)
+                             to_encoding=UTF_8,
+                             from_encoding=from_encoding,
+                             fallback_encoding=fallback_encoding)
 
 
 def lines(input_object,
-          explicit_input_codec=None,
-          input_fallback_codec=DEFAULT_INPUT_FALLBACK_CODEC,
+          from_encoding=None,
+          fallback_encoding=DEFAULT_FALLBACK_ENCODING,
           keepends=False):
     """Iterate over the decoded input object's lines"""
     for single_line in to_unicode(
             input_object,
-            explicit_input_codec=explicit_input_codec,
-            input_fallback_codec=input_fallback_codec).\
+            from_encoding=from_encoding,
+            fallback_encoding=fallback_encoding).\
                 splitlines(keepends=keepends):
         yield single_line
     #
 
 
 def read_from_file(input_file,
-                   explicit_input_codec=None,
-                   input_fallback_codec=DEFAULT_INPUT_FALLBACK_CODEC):
+                   from_encoding=None,
+                   fallback_encoding=DEFAULT_FALLBACK_ENCODING):
     """Read input file and return its content as unicode"""
     try:
         return to_unicode(input_file.read(),
-                          explicit_input_codec=explicit_input_codec,
-                          input_fallback_codec=input_fallback_codec)
+                          from_encoding=from_encoding,
+                          fallback_encoding=fallback_encoding)
     except AttributeError:
         with open(input_file,
                   mode=MODE_READ_BINARY) as real_input_file:
             return read_from_file(real_input_file,
-                                  explicit_input_codec=explicit_input_codec,
-                                  input_fallback_codec=input_fallback_codec)
+                                  from_encoding=from_encoding,
+                                  fallback_encoding=fallback_encoding)
         #
     #
 
 
 def lines_from_file(input_file_or_name,
-                    explicit_input_codec=None,
-                    input_fallback_codec=DEFAULT_INPUT_FALLBACK_CODEC,
+                    from_encoding=None,
+                    fallback_encoding=DEFAULT_FALLBACK_ENCODING,
                     keepends=False):
     """Iterate over the decoded input file's lines"""
     for single_line in read_from_file(
             input_file_or_name,
-            explicit_input_codec=explicit_input_codec,
-            input_fallback_codec=input_fallback_codec).\
+            from_encoding=from_encoding,
+            fallback_encoding=fallback_encoding).\
                 splitlines(keepends=keepends):
         yield single_line
     #
 
 
 def prepare_file_output(input_object,
-                        encoding=DEFAULT_ENCODING,
-                        explicit_input_codec=None,
-                        input_fallback_codec=DEFAULT_INPUT_FALLBACK_CODEC,
+                        to_encoding=DEFAULT_TARGET_ENCODING,
+                        from_encoding=None,
+                        fallback_encoding=DEFAULT_FALLBACK_ENCODING,
                         line_ending=DEFAULT_LINE_ENDING):
     """Return a bytes representation of the input object
     suitable for writing to a file using mode MODE_WRITE_BINARY.
@@ -239,11 +232,11 @@ def prepare_file_output(input_object,
         #
     else:
         lines_list = list(lines(input_object,
-                                input_fallback_codec=input_fallback_codec))
+                                fallback_encoding=fallback_encoding))
     #
     return anything_to_bytes(line_ending.join(lines_list),
-                             encoding=encoding,
-                             explicit_input_codec=explicit_input_codec)
+                             to_encoding=to_encoding,
+                             from_encoding=from_encoding)
 
 
 # pylint: disable=too-many-arguments; required for versatility
@@ -251,9 +244,9 @@ def prepare_file_output(input_object,
 
 def write_to_file(file_name,
                   input_object,
-                  encoding=DEFAULT_ENCODING,
-                  explicit_input_codec=None,
-                  input_fallback_codec=DEFAULT_INPUT_FALLBACK_CODEC,
+                  to_encoding=DEFAULT_TARGET_ENCODING,
+                  from_encoding=None,
+                  fallback_encoding=DEFAULT_FALLBACK_ENCODING,
                   line_ending=DEFAULT_LINE_ENDING,
                   write_mode=DEFAULT_WRITE_MODE):
     """Write the input object or list to the file specified by file_name"""
@@ -261,9 +254,9 @@ def write_to_file(file_name,
               mode=write_mode) as output_file:
         output_file.write(
             prepare_file_output(input_object,
-                                encoding=encoding,
-                                explicit_input_codec=explicit_input_codec,
-                                input_fallback_codec=input_fallback_codec,
+                                to_encoding=to_encoding,
+                                from_encoding=from_encoding,
+                                fallback_encoding=fallback_encoding,
                                 line_ending=line_ending))
     #
 
@@ -271,33 +264,40 @@ def write_to_file(file_name,
 # pylint: enable=too-many-arguments
 
 
-def _splitlines(unicode_text):
-    """Split unicode_text into lines using some kind of poor man's
-    universal newline support.
-    We cannot use str.splitlines() here
-    because it does not preserve trailing empty lines.
+def _splitlines_for_reconstruction(unicode_text):
+    """Split unicode_text using the splitlines() str method,
+    but append an empty string at the end if the last line
+    of the source ends with a line end,
+    to be able to keep this trailing line end when re-joining the list.
+    See <https://docs.python.org/3/library/stdtypes.html#str.splitlines>
+    for the list of line end characters.
     """
-    return re.split(r'(?:\r\n|\r|\n)', unicode_text)
+    splitted_lines = unicode_text.splitlines()
+    if unicode_text[-1] in '\n\r\v\f\x1c\x1d\x1e\x85\u2028\u2029':
+        splitted_lines.append('')
+    #
+    return splitted_lines
 
 
 def transcode_file(file_name,
-                   encoding=DEFAULT_ENCODING,
-                   explicit_input_codec=None,
-                   input_fallback_codec=DEFAULT_INPUT_FALLBACK_CODEC,
+                   to_encoding=DEFAULT_TARGET_ENCODING,
+                   from_encoding=None,
+                   fallback_encoding=DEFAULT_FALLBACK_ENCODING,
                    line_ending=None):
     """Read the input file and transcode it to the specified encoding IN PLACE.
     Preserve original line endings except when specified explicitly.
     """
     unicode_content = read_from_file(
         file_name,
-        explicit_input_codec=explicit_input_codec,
-        input_fallback_codec=input_fallback_codec)
+        from_encoding=from_encoding,
+        fallback_encoding=fallback_encoding)
     if line_ending in (LF, CRLF):
-        unicode_content = line_ending.join(_splitlines(unicode_content))
+        unicode_content = line_ending.join(
+            _splitlines_for_reconstruction(unicode_content))
     #
     with open(file_name,
               write_mode=MODE_WRITE_BINARY) as output_file:
-        output_file.write(to_bytes(unicode_content, encoding=encoding))
+        output_file.write(to_bytes(unicode_content, to_encoding=to_encoding))
     #
 
 
