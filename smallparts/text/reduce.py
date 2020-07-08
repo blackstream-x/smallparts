@@ -6,60 +6,105 @@ smallparts.text.reduce - Functions for reducing unicode text to ASCII
 
 """
 
-# import re
-
-# from smallparts import constants
-
-
-MAX_ASCII = '\x7f'
-MAX_C1_CONTROL = '\x9f'
-
-
-# German-style ASCII replacements for characters in the
-# Latin-1 Supplement, Latin Extended-A,
-# and Currency Symbols Unicode ranges
-# (U0080–U017F and U20A0–U20BF).
-# and some additional characters:
-# - Dutch Guilder (ƒ, U0192)
-# - Thai Baht (฿, U0e3f)
-# - Bangladesh Taka (৳, U09f3)
-# - Capital ß (ẞ, U1e9e)
 #
-# Control charachters U0080–U009f are not replaced.
+# Reduction rules as dicts: {source_characters: ascii_replacement, …}
+#
 
-GERMAN_REDUCTIONS = {
-    '\u0020': '\u00a0',
-    '{!}': '¡',
-    'ct': '¢',
-    'GBP': '£',
-    '{Waehrung}': '¤',
-    'JPY': '¥',
-    '|': '¦',
-    '{Paragraf}': '§',
-    '{"}': '¨',
-    '(C)': '©',
-    '{^a}': 'ª',
-    '<<': '«',
-    '{nicht}': '¬',
-    '{(-)}': '\u00ad',
-    '(R)': '®',
-    '{Macron}': '¯',
-    '{Grad}': '°',
-    '{+-}': '±',
-    '{^2}': '²',
-    '{^3}': '³',
-    "{'}": '´',
-    '{Mikro}': 'µ',
-    '{Absatzmarke}\n': '¶',
-    '{*}': '·×',
-    '{Cedille}': '¸',
-    '{^1}': '¹',
-    '{^o}': 'º',
-    '>>': '»',
-    '{1/4}': '¼',
-    '{1/2}': '½',
-    '{3/4}': '¾',
-    '{?}': '¿',
+PUNCTUATION = {
+    # Punctuation from the
+    # Latin-1 supplement (U0080–U00ff) and
+    # General punctuation (U2000–U206F) Unicode blocks
+    #
+    # Spacing characters → space
+    '\u0080\u2000\u2001\u2002\u2003\u2004'
+    '\u2005\u2006\u2007\u2008\u2009\u200a': '\x20',
+    # Soft hyphen → hyphen in parentheses
+    '\u00ad': '(-)',
+    # Hyphen bullet → hyphen
+    '\u2043': '-',
+    # Dashes → single or double hyphen
+    '\u2010\u2011\u2012\u2013': '-',
+    '\u2014\u2015': '--',
+    # Quotation marks → apostrophe, quotation mark, << or >>
+    '\u2018\u2019\u201a\u201b': '\x27',
+    '\u201c\u201d\u201e\u201f': '"',
+    '«': '<<',
+    '»': '>>',
+    # Leader dots, ellipsis → dots
+    '\u2024': '.',
+    '\u2025': '..',
+    '\u2026': '...',
+    # Bullets, middle dots, times sign → asterisk
+    '\u00b7\u00d7\u2022\u2027\u204c\u204d\u204e': '*',
+    # Line and paragraph separators → ASCII LF
+    '\u2028': '\n',
+    '\u2029': '\n\n',
+    # Per mille and per myriad (= per then thousand) signs → {description}
+    '\u0030': '{permille}',
+    '\u0031': '{permyriad}',
+    # Primes → apostrophes, reverse primes → grave accents
+    '\u2032': '\x27',
+    '\u2033': '\x27\x27',
+    '\u2034': '\x27\x27\x27',
+    '\u2057': '\x27\x27\x27\x27',
+    '\u2035': '\x60',
+    '\u2036': '\x60\x60',
+    '\u2037': '\x60\x60\x60',
+    # Caret, angle quotation marks → circumflex, less-than, greater than
+    '\u2038': '^',
+    '\u2039': '<',
+    '\u203a': '>',
+    # Exclamation and question marks, semicolon
+    '¡': '!',
+    '¿': '?',
+    '\u203c': '!!',
+    '\u203d': '?!',
+    '\u2047': '??',
+    '\u2048': '?!',
+    '\u2049': '!?',
+    '\u204f': ';',
+    # Division sign and fraction slash → slash
+    '÷\u2044': '/',
+    # Tironian sign et → ampersand
+    '\u204a': '&',
+    # Various punctuation from the U2000 block
+    '\u204b': '{reversed pilcrow}\n',
+    '\u2051': '**',
+    '\u2052': './.',
+    '\u2053': '~',
+    '\u2055': '*',
+    # Various punctuation from the U0080 block
+    '¢': 'ct',
+    '¤': '{currency}',
+    '¦': '|',
+    '§': '{section sign}',
+    '¨': '"',
+    '©': '(C)',
+    'ª': '^a',
+    '¬': '{not}',
+    '®': '(R)',
+    '¯': '{macron}',
+    '°': '{degree}',
+    '±': '+-',
+    '¹': '^1',
+    '²': '^2',
+    '³': '^3',
+    '´': '\x27',
+    'µ': '{micro}',
+    '¶': '{pilcrow}\n',
+    '¸': '{cedilla}',
+    'º': '^o',
+    '¼': '1/4',
+    '½': '1/2',
+    '¾': '3/4'
+}
+
+LATIN = {
+    # TODO!
+}
+
+GERMAN_LATIN_STILL_REVERSED = {
+    # TODO!
     'A': 'ÀÁÂÃÅĀĂĄ',
     'Ae': 'ÄÆ',
     'C': 'ÇĆĈĊČ',
@@ -79,6 +124,7 @@ GERMAN_REDUCTIONS = {
     'Oe': 'ÖØŒ',
     'R': 'ŔŖŘ',
     'S': 'ŚŜŞŠ',
+    'SZ': 'ẞ',
     'T': 'ŢŤŦ',
     'Th': 'Þ',
     'U': 'ÙÚÛŨŪŬŮŰŲ',
@@ -112,18 +158,17 @@ GERMAN_REDUCTIONS = {
     'ue': 'ü',
     'w': 'ŵ',
     'y': 'ýŷÿ',
-    'z': 'źżž',
-    '/': '÷',
+    'z': 'źżž'
+}
+
+ISO_CURRENCY_STILL_REVERSED = {
+    # TODO!
+    'GBP': '£',
+    'JPY': '¥',
     'ECU': '₠',
-    '{Colon}': '₡',
-    '{Cruzeiro}': '₢',
     'FRF': '₣',
-    '{Lira}': '₤',
-    '{Mill}': '₥',
     'NGN': '₦',
     'ESP': '₧',
-    '{Rupie}': '₨',
-    '{Won}': '₩',
     'ILS': '₪',
     'VND': '₫',
     'EUR': '€',
@@ -133,70 +178,127 @@ GERMAN_REDUCTIONS = {
     'Pf.': '₰',
     'PHP': '₱',
     'PYG': '₲',
-    '{Austral}': '₳',
     'UAH': '₴',
     'GHS': '₵',
-    '{Livre Tournois}': '₶',
-    '{Spesmilo}': '₷',
     'KZT': '₸',
     'INR': '₹',
     'TRY': '₺',
-    '{Nordische Mark}': '₻',
     'AZN': '₼',
     'RUB': '₽',
     'GEL': '₾',
     'BTC': '₿',
     'NLG': 'ƒ',
     'THB': '฿',
-    'BDT': '৳',
-    'SZ': 'ẞ'
+    'BDT': '৳'
 }
 
-FS_0 = '{0}'
+NON_ISO_CURRENCY_STILL_REVERSED = {
+    # TODO!
+    '{Colon}': '₡',
+    '{Cruzeiro}': '₢',
+    '{Lira}': '₤',
+    '{Mill}': '₥',
+    '{Rupee}': '₨',
+    '{Won}': '₩',
+    '{Austral}': '₳',
+    '{Livre Tournois}': '₶',
+    '{Spesmilo}': '₷',
+    '{Nordic Mark}': '₻',
+}
 
 
-class MakeAsciiReductionFunction():
 
-    """Make a function for reducing any given unicode string to ASCII
-    using the replacements given in a dict of (replacement, source characters)
-    pairs
-    """
+def _check_ascii_replacement(characters, replacement):
+    """Raise a ValueError if the replacement is not ASCII only"""
+    try:
+        replacement.encode('ascii')
+    except UnicodeEncodeError:
+        raise ValueError(
+            'Replacements must be ASCII only,'
+            ' the provided replacement {0!r}'
+            ' for {1!r} is invalid!'.format(
+                replacement, characters))
+    #
+
+
+class ConversionRules:
+
+    """Conversion Rules for the provided characters"""
 
     default_replacement = '[_]'
+    max_ascii = '\x7f'
+    max_c1_control = '\x9f'
 
-    def __init__(self, replacements_map):
-        """Build a mapping of strings and their replacements,
-        precompile the catch-all regular expression"""
-        self.replacements = []
-        for (replacement, source_characters) in replacements_map.items():
-            try:
-                replacement.encode('ascii')
-            except UnicodeEncodeError:
-                raise ValueError('Replacements must be ASCII only!')
-            #
-            self.replacements.append((source_characters, replacement))
-        #
-        self.replacements.sort()
+    def __init__(self, rules_mapping=None):
+        """Set up the internal conversion mapping
+        from the given rules mapping
+        (key: string of characters to convert; value: ASCII replacement)
+        """
+        self.__reductions = {}
+        self.add_reductions(rules_mapping)
 
-    def __call__(self, original_text):
-        """
-        """
-        reduced = []
-        for character in original_text:
-            if character <= MAX_ASCII:
-                reduced.append(character)
-            elif character > MAX_C1_CONTROL:
-                for (source_characters, replacement) in self.replacements:
-                    if character in source_characters:
-                        reduced.append(replacement)
-                        break
-                    #
-                else:
-                    reduced.append(self.default_replacement)
+    @property
+    def reductions(self):
+        """Read only access to self.__reductions (snapshot copy)"""
+        return dict(self.__reductions)
+
+    def add_reductions(self, rules_mapping):
+        """Add values from the given mapping to the internal mapping"""
+        if rules_mapping:
+            for source_characters, replacement in rules_mapping.items():
+                _check_ascii_replacement(source_characters, replacement)
+                for character in source_characters:
+                    self.__reductions[character] = replacement
                 #
             #
         #
-        return ''.join(reduced)
+
+    def overwrite_rules(self, reductions_mapping):
+        """Overwrite the internal mapping by the provided one"""
+        for character, replacement in reductions_mapping:
+            _check_ascii_replacement(character, replacement)
+        #
+        self.__reductions = dict(reductions_mapping)
+
+    def copy(self):
+        """Return a copy of the object"""
+        duplicate = ConversionRules()
+        duplicate.overwrite_rules(self.__reductions)
+        return duplicate
+
+    def __add__(self, other):
+        """Return a new object as a copy, with the internal mapping
+        updated form the added object's mapping"""
+        result = self.copy()
+        if isinstance(other, ConversionRules):
+            mapping_to_add = other.reductions
+        elif isinstance(other, dict):
+            mapping_to_add = other
+        else:
+            raise TypeError('Cannot add any other type than'
+                            ' ConversionRules or dict!')
+        #
+        result = self.copy()
+        result.add_reductions(mapping_to_add)
+        return result
+
+    def reduce_character(self, character):
+        """Reduce a single unicode character according to the rules"""
+        if character < self.max_ascii:
+            return character
+        #
+        if character < self.max_c1_control:
+            return ''
+        #
+        return self.__reductions.get(character, self.default_replacement)
+
+
+#
+# End of classes, start of rule definitions
+#
+
+
+BASIC_LATIN_RULES = ConversionRules(LATIN) + PUNCTUATION
 
 
 #
@@ -204,7 +306,13 @@ class MakeAsciiReductionFunction():
 #
 
 
-GERMAN_ASCII_REDUCER = MakeAsciiReductionFunction(GERMAN_REDUCTIONS)
+def to_ascii(unicode_text, conversion_rules=BASIC_LATIN_RULES):
+    """Reduce the given text to ascii"""
+    reduced = []
+    for character in unicode_text:
+        reduced.append(conversion_rules.reduce_character(character))
+    #
+    return ''.join(reduced)
 
 
 # vim:fileencoding=utf-8 autoindent ts=4 sw=4 sts=4 expandtab:
