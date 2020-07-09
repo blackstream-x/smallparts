@@ -10,10 +10,68 @@ smallparts.text.reduce - Functions for reducing unicode text to ASCII
 # Reduction rules as dicts: {source_characters: ascii_replacement, …}
 #
 
+LATIN = {
+    # Latin characters from the
+    # Latin-1 supplement (U0080–U00ff) and
+    # Latin extended-A (U0100–U017f) Unicode blocks
+    #
+    'ÀÁÂÃÄÅĀĂĄ': 'A',
+    'Æ': 'Ae',
+    'ÇĆĈĊČ': 'C',
+    'Ď': 'D',
+    'ÐĐ': 'Dh',
+    'ÈÉÊËĒĔĖĘĚ': 'E',
+    'ĜĞĠĢ': 'G',
+    'ĤĦ': 'H',
+    'ÌÍÎÏĨĪĬĮİ': 'I',
+    'Ĳ': 'IJ',
+    'Ĵ': 'J',
+    'Ķ': 'K',
+    'ĹĻĽĿŁ': 'L',
+    'ÑŃŅŇ': 'N',
+    'Ŋ': 'Ng',
+    'ÒÓÔÕÖŌŎŐØ': 'O',
+    'Œ': 'Oe',
+    'ŔŖŘ': 'R',
+    'ŚŜŞŠ': 'S',
+    'ŢŤŦ': 'T',
+    'Þ': 'Th',
+    'ÙÚÛÜŨŪŬŮŰŲ': 'U',
+    'Ŵ': 'W',
+    'ÝŶŸ': 'Y',
+    'ŹŻŽ': 'Z',
+    'àáâãäåāăą': 'a',
+    'æ': 'ae',
+    'çćĉċč': 'c',
+    'ď': 'd',
+    'ðđ': 'dh',
+    'èéêëēĕėęě': 'e',
+    'ĝğġģ': 'g',
+    'ĥħ': 'h',
+    'ìíîïĩīĭįı': 'i',
+    'ĳ': 'ij',
+    'ĵ': 'j',
+    'ķĸ': 'k',
+    'ĺļľŀł': 'l',
+    'ñńņň': 'n',
+    'ŋ': 'ng',
+    'òóôõöōŏőø': 'o',
+    'œ': 'oe',
+    'ŕŗř': 'r',
+    'śŝşšſ': 's',
+    'ß': 'ss',
+    'ţťŧ': 't',
+    'þ': 'th',
+    'ùúûüũūŭůűų': 'u',
+    'ŵ': 'w',
+    'ýŷÿ': 'y',
+    'źżž': 'z'
+}
+
 PUNCTUATION = {
     # Punctuation from the
     # Latin-1 supplement (U0080–U00ff) and
-    # General punctuation (U2000–U206F) Unicode blocks
+    # General punctuation (U2000–U206f) Unicode blocks
     #
     # Spacing characters → space
     '\u0080\u2000\u2001\u2002\u2003\u2004'
@@ -40,8 +98,8 @@ PUNCTUATION = {
     '\u2028': '\n',
     '\u2029': '\n\n',
     # Per mille and per myriad (= per then thousand) signs → {description}
-    '\u0030': '{permille}',
-    '\u0031': '{permyriad}',
+    '\u2030': '{permille}',
+    '\u2031': '{permyriad}',
     # Primes → apostrophes, reverse primes → grave accents
     '\u2032': '\x27',
     '\u2033': '\x27\x27',
@@ -99,113 +157,81 @@ PUNCTUATION = {
     '¾': '3/4'
 }
 
-LATIN = {
-    # TODO!
+ISO_CURRENCY = {
+    # ISO 4217 codes for all currency symbols from the
+    # Latin-1 supplement (U0080–U00ff) and
+    # Currency symbols (U20a0–U20bf) Unicode blocks
+    # which are clearly attributable
+    #
+    '£': 'GBP',
+    '¥': 'JPY',
+    '₠': 'ECU',
+    '₣': 'FRF',
+    '₦': 'NGN',
+    '₧': 'ESP',
+    '₪': 'ILS',
+    '₫': 'VND',
+    '€': 'EUR',
+    '₭': 'LAK',
+    '₮': 'MNT',
+    '₯': 'GRD',
+    '₱': 'PHP',
+    '₲': 'PYG',
+    '₳': 'ARA',
+    '₴': 'UAH',
+    '₵': 'GHS',
+    '₸': 'KZT',
+    '₹': 'INR',
+    '₺': 'TRY',
+    '₼': 'AZN',
+    '₽': 'RUB',
+    '₾': 'GEL',
+    '₿': 'BTC',
+    'ƒ': 'NLG',
+    '฿': 'THB',
+    '৳': 'BDT'
 }
 
-GERMAN_LATIN_STILL_REVERSED = {
-    # TODO!
-    'A': 'ÀÁÂÃÅĀĂĄ',
-    'Ae': 'ÄÆ',
-    'C': 'ÇĆĈĊČ',
-    'D': 'Ď',
-    'Dh': 'ÐĐ',
-    'E': 'ÈÉÊËĒĔĖĘĚ',
-    'G': 'ĜĞĠĢ',
-    'H': 'ĤĦ',
-    'I': 'ÌÍÎÏĨĪĬĮİ',
-    'IJ': 'Ĳ',
-    'J': 'Ĵ',
-    'K': 'Ķ',
-    'L': 'ĹĻĽĿŁ',
-    'N': 'ÑŃŅŇ',
-    'Ng': 'Ŋ',
-    'O': 'ÒÓÔÕŌŎŐ',
-    'Oe': 'ÖØŒ',
-    'R': 'ŔŖŘ',
-    'S': 'ŚŜŞŠ',
-    'SZ': 'ẞ',
-    'T': 'ŢŤŦ',
-    'Th': 'Þ',
-    'U': 'ÙÚÛŨŪŬŮŰŲ',
-    'Ue': 'Ü',
-    'W': 'Ŵ',
-    'Y': 'ÝŶŸ',
-    'Z': 'ŹŻŽ',
-    'a': 'àáâãåāăą',
-    'ae': 'äæ',
-    'c': 'çćĉċč',
-    'd': 'ď',
-    'dh': 'ðđ',
-    'e': 'èéêëēĕėęě',
-    'g': 'ĝğġģ',
-    'h': 'ĥħ',
-    'i': 'ìíîïĩīĭįı',
-    'ij': 'ĳ',
-    'j': 'ĵ',
-    'k': 'ķĸ',
-    'l': 'ĺļľŀł',
-    'n': 'ñńņň',
-    'ng': 'ŋ',
-    'o': 'òóôõōŏő',
-    'oe': 'öøœ',
-    'r': 'ŕŗř',
-    's': 'śŝşšſ',
-    'ss': 'ß',
-    't': 'ţťŧ',
-    'th': 'þ',
-    'u': 'ùúûũūŭůűų',
-    'ue': 'ü',
-    'w': 'ŵ',
-    'y': 'ýŷÿ',
-    'z': 'źżž'
+NON_ISO_CURRENCY = {
+    # Names for all currency symbols from the
+    # Currency symbols (U20a0–U20bf) Unicode block that are
+    # NOT clearly attributable or do not have a ISO 4217 code
+    #
+    '₡': '{Colon}',             # CRC and SVC
+    '₢': '{Cruzeiro}',          # BRB, BRC, BRN, BRE, BRR
+    '₤': '{Lira}',              # ITL, MTL, SML, VAL, possybly also SYP
+    '₥': '{Mill}',              # former US currency unit (1/1000 $)
+    '₨': '{Rupee}',             # various currencies; Indian Rupee: see INR
+    '₩': '{Won}',               # KPW and KRW
+    '₰': '{Pfennig}',           # former German curreny unit (1/100 Mark)
+    '₶': '{Livre tournois}',    # former French currency, 13th to 18th century
+    '₷': '{Spesmilo}',          # historical proposed int'l currency
+    '₻': '{Nordic Mark}'        # Danish rigsdaler
 }
 
-ISO_CURRENCY_STILL_REVERSED = {
-    # TODO!
-    'GBP': '£',
-    'JPY': '¥',
-    'ECU': '₠',
-    'FRF': '₣',
-    'NGN': '₦',
-    'ESP': '₧',
-    'ILS': '₪',
-    'VND': '₫',
-    'EUR': '€',
-    'LAK': '₭',
-    'MNT': '₮',
-    'GRD': '₯',
-    'Pf.': '₰',
-    'PHP': '₱',
-    'PYG': '₲',
-    'UAH': '₴',
-    'GHS': '₵',
-    'KZT': '₸',
-    'INR': '₹',
-    'TRY': '₺',
-    'AZN': '₼',
-    'RUB': '₽',
-    'GEL': '₾',
-    'BTC': '₿',
-    'NLG': 'ƒ',
-    'THB': '฿',
-    'BDT': '৳'
+GERMAN_OVERRIDES = {
+    # German-language overrides
+    'Ä': 'Ae',
+    'ÖŐØ': 'Oe',
+    'ẞ': 'SZ',
+    'ÜŰ': 'Ue',
+    'ä': 'ae',
+    'öőø': 'oe',
+    'üű': 'ue',
+    '\u2030': '{Promille}',
+    '¤': '{Waehrung}',
+    '§': 'Par.',
+    '¬': '{nicht}',
+    '°': '{Grad}',
+    '¶': '{Absatzmarke}\n',
+    '¸': '{Cedille}',
+    '₰': 'Pf.'
 }
 
-NON_ISO_CURRENCY_STILL_REVERSED = {
-    # TODO!
-    '{Colon}': '₡',
-    '{Cruzeiro}': '₢',
-    '{Lira}': '₤',
-    '{Mill}': '₥',
-    '{Rupee}': '₨',
-    '{Won}': '₩',
-    '{Austral}': '₳',
-    '{Livre Tournois}': '₶',
-    '{Spesmilo}': '₷',
-    '{Nordic Mark}': '₻',
-}
 
+#
+# Internal helper functions
+#
 
 
 def _check_ascii_replacement(characters, replacement):
@@ -219,6 +245,11 @@ def _check_ascii_replacement(characters, replacement):
             ' for {1!r} is invalid!'.format(
                 replacement, characters))
     #
+
+
+#
+# Classes
+#
 
 
 class ConversionRules:
@@ -255,7 +286,7 @@ class ConversionRules:
 
     def overwrite_rules(self, reductions_mapping):
         """Overwrite the internal mapping by the provided one"""
-        for character, replacement in reductions_mapping:
+        for character, replacement in reductions_mapping.items():
             _check_ascii_replacement(character, replacement)
         #
         self.__reductions = dict(reductions_mapping)
@@ -268,7 +299,8 @@ class ConversionRules:
 
     def __add__(self, other):
         """Return a new object as a copy, with the internal mapping
-        updated form the added object's mapping"""
+        updated form the added object's mapping
+        """
         result = self.copy()
         if isinstance(other, ConversionRules):
             mapping_to_add = other.reductions
@@ -298,7 +330,7 @@ class ConversionRules:
 #
 
 
-BASIC_LATIN_RULES = ConversionRules(LATIN) + PUNCTUATION
+BASIC_LATIN_RULES = ConversionRules(LATIN)
 
 
 #
@@ -313,6 +345,18 @@ def to_ascii(unicode_text, conversion_rules=BASIC_LATIN_RULES):
         reduced.append(conversion_rules.reduce_character(character))
     #
     return ''.join(reduced)
+
+
+def latin_to_ascii(unicode_text, *additional_rules):
+    """Reduce the given text to ascii using basic latin rules
+    plus the additional rules given as positional parameters
+    after the text
+    """
+    applicable_rules = BASIC_LATIN_RULES
+    for rule in additional_rules:
+        applicable_rules = applicable_rules + rule
+    #
+    return to_ascii(unicode_text, conversion_rules=applicable_rules)
 
 
 # vim:fileencoding=utf-8 autoindent ts=4 sw=4 sts=4 expandtab:
