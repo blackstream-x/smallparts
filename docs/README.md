@@ -2,14 +2,11 @@
 
 ## smallparts.constants
 
-Constants commonly used throughout this package
+Constants commonly used throughout this package.
 
-## smallparts.lists
+## [smallparts.lists](./smallparts.lists.md)
 
-Functions for lists. Currently contains only one function:
-
-**flatten**(*nested_list*)
-Flattens the provided nested list.
+Functions for lists.
 
 ## smallparts.markup
 
