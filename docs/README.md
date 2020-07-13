@@ -30,8 +30,8 @@ Functions for easily joining strings
 
 ### [smallparts.text.reduce](./smallparts.text.reduce.md)
 
-Classes, functions and rules for reducing unicode text to ASCII.
-Although you would gess this should not be necessary anymore in 2020,
+Classes, functions and rules for reducing unicode text to ASCII.  
+Although you would guess this should not be necessary anymore in 2020,
 there are still a few use cases. 
 
 ### smallparts.text.templates
