@@ -28,9 +28,9 @@ Subpackage with the following modules:
 
 Functions for easily joining strings
 
-### smallparts.text.reduce
+### [smallparts.text.reduce](./smallparts.text.reduce.md)
 
-Functions for reducing (latin) text to the ASCII charset.
+Classes, functions and rules for reducing unicode text to ASCII.
 Although you would gess this should not be necessary anymore in 2020,
 there are still a few use cases. 
 

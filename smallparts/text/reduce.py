@@ -2,7 +2,9 @@
 
 """
 
-smallparts.text.reduce - Functions for reducing unicode text to ASCII
+smallparts.text.reduce
+
+Classes, functions and rules for reducing unicode text to ASCII
 
 """
 
@@ -69,7 +71,7 @@ LATIN = {
 }
 
 PUNCTUATION = {
-    # Punctuation from the
+    # Punctuation and symbols from the
     # Latin-1 supplement (U0080–U00ff) and
     # General punctuation (U2000–U206f) Unicode blocks
     #
@@ -125,15 +127,17 @@ PUNCTUATION = {
     '÷\u2044': '/',
     # Tironian sign et → ampersand
     '\u204a': '&',
-    # Various punctuation from the U2000 block
+    # Various punctuation and symbols from the U2000 block
     '\u204b': '{reversed pilcrow}\n',
     '\u2051': '**',
     '\u2052': './.',
     '\u2053': '~',
     '\u2055': '*',
-    # Various punctuation from the U0080 block
+    # Various punctuation and symbols from the U0080 block
     '¢': 'ct',
+    '£': 'GBP',
     '¤': '{currency}',
+    '¥': 'JPY',
     '¦': '|',
     '§': '{section sign}',
     '¨': '"',
@@ -159,12 +163,9 @@ PUNCTUATION = {
 
 ISO_CURRENCY = {
     # ISO 4217 codes for all currency symbols from the
-    # Latin-1 supplement (U0080–U00ff) and
-    # Currency symbols (U20a0–U20bf) Unicode blocks
-    # which are clearly attributable
+    # Currency symbols (U20a0–U20bf) Unicode block
+    # that are clearly attributable
     #
-    '£': 'GBP',
-    '¥': 'JPY',
     '₠': 'ECU',
     '₣': 'FRF',
     '₦': 'NGN',
@@ -253,21 +254,21 @@ def _check_ascii_replacement(characters, replacement):
 #
 
 
-class ConversionRules:
+class ConversionTable:
 
-    """Conversion Rules for the provided characters"""
+    """Conversion table for reductions to ASCII"""
 
-    default_replacement = '[_]'
     max_ascii = '\x7f'
     max_c1_control = '\x9f'
 
-    def __init__(self, rules_mapping=None):
+    def __init__(self, rules_mapping, default_replacement='{}'):
         """Set up the internal conversion mapping
         from the given rules mapping
         (key: string of characters to convert; value: ASCII replacement)
         """
         self.__reductions = {}
         self.add_reductions(rules_mapping)
+        self.default_replacement = default_replacement
 
     @property
     def reductions(self):
@@ -276,42 +277,28 @@ class ConversionRules:
 
     def add_reductions(self, rules_mapping):
         """Add values from the given mapping to the internal mapping"""
-        if rules_mapping:
-            for source_characters, replacement in rules_mapping.items():
-                _check_ascii_replacement(source_characters, replacement)
-                for character in source_characters:
-                    self.__reductions[character] = replacement
-                #
+        for source_characters, replacement in rules_mapping.items():
+            _check_ascii_replacement(source_characters, replacement)
+            for character in source_characters:
+                self.__reductions[character] = replacement
             #
         #
-
-    def overwrite_rules(self, reductions_mapping):
-        """Overwrite the internal mapping by the provided one"""
-        for character, replacement in reductions_mapping.items():
-            _check_ascii_replacement(character, replacement)
-        #
-        self.__reductions = dict(reductions_mapping)
-
-    def copy(self):
-        """Return a copy of the object"""
-        duplicate = ConversionRules()
-        duplicate.overwrite_rules(self.__reductions)
-        return duplicate
 
     def __add__(self, other):
         """Return a new object as a copy, with the internal mapping
         updated form the added object's mapping
         """
-        result = self.copy()
-        if isinstance(other, ConversionRules):
+        if isinstance(other, ConversionTable):
             mapping_to_add = other.reductions
         elif isinstance(other, dict):
             mapping_to_add = other
         else:
             raise TypeError('Cannot add any other type than'
-                            ' ConversionRules or dict!')
+                            ' ConversionTable or dict!')
         #
-        result = self.copy()
+        result = ConversionTable(
+            self.__reductions,
+            default_replacement=self.default_replacement)
         result.add_reductions(mapping_to_add)
         return result
 
@@ -341,11 +328,11 @@ def latin_to_ascii(unicode_text, *additional_rules):
     plus the additional rules given as positional parameters
     after the text
     """
-    applicable_rules = ConversionRules(LATIN)
+    conversion_table = ConversionTable(LATIN)
     for rule in additional_rules:
-        applicable_rules = applicable_rules + rule
+        conversion_table = conversion_table + rule
     #
-    return applicable_rules.reduce_text(unicode_text)
+    return conversion_table.reduce_text(unicode_text)
 
 
 # vim:fileencoding=utf-8 autoindent ts=4 sw=4 sts=4 expandtab:
