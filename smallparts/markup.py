@@ -21,7 +21,6 @@ from smallparts.text import transcode
 from smallparts.text import translate
 
 
-
 #
 # Constants
 #

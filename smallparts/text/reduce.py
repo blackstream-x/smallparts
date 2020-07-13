@@ -210,7 +210,8 @@ NON_ISO_CURRENCY = {
 }
 
 GERMAN_OVERRIDES = {
-    # German-language overrides
+    # German-language overrides including U1e9e (ẞ, capital ß)
+    #
     'Ä': 'Ae',
     'ÖŐØ': 'Oe',
     'ẞ': 'SZ',

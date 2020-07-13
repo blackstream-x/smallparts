@@ -221,11 +221,11 @@ def lines_from_file(input_file_or_name,
                     fallback_encoding=DEFAULT_FALLBACK_ENCODING,
                     keepends=False):
     """Iterate over the decoded input file's lines"""
-    for single_line in read_from_file(
-            input_file_or_name,
-            from_encoding=from_encoding,
-            fallback_encoding=fallback_encoding).\
-                splitlines(keepends=keepends):
+    decoded_file_content = read_from_file(
+        input_file_or_name,
+        from_encoding=from_encoding,
+        fallback_encoding=fallback_encoding)
+    for single_line in decoded_file_content.splitlines(keepends=keepends):
         yield single_line
     #
 
