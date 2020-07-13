@@ -1,4 +1,4 @@
-# smallparts.lists
+# smallparts.sequences
 
 Source: [smallparts/sequences.py](https://github.com/blackstream-x/smallparts/blob/master/smallparts/sequences.py)
 
