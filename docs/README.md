@@ -4,10 +4,6 @@
 
 Constants commonly used throughout this package.
 
-## [smallparts.lists](./smallparts.lists.md)
-
-Functions for lists.
-
 ## smallparts.markup
 
 HTML and XML generation.
@@ -15,6 +11,10 @@ HTML and XML generation.
 ## smallparts.namespaces
 
 Simple namespaces initialized like dicts (in fact, they are based on dicts).
+
+## [smallparts.sequences](./smallparts.sequences.md)
+
+Functions for sequences.
 
 ## smallparts.time_display
 
