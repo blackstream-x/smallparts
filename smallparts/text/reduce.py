@@ -324,13 +324,10 @@ class ConversionRules:
         #
         return self.__reductions.get(character, self.default_replacement)
 
-
-#
-# End of classes, start of rule definitions
-#
-
-
-BASIC_LATIN_RULES = ConversionRules(LATIN)
+    def reduce_text(self, unicode_text):
+        """Reduce the provided unicode text character by character"""
+        return ''.join(self.reduce_character(character)
+                       for character in unicode_text)
 
 
 #
@@ -338,25 +335,16 @@ BASIC_LATIN_RULES = ConversionRules(LATIN)
 #
 
 
-def to_ascii(unicode_text, conversion_rules=BASIC_LATIN_RULES):
-    """Reduce the given text to ascii"""
-    reduced = []
-    for character in unicode_text:
-        reduced.append(conversion_rules.reduce_character(character))
-    #
-    return ''.join(reduced)
-
-
 def latin_to_ascii(unicode_text, *additional_rules):
     """Reduce the given text to ascii using basic latin rules
     plus the additional rules given as positional parameters
     after the text
     """
-    applicable_rules = BASIC_LATIN_RULES
+    applicable_rules = ConversionRules(LATIN)
     for rule in additional_rules:
         applicable_rules = applicable_rules + rule
     #
-    return to_ascii(unicode_text, conversion_rules=applicable_rules)
+    return applicable_rules.reduce_text(unicode_text)
 
 
 # vim:fileencoding=utf-8 autoindent ts=4 sw=4 sts=4 expandtab:
