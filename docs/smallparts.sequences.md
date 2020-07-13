@@ -12,7 +12,7 @@ smallparts.sequences.**flatten**(*iterable*)
 
 Returns a list containing all items in iterable which are either strings, bytes
 or non-iterable objects. This function uses recursion, thus expanding all iterables
-(except strings or bytes) im any depth.
+(except strings or bytes) in any depth.
 
 Example:
 
