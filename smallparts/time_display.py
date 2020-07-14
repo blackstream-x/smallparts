@@ -7,8 +7,7 @@ smallparts.time_display - time representation functions
 """
 
 
-from smallparts import text
-
+from smallparts.l10n import enumerations as ln_enum
 from smallparts.l10n import time_indications as ln_time
 
 
@@ -107,7 +106,7 @@ def pretty_printed_timedelta(timedelta, limits=None, lang=None):
             ln_time.pretty_print_component(weeks=totals[ln_time.WEEKS],
                                            lang=lang))
     #
-    return text.enumeration(result[::-1])
+    return ln_enum.enumeration(result[::-1], ln_enum.AND, lang=lang)
 
 
 # vim:fileencoding=utf-8 autoindent ts=4 sw=4 sts=4 expandtab:

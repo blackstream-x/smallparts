@@ -43,6 +43,15 @@ NUMBER_CATEGORIES = {
         WEEKS: ('Woche', 'Wochen'),
         MONTHS: ('Monat', 'Monate'),
         YEARS: ('Jahr', 'Jahre')
+    },
+    languages.FR: {
+        SECONDS: ('seconde', 'secondes'),
+        MINUTES: ('minute', 'Minutes'),
+        HOURS: ('heure', 'heures'),
+        DAYS: ('jour', 'jours'),
+        WEEKS: ('semaine', 'semaines'),
+        MONTHS: ('mois', 'mois'),
+        YEARS: ('an', 'ans')
     }
 }
 
@@ -64,7 +73,7 @@ def pretty_print_component(**kwargs):
         if lang not in languages.SUPPORTED:
             raise ValueError('Language {0!r} not supported!'.format(lang))
         #
-        raise ValueError('No {0!r} translation available!'.format(lang))
+        raise ValueError('No {0!r} translation available yet!'.format(lang))
     #
     for unit in SUPPORTED_UNITS:
         amount = kwargs.get(unit)
