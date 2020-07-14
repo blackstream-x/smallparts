@@ -8,6 +8,18 @@ Constants commonly used throughout this package.
 
 HTML and XML generation.
 
+## smallparts.l10n
+
+Localization subpackage.
+
+### smallparts.l10n.languages
+
+Definitions of supported languages.
+
+### smallparts.l10n.time_indications
+
+Translations of time indications.
+
 ## smallparts.namespaces
 
 Simple namespaces initialized like dicts (in fact, they are based on dicts).
