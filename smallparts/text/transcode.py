@@ -15,6 +15,8 @@ import logging
 import os.path
 import shutil
 
+from smallparts.text import split
+
 
 # Encodings
 
@@ -275,21 +277,6 @@ def write_to_file(file_name,
     #
 
 
-def _splitlines_for_reconstruction(unicode_text):
-    """Split unicode_text using the splitlines() str method,
-    but append an empty string at the end if the last line
-    of the source ends with a line end,
-    to be able to keep this trailing line end when re-joining the list.
-    See <https://docs.python.org/3/library/stdtypes.html#str.splitlines>
-    for the list of line end characters.
-    """
-    splitted_lines = unicode_text.splitlines()
-    if unicode_text[-1] in '\n\r\v\f\x1c\x1d\x1e\x85\u2028\u2029':
-        splitted_lines.append('')
-    #
-    return splitted_lines
-
-
 def transcode_file(file_name,
                    to_encoding=DEFAULT_TARGET_ENCODING,
                    from_encoding=None,
@@ -322,7 +309,7 @@ def transcode_file(file_name,
     #
     if line_ending in (LF, CRLF):
         unicode_content = line_ending.join(
-            _splitlines_for_reconstruction(unicode_content))
+            split.lines_for_reconstruction(unicode_content))
     #
     with open(file_name,
               mode=MODE_WRITE_BINARY) as output_file:

@@ -236,7 +236,7 @@ GERMAN_OVERRIDES = {
 #
 
 
-def _check_ascii_replacement(characters, replacement):
+def check_ascii_replacement(characters, replacement):
     """Raise a ValueError if the replacement is not ASCII only"""
     try:
         replacement.encode('ascii')
@@ -278,7 +278,7 @@ class ConversionTable:
     def add_reductions(self, rules_mapping):
         """Add values from the given mapping to the internal mapping"""
         for source_characters, replacement in rules_mapping.items():
-            _check_ascii_replacement(source_characters, replacement)
+            check_ascii_replacement(source_characters, replacement)
             for character in source_characters:
                 self.__reductions[character] = replacement
             #
@@ -301,6 +301,10 @@ class ConversionTable:
             default_replacement=self.default_replacement)
         result.add_reductions(mapping_to_add)
         return result
+
+    def __eq__(self, other):
+        """Return True if reductions of both ConversionTables are equal"""
+        return self.reductions == other.reductions
 
     def reduce_character(self, character):
         """Reduce a single unicode character according to the rules"""

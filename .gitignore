@@ -9,9 +9,10 @@ __pycache__/
 venv/
 *~
 
-# due to using tox and pytest
+# due to using test tools
 .tox
 .cache
+.coverage
 
 # Spyder project info
 .spyproject

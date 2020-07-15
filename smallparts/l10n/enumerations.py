@@ -45,26 +45,42 @@ ENUM_JOINERS = {
         EITHER: ('entweder', COMMA, 'oder'),
         NEITHER: ('weder', COMMA, 'noch')
     },
+     languages.ES: {
+        AND: (None, COMMA, 'y'),
+        OR: (None, COMMA, 'o'),
+        EITHER: ('ya sea', COMMA, 'o'),
+        NEITHER: ('ni', COMMA, 'ni')
+    },
     languages.FR: {
         AND: (None, COMMA, 'et'),
         OR: (None, COMMA, 'ou'),
         EITHER: ('soit', COMMA, 'ou'),
         NEITHER: ('ni', COMMA, 'ni')
-    }
+    },
+    '__test__': {AND: (None, None, None)}
 }
 
 # Spacing rules: (before, after)
 SPACING_RULES = {
     languages.EN: {
         DEFAULT: (True, True),
-        EXCEPTIONS: {BEFORE: {',;.:!?': False}}
+        EXCEPTIONS: {BEFORE: {',;.:!?/': False},
+                     AFTER: {'/': False}}
     },
     languages.DE: {
         DEFAULT: (True, True),
         EXCEPTIONS: {BEFORE: {',;.:!?': False}}
     },
+    languages.ES: {
+        DEFAULT: (True, True),
+        EXCEPTIONS: {BEFORE: {',;.:!?': False}}
+    },
     languages.FR: {
         DEFAULT: (True, True),
+        EXCEPTIONS: {}
+    },
+    '__test__': {
+        DEFAULT: (False, False),
         EXCEPTIONS: {}
     }
 }
@@ -74,20 +90,21 @@ SPACING_RULES = {
 #
 
 
-def __apply_spacing_rules(joiner, lang):
+def apply_spacing_rules(joiner, lang=None):
     """Apply language-specific spacing rules"""
     stripped_joiner = joiner.strip()
     if not stripped_joiner:
         return joiner
     #
+    lang = lang or languages.DEFAULT
     try:
         spacing_rules = SPACING_RULES[lang]
     except KeyError:
-        if lang not in languages.SUPPORTED:
-            raise ValueError('Language {0!r} not supported!'.format(lang))
-        #
         raise ValueError(
-            'No spacing rules available yet for {0!r}!'.format(lang))
+            languages.missing_translation(
+                lang,
+                message='No spacing rules available yet'
+                'for {0!r}!'.format(lang)))
     #
     for (characters, rule_before) in spacing_rules[EXCEPTIONS].get(
             BEFORE, {}).items():
@@ -125,10 +142,7 @@ def enumeration(sequence, enum_type, lang=None):
     try:
         enum_joiners = ENUM_JOINERS[lang]
     except KeyError:
-        if lang not in languages.SUPPORTED:
-            raise ValueError('Language {0!r} not supported!'.format(lang))
-        #
-        raise ValueError('No {0!r} translation available yet!'.format(lang))
+        raise ValueError(languages.missing_translation(lang))
     else:
         try:
             prefix, joiner, final_joiner = enum_joiners[enum_type]
@@ -150,8 +164,8 @@ def enumeration(sequence, enum_type, lang=None):
     return raw_join(
         sequence,
         prefix=prefix,
-        joiner=__apply_spacing_rules(joiner, lang=lang),
-        final_joiner=__apply_spacing_rules(final_joiner, lang=lang))
+        joiner=apply_spacing_rules(joiner, lang=lang),
+        final_joiner=apply_spacing_rules(final_joiner, lang=lang))
 
 
 # vim:fileencoding=utf-8 autoindent ts=4 sw=4 sts=4 expandtab:

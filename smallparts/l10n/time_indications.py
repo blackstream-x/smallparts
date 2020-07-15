@@ -70,10 +70,7 @@ def pretty_print_component(**kwargs):
     try:
         number_category = NUMBER_CATEGORIES[lang]
     except KeyError:
-        if lang not in languages.SUPPORTED:
-            raise ValueError('Language {0!r} not supported!'.format(lang))
-        #
-        raise ValueError('No {0!r} translation available yet!'.format(lang))
+        raise ValueError(languages.missing_translation(lang))
     #
     for unit in SUPPORTED_UNITS:
         amount = kwargs.get(unit)

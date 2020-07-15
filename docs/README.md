@@ -46,6 +46,10 @@ Classes, functions and rules for reducing unicode text to ASCII.
 Although you would guess this should not be necessary anymore in 2020,
 there are still a few use cases. 
 
+### smallparts.text.split
+
+One wrapper function for str.splitlines() for preserving a trailing line break.
+
 ### smallparts.text.templates
 
 One class enhancing the String.Template class.
