@@ -13,7 +13,7 @@ from smallparts.l10n import languages
 
 class TestSimple(unittest.TestCase):
 
-    """Check the l10n.languages module"""
+    """Test the l10n.languages module"""
 
     def test_unsupported_language(self):
         """Message: unsupported language"""

@@ -14,7 +14,7 @@ from smallparts.l10n import languages
 
 class TestSimple(unittest.TestCase):
 
-    """Check the l10n.enmerations module"""
+    """Check the l10n.enumerations module"""
 
     def test_unsupported_language_spacing_rules(self):
         """Unsupported language in apply_spacing_rules"""

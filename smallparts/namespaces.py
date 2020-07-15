@@ -75,12 +75,14 @@ class DefaultNamespace(Namespace):
     attributes
     """
 
-    visible_attributes = ('items', '__default')
+    visible_attributes = ('items', 'default__value__')
 
     def __init__(self, *args, **kwargs):
         """Initialize like a dict, but steal the 'default'
         keyword argument if given"""
-        self.__default = kwargs.pop('default', None)
+        object.__setattr__(self,
+                           'default__value__',
+                           kwargs.pop('default', None))
         super(DefaultNamespace, self).__init__(*args, **kwargs)
 
     def __getattribute__(self, name):
@@ -93,7 +95,7 @@ class DefaultNamespace(Namespace):
         try:
             return self[name]
         except KeyError:
-            return dict.setdefault(self, name, self.__default)
+            return dict.setdefault(self, name, self.default__value__)
         #
 
 
