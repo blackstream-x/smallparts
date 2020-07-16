@@ -13,16 +13,18 @@ from smallparts import markup
 
 class TestSimple(unittest.TestCase):
 
-    """Test the namespaces module"""
+    """Test the markup module"""
 
-    def test_wrap_cdata(self):
-        """Test markup.wrap_cdata"""
-        self.assertEqual(
-            markup.wrap_cdata('wrapped character data'),
-            '<![CDATA[wrapped character data]]>')
-        self.assertEqual(
-            markup.wrap_cdata('split <![CDATA[*CDATA section*]]> test'),
-            '<![CDATA[split <![CDATA[*CDATA section*]]]]><![CDATA[> test]]>')
+# =============================================================================
+#     def test_wrap_cdata(self):
+#         """Test markup.wrap_cdata"""
+#         self.assertEqual(
+#             markup.wrap_cdata('wrapped character data'),
+#             '<![CDATA[wrapped character data]]>')
+#         self.assertEqual(
+#             markup.wrap_cdata('split <![CDATA[*CDATA section*]]> test'),
+#             '<![CDATA[split <![CDATA[*CDATA section*]]]]><![CDATA[> test]]>')
+# =============================================================================
 
 # =============================================================================
 #     def test_namespace(self):
