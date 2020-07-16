@@ -56,6 +56,14 @@ SECOND_INDEX = ONE
 LAST_INDEX = -1
 
 #
+# Encodings
+#
+
+ASCII = 'ascii'
+CP1252 = 'cp1252'
+UTF_8 = 'utf-8'
+
+#
 # Functional constants
 #
 
@@ -65,8 +73,6 @@ MODE_READ = 'r'
 MODE_READ_BINARY = 'rb'
 MODE_WRITE = 'w'
 MODE_WRITE_BINARY = 'wb'
-
-UTF8 = 'utf-8'
 
 YES = 'yes'
 NO = 'no'

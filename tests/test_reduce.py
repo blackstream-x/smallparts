@@ -19,8 +19,7 @@ class TestSimple(unittest.TestCase):
         """Check ascii replacements"""
         self.assertRaises(
             ValueError,
-            reduce.check_ascii_replacement,
-            'ẞ',
+            reduce.checked_ascii,
             '{Capital ß}')
 
     def test_conversion_table_add_and_eq(self):
@@ -40,25 +39,61 @@ class TestSimple(unittest.TestCase):
             conversion_table.__add__,
             'unsupported (pointless)')
 
-    def test_reduce_invalid_characters(self):
+    def test_remove_invalid_characters(self):
         """Empty replacements for C1 controls"""
-        conversion_table = reduce.ConversionTable(reduce.LATIN)
+        conversion_table = reduce.ConversionTable(
+            reduce.LATIN,
+            remove_c1_controls=True)
         self.assertEqual(
-            conversion_table.reduce_character('\x81'),
-            '')
+            conversion_table.reduce_character('\x81'), '')
 
-    def test_basic_latin_to_ascii(self):
+    def test_reduce_unknown_characters(self):
+        r"""\xNN replacements for C1 controls"""
+        conversion_table = reduce.ConversionTable(
+            reduce.LATIN)
+        self.assertEqual(
+            conversion_table.reduce_character('\x81'), r'\x81')
+
+    def test_reduce_unknown_unicode(self):
+        r"""\uNNNN replacements for Unicode characters above U00ff"""
+        conversion_table = reduce.ConversionTable(
+            reduce.LATIN)
+        self.assertEqual(
+            conversion_table.reduce_text(
+                'Bérurier Noir – Hélène et le sang'),
+            r'Berurier Noir \u2013 Helene et le sang')
+
+    def test_reduce_default(self):
+        """Default replacements"""
+        conversion_table = reduce.ConversionTable(
+            reduce.LATIN,
+            default_replacement='???')
+        self.assertEqual(
+            conversion_table.reduce_text(
+                'Bérurier Noir – Hélène et le sang'),
+            r'Berurier Noir ??? Helene et le sang')
+
+    def test_reduce_punctuation(self):
+        """Replacement of punctuation"""
+        conversion_table = reduce.ConversionTable(
+            reduce.LATIN) + reduce.PUNCTUATION
+        self.assertEqual(
+            conversion_table.reduce_text(
+                'Bérurier Noir – Hélène et le sang'),
+            'Berurier Noir - Helene et le sang')
+
+    def test_basic_latin(self):
         """Basic latin conversion results"""
         self.assertEqual(
-            reduce.latin_to_ascii('Hélène Müller'),
-            'Helene Muller')
+            reduce.latin_to_ascii('Motörhead'),
+            'Motorhead')
 
-    def test_german_latin_to_ascii(self):
+    def test_german_latin(self):
         """German conversion results"""
         self.assertEqual(
-            reduce.latin_to_ascii('Hélène Müller',
+            reduce.latin_to_ascii('Müller',
                                   reduce.GERMAN_OVERRIDES),
-            'Helene Mueller')
+            'Mueller')
 
 
 if __name__ == '__main__':

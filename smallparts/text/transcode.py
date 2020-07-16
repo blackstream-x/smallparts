@@ -15,13 +15,15 @@ import logging
 import os.path
 import shutil
 
+from smallparts import constants
+
 from smallparts.text import split
 
 
 # Encodings
 
-CP1252 = 'cp1252'
-UTF_8 = 'utf8'
+#CP1252 = 'cp1252'
+#UTF_8 = 'utf8'
 
 BOM_ASSIGNMENTS = (
     (codecs.BOM_UTF32_BE, 'utf_32_be'),
@@ -43,8 +45,8 @@ MODE_WRITE_BINARY = 'wb'
 
 # Defaults
 
-DEFAULT_TARGET_ENCODING = UTF_8
-DEFAULT_FALLBACK_ENCODING = CP1252
+DEFAULT_TARGET_ENCODING = constants.UTF_8
+DEFAULT_FALLBACK_ENCODING = constants.CP1252
 DEFAULT_LINE_ENDING = LF
 DEFAULT_WRITE_MODE = MODE_WRITE_BINARY
 
@@ -84,8 +86,8 @@ def to_unicode_and_encoding_name(
             #
         #
         try:
-            return (input_object.decode(UTF_8),
-                    UTF_8)
+            return (input_object.decode(constants.UTF_8),
+                    constants.UTF_8)
         except UnicodeDecodeError:
             return (input_object.decode(fallback_encoding),
                     fallback_encoding)
@@ -159,7 +161,7 @@ def to_utf8(input_object):
     """Encode the input object string to UTF-8
     using this modules's to_bytes() function
     """
-    return to_bytes(input_object, to_encoding=UTF_8)
+    return to_bytes(input_object, to_encoding=constants.UTF_8)
 
 
 def anything_to_utf8(
@@ -170,18 +172,19 @@ def anything_to_utf8(
     using this modules's to_bytes() function
     """
     return anything_to_bytes(input_object,
-                             to_encoding=UTF_8,
+                             to_encoding=constants.UTF_8,
                              from_encoding=from_encoding,
                              fallback_encoding=fallback_encoding)
 
 
-def fix_double_utf8_transformation(unicode_text, wrong_encoding=CP1252):
+def fix_double_utf8_transformation(unicode_text,
+                                   wrong_encoding=constants.CP1252):
     """Fix duplicate UTF-8 transformation,
     which is a frequent result of reading UTF-8 encoded text as Latin encoded
     (CP-1252, ISO-8859-1 or similar), resulting in characters like Ã¤Ã¶Ã¼.
     This function reverts the effect.
     """
-    if wrong_encoding == UTF_8:
+    if wrong_encoding == constants.UTF_8:
         raise ValueError('This would not have any effect!')
     #
     return to_unicode(to_bytes(unicode_text, to_encoding=wrong_encoding))

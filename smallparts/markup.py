@@ -597,7 +597,7 @@ class Translation():
 
 
 def xml_declaration(version=XML_VERSION,
-                    encoding=constants.UTF8,
+                    encoding=constants.UTF_8,
                     standalone=None):
     """Return an XML declaration.
     Omit the 'standalone' attribute if not specified.
@@ -619,7 +619,7 @@ def xml_declaration(version=XML_VERSION,
 
 def xml_document(content,
                  version=XML_VERSION,
-                 encoding=constants.UTF8,
+                 encoding=constants.UTF_8,
                  standalone=None):
     """Return a full XML document.
     Strip trailing whitespace from the content

@@ -8,6 +8,10 @@ Classes, functions and rules for reducing unicode text to ASCII
 
 """
 
+
+from smallparts import constants
+
+
 #
 # Reduction rules as dicts: {source_characters: ascii_replacement, …}
 #
@@ -232,21 +236,25 @@ GERMAN_OVERRIDES = {
 
 
 #
-# Internal helper functions
+# Helper functions
 #
 
 
-def check_ascii_replacement(characters, replacement):
-    """Raise a ValueError if the replacement is not ASCII only"""
+def checked_ascii(unicode_text):
+    """If the unicode_text is ASCII only (encodable unsing 'ascii'),
+    return it unchanged.
+    Raise a ValueError om all encoding errors,
+    or a TypeError if no string was provided.
+    """
     try:
-        replacement.encode('ascii')
+        unicode_text.encode(constants.ASCII)
+    except AttributeError:
+        raise TypeError('Expected a str object')
     except UnicodeEncodeError:
         raise ValueError(
-            'Replacements must be ASCII only,'
-            ' the provided replacement {0!r}'
-            ' for {1!r} is invalid!'.format(
-                replacement, characters))
+            '{0} is not ASCII only'.format(unicode_text))
     #
+    return unicode_text
 
 
 #
@@ -258,17 +266,24 @@ class ConversionTable:
 
     """Conversion table for reductions to ASCII"""
 
-    max_ascii = '\x7f'
     max_c1_control = '\x9f'
 
-    def __init__(self, rules_mapping, default_replacement='{}'):
+    def __init__(self,
+                 rules_mapping,
+                 default_replacement=None,
+                 remove_c1_controls=False):
         """Set up the internal conversion mapping
         from the given rules mapping
         (key: string of characters to convert; value: ASCII replacement)
         """
         self.__reductions = {}
         self.add_reductions(rules_mapping)
-        self.default_replacement = default_replacement
+        try:
+            self.default_replacement = checked_ascii(default_replacement)
+        except TypeError:
+            self.default_replacement = None
+        #
+        self.remove_c1_controls = remove_c1_controls
 
     @property
     def reductions(self):
@@ -278,9 +293,9 @@ class ConversionTable:
     def add_reductions(self, rules_mapping):
         """Add values from the given mapping to the internal mapping"""
         for source_characters, replacement in rules_mapping.items():
-            check_ascii_replacement(source_characters, replacement)
+            valid_replacement = checked_ascii(replacement)
             for character in source_characters:
-                self.__reductions[character] = replacement
+                self.__reductions[character] = valid_replacement
             #
         #
 
@@ -298,7 +313,8 @@ class ConversionTable:
         #
         result = ConversionTable(
             self.__reductions,
-            default_replacement=self.default_replacement)
+            default_replacement=self.default_replacement,
+            remove_c1_controls=self.remove_c1_controls)
         result.add_reductions(mapping_to_add)
         return result
 
@@ -307,14 +323,34 @@ class ConversionTable:
         return self.reductions == other.reductions
 
     def reduce_character(self, character):
-        """Reduce a single unicode character according to the rules"""
-        if character < self.max_ascii:
-            return character
+        r"""Reduce a single unicode character to ASCII
+        according to the following rules:
+        - if the character is valid ASCII, return it unchanged
+        - if it is in the C1 controls range (U0080-U009f)
+          AND the ConversionTable instance was created
+          with remove_c1_controls=True, return an empty string
+        - in any other case, return the defined replacement.
+        - if no replacement is defined, either return the
+          default replacement or, if no default replacement
+          had been specified, the appropriate Unicode escape
+          (\xNN, \uNNNN or \uNNNNNNNN).
+        """
+        try:
+            return checked_ascii(character)
+        except ValueError:
+            if character <= self.max_c1_control and self.remove_c1_controls:
+                return constants.EMPTY
+            #
         #
-        if character < self.max_c1_control:
-            return ''
+        try:
+            return self.__reductions[character]
+        except KeyError:
+            if self.default_replacement is None:
+                return character.encode(
+                    'unicode_escape').decode(constants.ASCII)
+            #
+            return self.default_replacement
         #
-        return self.__reductions.get(character, self.default_replacement)
 
     def reduce_text(self, unicode_text):
         """Reduce the provided unicode text character by character"""
@@ -328,7 +364,7 @@ class ConversionTable:
 
 
 def latin_to_ascii(unicode_text, *additional_rules):
-    """Reduce the given text to ascii using basic latin rules
+    """Reduce the given text to ASCII using basic latin rules
     plus the additional rules given as positional parameters
     after the text
     """
