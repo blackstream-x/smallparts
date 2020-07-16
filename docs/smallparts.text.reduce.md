@@ -75,7 +75,7 @@ either a \xNN, \uNNNN or \uNNNNNNNN unicode escape, depending on their codepoint
 
 ### Function
 
-smallparts.text.reduce.**latin_to_ascii**(*unicode_text ,*_*_*additional_rules*)
+smallparts.text.reduce.**latin_to_ascii**(*unicode_text,* _*_*additional_rules*)
 
 Reduces the given text to ASCII using basic latin rules (as defined in **LATIN**)
 plus the additional rules given as positional parameters after the text.
