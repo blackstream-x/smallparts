@@ -61,13 +61,14 @@ smallparts.text.transcode.**fix_double_utf8_transformation**(*unicode_text*, *wr
 > resulting in character sequences like ```Ã¤Ã¶Ã¼```.  
 > This function reverts the effect.
 
-(tbc)
+*(tbc)*
 
 ## Usage examples
 
 ```python
 >>> from smallparts.text import transcode
->>> …
+>>> transcode.fix_double_utf8_transformation('Ã¤Ã¶Ã¼')
+'äöü'
 >>> 
 ```
 
