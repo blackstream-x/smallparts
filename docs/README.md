@@ -4,10 +4,6 @@
 
 > Constants commonly used throughout this package.
 
-## smallparts.markup
-
-> HTML and XML generation.
-
 ## smallparts.l10n
 
 > Localization subpackage.
@@ -20,6 +16,10 @@
 
 > Translations of time indications.
 
+## smallparts.markup
+
+> HTML and XML generation.
+
 ## smallparts.namespaces
 
 > Simple namespaces initialized like dicts (in fact, they are based on dicts).
@@ -27,10 +27,6 @@
 ## [smallparts.sequences](./smallparts.sequences.md)
 
 > Functions for sequences.
-
-## smallparts.time_display
-
-> Functions for displaying time
 
 ## smallparts.text
 
@@ -54,11 +50,16 @@
 
 > One class enhancing the String.Template class.
 
-### smallparts.text.transcode
+### [smallparts.text.transcode](./smallparts.text.transcode.md)
 
 > Functions for transcoding text between various encodings.
 
 ### smallparts.text.translate
 
 > Functions and classes for text transliteration.
+
+## smallparts.time_display
+
+> Functions for displaying time
+
 

@@ -129,7 +129,7 @@ def anything_to_bytes(
         fallback_encoding=DEFAULT_FALLBACK_ENCODING):
     """Encode any given object to a bytes representation
     using the provided encoding, after decoding it to unicode
-    using this modules's to_unicode() function
+    using this modules's anything_to_unicode() function
     """
     try:
         return to_bytes(input_object, to_encoding=to_encoding)
