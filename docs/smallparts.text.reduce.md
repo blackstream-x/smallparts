@@ -44,7 +44,7 @@ smallparts.text.reduce.**checked_ascii**(*unicode_text*)
 > Returns *unicode_text* unchanged if it can be converted to ASCII,
 > else raises a ValueError.  
 > Raises a TypeError if a non-string object was given.
-> 
+>
 > This function is used internally in the ConversionTable class to check all
 > replacements as well as the default replacement.
 
@@ -110,7 +110,7 @@ smallparts.text.reduce.**latin_to_ascii**(*unicode_text,* _*_*additional_rules*)
 
 > Reduces the given text to ASCII using basic latin rules (as defined in **LATIN**)
 > plus the additional rules given as positional parameters after the text.
-> 
+>
 > Internally, this function first builds a ConversionTable instance from the
 > **LATIN** dict, and adds the provided *additional_rules* (which may be
 > either ConversionTable instances or dicts) one by one.  

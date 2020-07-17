@@ -9,23 +9,23 @@ This module defines the following functions:
 
 smallparts.text.join.**by_blanks**(_*parts_)
 
-> Join the provided text parts using blanks
+> Joins the provided text parts using blanks
 
 smallparts.text.join.**directly**(_*parts_)
 
-> Join the provided text parts directly adjacent
+> Joins the provided text parts directly adjacent
 
 smallparts.text.join.**by_blanks**(_*parts_)
 
-> Join the provided text parts using newline characters (```\n```)
+> Joins the provided text parts using newline characters (```\n```)
 
 smallparts.text.join.**by_blanks**(_*parts_)
 
-> Join the provided text parts using CRLF (```\r\n```)
+> Joins the provided text parts using CRLF (```\r\n```)
 
 smallparts.text.join.**using**(*join_string,* _*parts_)
 
-> Join the provided text parts using *join_string*
+> Joins the provided text parts using *join_string*
 
 ## Usage examples
 
