@@ -20,10 +20,7 @@ from smallparts import constants
 from smallparts.text import split
 
 
-# Encodings
-
-#CP1252 = 'cp1252'
-#UTF_8 = 'utf8'
+# Encodings with byte order marks
 
 BOM_ASSIGNMENTS = (
     (codecs.BOM_UTF32_BE, 'utf_32_be'),
@@ -32,23 +29,10 @@ BOM_ASSIGNMENTS = (
     (codecs.BOM_UTF16_LE, 'utf_16_le'),
     (codecs.BOM_UTF8, 'utf_8_sig'))
 
-# Line endings
-
-LF = '\n'
-CRLF = '\r\n'
-
-# File access modes
-
-MODE_APPEND_BINARY = 'ab'
-MODE_READ_BINARY = 'rb'
-MODE_WRITE_BINARY = 'wb'
-
-# Defaults
-
 DEFAULT_TARGET_ENCODING = constants.UTF_8
 DEFAULT_FALLBACK_ENCODING = constants.CP1252
-DEFAULT_LINE_ENDING = LF
-DEFAULT_WRITE_MODE = MODE_WRITE_BINARY
+DEFAULT_LINE_ENDING = constants.LF
+DEFAULT_WRITE_MODE = constants.MODE_WRITE_BINARY
 
 #
 # Functions
@@ -213,7 +197,7 @@ def read_from_file(input_file,
                           fallback_encoding=fallback_encoding)
     except AttributeError:
         with open(input_file,
-                  mode=MODE_READ_BINARY) as real_input_file:
+                  mode=constants.MODE_READ_BINARY) as real_input_file:
             return read_from_file(real_input_file,
                                   from_encoding=from_encoding,
                                   fallback_encoding=fallback_encoding)
@@ -291,7 +275,7 @@ def transcode_file(file_name,
     Write a backup file unless explicitly told not to do that.
     """
     with open(file_name,
-              mode=MODE_READ_BINARY) as input_file:
+              mode=constants.MODE_READ_BINARY) as input_file:
         bytes_content = input_file.read()
     #
     unicode_content, detected_encoding = to_unicode_and_encoding_name(
@@ -310,12 +294,12 @@ def transcode_file(file_name,
             file_name_root, detected_encoding, file_extension)
         shutil.move(file_name, backup_file_name)
     #
-    if line_ending in (LF, CRLF):
+    if line_ending in (constants.LF, constants.CRLF):
         unicode_content = line_ending.join(
             split.lines_for_reconstruction(unicode_content))
     #
     with open(file_name,
-              mode=MODE_WRITE_BINARY) as output_file:
+              mode=constants.MODE_WRITE_BINARY) as output_file:
         output_file.write(to_bytes(unicode_content, to_encoding=to_encoding))
     #
     return True

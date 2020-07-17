@@ -1,6 +1,6 @@
 # smallparts.text.split
 
-> Text splitting functions.
+> Text splitting functions.  
 > Source: [smallparts/text/split.py](https://github.com/blackstream-x/smallparts/blob/master/smallparts/text/split.py)
 
 ## Module contents
