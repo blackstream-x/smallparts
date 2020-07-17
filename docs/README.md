@@ -36,7 +36,7 @@ Functions for displaying time
 
 Subpackage with the following modules:
 
-### smallparts.text.join
+### [smallparts.text.join](./smallparts.text.join.md)
 
 Functions for easily joining strings
 

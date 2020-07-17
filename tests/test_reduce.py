@@ -13,7 +13,7 @@ from smallparts.text import reduce
 
 class TestSimple(unittest.TestCase):
 
-    """Check the module"""
+    """Test the module"""
 
     def test_ascii_check(self):
         """Check ascii replacements"""
