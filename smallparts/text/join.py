@@ -4,7 +4,7 @@
 
 smallparts.text.join
 
-Text joining functions where the parts are given as arguments
+Text joining functions where the parts are given as positional arguments
 
 """
 

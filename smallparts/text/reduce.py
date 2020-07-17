@@ -277,22 +277,29 @@ class ConversionTable:
         (key: string of characters to convert; value: ASCII replacement)
         """
         self.__reductions = {}
-        self.add_reductions(rules_mapping)
+        self.add_reduction_items(rules_mapping.items())
         try:
-            self.default_replacement = checked_ascii(default_replacement)
+            self.__default_replacement = checked_ascii(default_replacement)
         except TypeError:
-            self.default_replacement = None
+            self.__default_replacement = None
         #
         self.remove_c1_controls = remove_c1_controls
 
     @property
-    def reductions(self):
-        """Read only access to self.__reductions (snapshot copy)"""
-        return dict(self.__reductions)
+    def reduction_items(self):
+        """self.__reductions.items() (readonly access)"""
+        return self.__reductions.items()
 
-    def add_reductions(self, rules_mapping):
-        """Add values from the given mapping to the internal mapping"""
-        for source_characters, replacement in rules_mapping.items():
+    @property
+    def default_replacement(self):
+        """Read only access to self.__default_replacement"""
+        return self.__default_replacement
+
+    def add_reduction_items(self, reduction_items):
+        """Add the given items (= souce_characters, replacement tuples)
+        to the internal mapping
+        """
+        for source_characters, replacement in reduction_items:
             valid_replacement = checked_ascii(replacement)
             for character in source_characters:
                 self.__reductions[character] = valid_replacement
@@ -304,23 +311,28 @@ class ConversionTable:
         updated form the added object's mapping
         """
         if isinstance(other, ConversionTable):
-            mapping_to_add = other.reductions
+            items_to_add = other.reduction_items
         elif isinstance(other, dict):
-            mapping_to_add = other
+            items_to_add = other.items()
         else:
             raise TypeError('Cannot add any other type than'
                             ' ConversionTable or dict!')
         #
         result = ConversionTable(
             self.__reductions,
-            default_replacement=self.default_replacement,
+            default_replacement=self.__default_replacement,
             remove_c1_controls=self.remove_c1_controls)
-        result.add_reductions(mapping_to_add)
+        result.add_reduction_items(items_to_add)
         return result
 
+    __radd__ = __add__
+
     def __eq__(self, other):
-        """Return True if reductions of both ConversionTables are equal"""
-        return self.reductions == other.reductions
+        """Return True if reductions and default replacements
+        of both ConversionTables are equal
+        """
+        return (self.reduction_items == other.reduction_items and
+                self.default_replacement == other.default_replacement)
 
     def reduce_character(self, character):
         r"""Reduce a single unicode character to ASCII
@@ -345,17 +357,17 @@ class ConversionTable:
         try:
             return self.__reductions[character]
         except KeyError:
-            if self.default_replacement is None:
+            if self.__default_replacement is None:
                 return character.encode(
                     'unicode_escape').decode(constants.ASCII)
             #
-            return self.default_replacement
+            return self.__default_replacement
         #
 
     def reduce_text(self, unicode_text):
         """Reduce the provided unicode text character by character"""
-        return ''.join(self.reduce_character(character)
-                       for character in unicode_text)
+        return constants.EMPTY.join(self.reduce_character(character)
+                                    for character in unicode_text)
 
 
 #

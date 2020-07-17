@@ -8,9 +8,9 @@ The package documentation can be found
 
 ----
 
-Note: this project is forked off a sample project that exists for
-PyPUG's "Tutorial on Packaging and Distributing Projects"
-(<https://github.com/pypa/sampleproject>).
-Apart from the basic structure of the package,
-this project shares nothing in commmon with its parent.
+> Please note: this project has been created as a fork of a sample project
+> that exists for the Python Packaging User Guide’s Tutorial on Packaging
+> and Distributing Projects (<https://github.com/pypa/sampleproject>).
+> Apart from the basic structure of the package,
+> this project shares nothing in commmon with its parent.
 
