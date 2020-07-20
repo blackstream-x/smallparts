@@ -4,7 +4,7 @@ A humble collection of convenience modules for use with Python 3
 
 This project mainly focuses on text conversion and generation.
 The package documentation can be found
-[here](https://blackstream-x.github.io/smallparts/index.html "on GitHub Pages").
+[here](https://blackstream-x.github.io/smallparts/ "on GitHub Pages").
 
 ----
 
