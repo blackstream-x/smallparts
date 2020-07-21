@@ -14,7 +14,8 @@ from smallparts import constants
 class MakeTranslationFunction():
 
     """Make a function for multiple replacements
-    (adapted from Python Cookbook, Recipe 1.18)
+    (adapted from Python Cookbook, Recipe 1.18, see
+     <https://www.oreilly.com/library/view/python-cookbook/0596001673/ch03s15.html>)
     """
 
     def __init__(self, *args, **kwargs):

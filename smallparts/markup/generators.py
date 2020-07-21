@@ -9,11 +9,6 @@ Markup (HTML, XML) generation and parsing
 """
 
 
-#import html.entities
-#import re
-#import unicodedata
-#import xml.sax.saxutils
-
 from smallparts import constants
 
 from smallparts.markup import elements

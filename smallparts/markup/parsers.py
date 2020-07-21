@@ -15,7 +15,7 @@ import re
 from smallparts import constants
 
 from smallparts.markup import elements
-from smallparts.markup import entities
+from smallparts.markup import characters
 
 
 #
@@ -75,16 +75,16 @@ class HTMLTagStripper(html.parser.HTMLParser):
 
     def handle_charref(self, name):
         """Resolve numeric character reference"""
-        self.__add_body_content(entities.resolve_charref(name))
+        self.__add_body_content(characters.resolve_single_charref(name))
 
     def handle_entityref(self, name):
         """Resolve a named entity reference, use the entity reference
         itself as fallback in case the name could not be resolved.
         """
         try:
-            self.__add_body_content(entities.resolve_entityref(name))
+            self.__add_body_content(characters.resolve_single_entityref(name))
         except KeyError:
-            self.__add_body_content(entities.entity(name))
+            self.__add_body_content(characters.entity(name))
         #
 
     def handle_starttag(self, tag, attrs):
