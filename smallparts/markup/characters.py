@@ -152,11 +152,22 @@ def encode_to_charrefs(source_text):
 def defuse(source_text,
            target_xml_version=constants.XML_1_0,
            remove=INVALID):
-    """Defuse source_text for use as content of an XML element:
-    Remove invalid codepoints and, if requested,
-    also restricted and/or discouraged ones
-    (removing discouraged codepoints implies removing restricted ones).
-    Escape special characters (<, > and &).
+    """Defuse source_text in two steps for use as content of an XML element:
+    1.) clean up the text by removing the specified codepoints:
+        - None (requested explicitly by specifying remove=None)
+        - Invalid codepoints as defined in the
+          INVALID_CODEPOINTS[target_xml_version] tuple
+          (this is the default, but could also be
+           requested explicitly by specifying remove=INVALID)
+        - Invalid codepoints as above AND
+          restricted codepoints as defined in the
+          RESTRICTED_CODEPOINTS[target_xml_version] tuple
+          (requested explicitly by specifying remove=RESTRICTED)
+        - Invalid AND restricted codepoints as above AND
+          discouraged codepoints as defined in the
+          (not XML version dependent) DISCOURAGED_CODEPOINTS tuple
+          (requested explicitly by specifying remove=DISCOURAGED)
+    2.) Escape special characters (<, > and &).
     """
     if target_xml_version not in SUPPORTED_XML_VERSIONS:
         raise ValueError(
