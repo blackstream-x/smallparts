@@ -16,6 +16,7 @@ from smallparts import constants
 
 from smallparts.markup import elements
 from smallparts.markup import characters
+from smallparts.namespaces import Namespace
 
 
 #
@@ -42,7 +43,7 @@ class HTMLTagStripper(html.parser.HTMLParser):
         """Instantiate the base class and define instance variables"""
         html.parser.HTMLParser.__init__(self)
         self.__content_list = []
-        self.__image_descriptions = []
+        self.__images = []
         self.__in_body = False
 
     def __add_body_content(self, content):
@@ -61,9 +62,9 @@ class HTMLTagStripper(html.parser.HTMLParser):
                                               _content).strip()
 
     @property
-    def image_descriptions(self):
-        """Return the saved image descriptions"""
-        return list(self.__image_descriptions)
+    def images(self):
+        """Return the saved image data"""
+        return list(self.__images)
 
     def error(self, message):
         """override _markupbase.ParserBase abstract method"""
@@ -93,16 +94,12 @@ class HTMLTagStripper(html.parser.HTMLParser):
             self.__add_body_content(constants.BLANK)
         else:
             self.__add_body_content(constants.NEWLINE)
+        #
         if tag == elements.BODY:
             self.__in_body = True
         elif tag == elements.IMG:
-            # save images' alt texts
-            attrs_map = dict(attrs)
-            try:
-                self.__image_descriptions.append(attrs_map['alt'])
-            except KeyError:
-                pass
-            #
+            # save images' attributes
+            self.__images.append(Namespace(dict(attrs)))
         #
 
     def handle_endtag(self, tag):

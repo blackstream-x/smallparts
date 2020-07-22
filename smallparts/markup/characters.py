@@ -30,23 +30,33 @@ PRX_NAMED_ENTITY = re.compile(
 PRX_NUMERIC_ENTITY = re.compile(
     FS_ENTITY.format(r'#(\d+|x[\da-f]+)'))
 
-V10 = '1.0'
-V11 = '1.1'
-
-# Invalid and restricted code points, see
+# Invalid, restricted and discouraged codepoints, see
 # <https://www.w3.org/TR/2006/REC-xml-20060816/Overview.html#charsets>
 # for XML 1.0 and
 # <https://www.w3.org/TR/xml11/Overview.html#charsets>
 # for XML 1.1
 
-RESTRICTED_C0 = list(range(0x1, 0x9)) + [0xb, 0xc] + list(range(0xe, 0x20))
+SUPPORTED_XML_VERSIONS = (constants.XML_1_0, constants.XML_1_1)
 
+RESTRICTED_C0_CONTROLS = \
+    list(range(0x1, 0x9)) + [0xb, 0xc] + list(range(0xe, 0x20))
+RESTRICTED__IN_XML_1_0 = \
+    list(range(0x7f, 0x85)) + list(range(0x86, 0xa0))
+INVALID_IN_XML_1_1 = \
+    [0x0] + list(range(0xd800, 0xe000)) + [0xfffe, 0xffff]
 INVALID_CODEPOINTS = {
-    V11: [0x0] + list(range(0xd800, 0xe000)) + [0xfffe, 0xffff]}
+    constants.XML_1_0: INVALID_IN_XML_1_1 + RESTRICTED_C0_CONTROLS,
+    constants.XML_1_1: INVALID_IN_XML_1_1}
 RESTRICTED_CODEPOINTS = {
-    V10: list(range(0x7f, 0x85)) + list(range(0x86, 0xa0))}
-INVALID_CODEPOINTS[V10] = sorted(INVALID_CODEPOINTS[V11] + RESTRICTED_C0)
-RESTRICTED_CODEPOINTS[V11] = RESTRICTED_C0 + RESTRICTED_CODEPOINTS[V10]
+    constants.XML_1_0: RESTRICTED__IN_XML_1_0,
+    constants.XML_1_1: RESTRICTED__IN_XML_1_0 + RESTRICTED_C0_CONTROLS}
+DISCOURAGED_CODEPOINTS = list(range(0xfdd0, 0xfde0)) + [
+    0x1fffe, 0x1ffff, 0x2fffe, 0x2ffff, 0x3fffe, 0x3ffff,
+    0x4fffe, 0x4ffff, 0x5fffe, 0x5ffff, 0x6fffe, 0x6ffff,
+    0x7fffe, 0x7ffff, 0x8fffe, 0x8ffff, 0x9fffe, 0x9ffff,
+    0xafffe, 0xaffff, 0xbfffe, 0xbffff, 0xcfffe, 0xcffff,
+    0xdfffe, 0xdffff, 0xefffe, 0xeffff, 0xffffe, 0xfffff,
+    0x10fffe, 0x10ffff]
 
 #
 #
@@ -127,17 +137,20 @@ def resolve_all_entityrefs(source_text):
 
 
 def encode_to_charrefs(source_text):
-    """Replace non-ascii characters by numeric entities,
-    return unicode
-    """
+    """Replace non-ascii characters by numeric entities"""
     ascii_bytes = source_text.encode('ascii',
                                      errors='xmlcharrefreplace')
     return ascii_bytes.decode()
 
 
-def defuse(source_text, target_xml_version=V10, remove_restricted=False):
+def defuse(source_text,
+           target_xml_version=constants.XML_1_0,
+           remove_restricted=False,
+           remove_discouraged=False):
     """Defuse source_text for use as content of an XML element:
-    Remove invalid codepoints and, if requested also restricted ones.
+    Remove invalid codepoints and, if requested,
+    also restricted and/or discouraged ones
+    (removing discouraged codepoints implies removing restricted ones).
     Escape special characters (<, > and &).
     """
     try:
@@ -145,13 +158,19 @@ def defuse(source_text, target_xml_version=V10, remove_restricted=False):
             INVALID_CODEPOINTS[target_xml_version])
     except KeyError:
         raise ValueError(
-            'target_xml_version must be {0!r} or {1!r}'.format(V10, V11))
+            'target_xml_version must be one of {0!r}!'.format(
+                SUPPORTED_XML_VERSIONS))
     #
-    if remove_restricted:
+    if remove_restricted or remove_restricted:
         remove_codepoints.update(
             dict.fromkeys(RESTRICTED_CODEPOINTS[target_xml_version]))
     #
-    return xml.sax.saxutils.escape(source_text.translate(remove_codepoints))
+    if remove_discouraged:
+        remove_codepoints.update(
+            dict.fromkeys(DISCOURAGED_CODEPOINTS))
+    #
+    return xml.sax.saxutils.escape(
+        source_text.translate(remove_codepoints))
 
 
 # vim: fileencoding=utf-8 ts=4 sts=4 sw=4 autoindent expandtab syntax=python:

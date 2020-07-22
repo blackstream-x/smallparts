@@ -39,7 +39,6 @@ FS_STARTTAG = '<{tag_name}{tag_attributes}>'
 JS_RETURN = 'return'
 
 XML = 'xml'
-XML_VERSION = '1.0'
 
 #
 # Names caches
@@ -169,7 +168,7 @@ class Html5Generator(HtmlGenerator):
 #
 
 
-def xml_declaration(version=XML_VERSION,
+def xml_declaration(version=constants.XML_1_0,
                     encoding=constants.UTF_8,
                     standalone=None):
     """Return an XML declaration.
@@ -191,7 +190,7 @@ def xml_declaration(version=XML_VERSION,
 
 
 def xml_document(content,
-                 version=XML_VERSION,
+                 version=constants.XML_1_0,
                  encoding=constants.UTF_8,
                  standalone=None):
     """Return a full XML document.

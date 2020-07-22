@@ -77,6 +77,9 @@ MODE_WRITE_BINARY = 'wb'
 YES = 'yes'
 NO = 'no'
 
+XML_1_0 = '1.0'
+XML_1_1 = '1.1'
+
 #
 # Return codes
 #
