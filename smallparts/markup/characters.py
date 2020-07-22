@@ -87,11 +87,16 @@ def entity_from_name(unicode_character_name):
     return entity(ord(unicodedata.lookup(unicode_character_name)))
 
 
-def replace_by_charref(character, source_text):
-    """Replace all occurrences of character in source_text
-    by the mathing numeric entity
+def translate_to_charrefs(characters_sequence, source_text):
+    """Return source_text with all characters from the
+    characters sequence translated to their respective charrefs.
     """
-    return source_text.replace(character, entity(ord(character)))
+    charrefs = {}
+    for character in characters_sequence:
+        codepoint = ord(character)
+        charrefs[codepoint] = entity(codepoint)
+    #
+    return source_text.translate(charrefs)
 
 
 def resolve_single_charref(charref_number):
