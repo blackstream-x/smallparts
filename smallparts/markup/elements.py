@@ -4,7 +4,7 @@
 
 smallparts.markup.elements
 
-Markup (HTML, XML) generation and parsing - Element definitions
+Markup (HTML, XML) generation – Element definitions
 
 """
 
@@ -39,6 +39,11 @@ HTML_INLINE_ELEMENTS = (
     TAG.wbr)
 
 
+#
+# Functions
+#
+
+
 def xml_attribute(attr_name, attr_value):
     """Make an XML attribute from the given attr_name, attr_value pair"""
     return join.using(
@@ -53,9 +58,10 @@ def make_attributes_string(attributes=None, **kwargs):
     if attributes is None:
         attributes = {}
     attributes.update(kwargs)
-    tag_attributes_list = [xml_attribute(attr_name, attr_value)
-                           for (attr_name, attr_value) in attributes.items()
-                           if attr_value is not None]
+    tag_attributes_list = [
+        xml_attribute(attr_name, attr_value)
+        for (attr_name, attr_value) in attributes.items()
+        if attr_value is not None]
     if tag_attributes_list:
         return join.directly(
             constants.BLANK,

@@ -2,9 +2,9 @@
 
 """
 
-smallparts.markup
+smallparts.markup.generators
 
-Markup (HTML, XML) generation and parsing
+Markup (HTML, XML) generation
 
 """
 
@@ -12,40 +12,13 @@ Markup (HTML, XML) generation and parsing
 from smallparts import constants
 
 from smallparts.markup import elements
-from smallparts.namespaces import Namespace, InstantNames
+from smallparts.namespaces import Namespace
 from smallparts.text import join
-from smallparts.text import translate
 
 
 #
-# Constants
+# Functions
 #
-
-CDATA_START = '<![CDATA['
-CDATA_END = ']]>'
-
-# A CDATA section end string splitted up
-# into two parts in separate CDATA sections
-CDATA_END_SPLITTED_UP = ']]{0}{1}>'.format(CDATA_END, CDATA_START)
-
-FS_COMMENT = '<!-- {0} -->'
-FS_CSS_PROPERTY = '{0}: {1};'
-FS_CSS_IMPORTANT = '{0} !important'
-
-FS_FUNCTION_CALL = '{0}({1})'
-FS_SINGLE_QUOTED = "'{0}'"
-FS_STARTTAG = '<{tag_name}{tag_attributes}>'
-
-JS_RETURN = 'return'
-
-XML = 'xml'
-
-#
-# Names caches
-#
-
-TAG = InstantNames(translate.remove_trailing_underscores,
-                   translate.underscores_to_dashes)
 
 
 def wrap_cdata(character_data):
@@ -54,17 +27,16 @@ def wrap_cdata(character_data):
     <https://en.wikipedia.org/wiki/CDATA#Nesting>
     """
     return join.directly(
-        CDATA_START,
-        character_data.replace(CDATA_END, CDATA_END_SPLITTED_UP),
-        CDATA_END)
-
+        '<![CDATA[',
+        character_data.replace(']]>', ']]]]><![CDATA[>'),
+        ']]>')
 
 
 def css_property(property_name, property_value):
     """Generate a CSS property:
     property_name: property_value;
     """
-    return FS_CSS_PROPERTY.format(property_name, property_value)
+    return '{0}: {1};'.format(property_name, property_value)
 
 
 def css_important_property(property_name, property_value):
@@ -72,17 +44,17 @@ def css_important_property(property_name, property_value):
     property_name: property_value !important;
     """
     return css_property(property_name,
-                        FS_CSS_IMPORTANT.format(property_value))
+                        '{0} !important'.format(property_value))
 
 
 def js_function_call(function_name, arguments):
     """Generate JavaScript code:
     function_name(*arguments)
     """
-    return FS_FUNCTION_CALL.format(
+    return '{0}({1})'.format(
         function_name,
         constants.COMMA_BLANK.join(
-            FS_SINGLE_QUOTED.format(single_arg)
+            "'{0}'".format(single_arg)
             for single_arg in arguments))
 
 
@@ -90,22 +62,48 @@ def js_return(function_name, *arguments):
     """Generate JavaScript code:
     return function_name(*arguments);
     """
-    return join.directly(
-        JS_RETURN,
-        constants.BLANK,
-        js_function_call(function_name, arguments),
-        constants.SEMICOLON)
+    return 'return {0};'.format(js_function_call(function_name, arguments))
+
+
+def xml_declaration(version=constants.XML_1_0,
+                    encoding=constants.UTF_8,
+                    standalone=None):
+    """Return an XML declaration.
+    Omit the 'standalone' attribute if not specified.
+    """
+    if standalone is not None:
+        if standalone:
+            standalone = constants.YES
+        else:
+            standalone = constants.NO
+        #
+    #
+    return '<?xml{0} ?>'.format(
+        elements.make_attributes_string(
+            version=version,
+            encoding=encoding,
+            standalone=standalone))
+
+
+def xml_document(content,
+                 version=constants.XML_1_0,
+                 encoding=constants.UTF_8,
+                 standalone=None):
+    """Return a full XML document.
+    Strip trailing whitespace from the content
+    and end the document with a newline.
+    """
+    return join.by_newlines(
+        xml_declaration(version=version,
+                        encoding=encoding,
+                        standalone=standalone),
+        content.rstrip(),
+        constants.EMPTY)
 
 
 #
 # Class definitions
 #
-
-
-# pylint: disable=too-few-public-methods; not suitable for the element classes
-
-
-# pylint: enable=too-few-public-methods
 
 
 class XmlGenerator(Namespace):
@@ -146,13 +144,18 @@ class HtmlGenerator(XmlGenerator):
         """Define non-standard elements"""
         super(HtmlGenerator, self).__init__()
         cls = type(self)
-        self.br_ = cls.element_factory(TAG.br, compact_empty=True)
-        self.hr_ = cls.element_factory(TAG.hr, compact_empty=True)
-        self.img = cls.element_factory(TAG.img, compact_empty=True)
-        self.link = cls.element_factory(TAG.link, compact_empty=True)
-        self.meta = cls.element_factory(TAG.meta, compact_empty=True)
-        self.input_ = self.input = \
-            cls.element_factory(TAG.input, compact_empty=True)
+        self.br_ = cls.element_factory(
+            elements.TAG.br_, compact_empty=True)
+        self.hr_ = cls.element_factory(
+            elements.TAG.hr_, compact_empty=True)
+        self.img = cls.element_factory(
+            elements.TAG.img, compact_empty=True)
+        self.link = cls.element_factory(
+            elements.TAG.link, compact_empty=True)
+        self.meta = cls.element_factory(
+            elements.TAG.meta, compact_empty=True)
+        self.input_ = self.input = cls.element_factory(
+            elements.TAG.input, compact_empty=True)
         #
 
 
@@ -161,48 +164,6 @@ class Html5Generator(HtmlGenerator):
     """Generate HTML5 code """
 
     element_factory = elements.Html5Element
-
-
-#
-# End of class definitions, start of function definitions
-#
-
-
-def xml_declaration(version=constants.XML_1_0,
-                    encoding=constants.UTF_8,
-                    standalone=None):
-    """Return an XML declaration.
-    Omit the 'standalone' attribute if not specified.
-    """
-    if standalone is not None:
-        if standalone:
-            standalone = constants.YES
-        else:
-            standalone = constants.NO
-        #
-    #
-    return FS_STARTTAG.format(
-        tag_name=XML,
-        tag_attributes=elements.make_attributes_string(
-            version=version,
-            encoding=encoding,
-            standalone=standalone))
-
-
-def xml_document(content,
-                 version=constants.XML_1_0,
-                 encoding=constants.UTF_8,
-                 standalone=None):
-    """Return a full XML document.
-    Strip trailing whitespace from the content
-    and end the document with a newline.
-    """
-    return join.by_newlines(
-        xml_declaration(version=version,
-                        encoding=encoding,
-                        standalone=standalone),
-        content.rstrip(),
-        constants.EMPTY)
 
 
 # vim: fileencoding=utf-8 ts=4 sts=4 sw=4 autoindent expandtab syntax=python:
