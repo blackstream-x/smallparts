@@ -45,7 +45,7 @@ ENUM_JOINERS = {
         EITHER: ('entweder', COMMA, 'oder'),
         NEITHER: ('weder', COMMA, 'noch')
     },
-     languages.ES: {
+    languages.ES: {
         AND: (None, COMMA, 'y'),
         OR: (None, COMMA, 'o'),
         EITHER: ('ya sea', COMMA, 'o'),

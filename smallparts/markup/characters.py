@@ -98,7 +98,7 @@ def defuse(source_text,
             if remove == DISCOURAGED:
                 remove_codepoints.update(
                     dict.fromkeys(DISCOURAGED_CODEPOINTS))
-           #
+            #
         #
         cleaned_up_source = source_text.translate(remove_codepoints)
     else:
