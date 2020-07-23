@@ -48,8 +48,8 @@ class EntityResolver():
 
     def __init__(self, named_entities=None):
         """Precompile the regular expression matching all entity references.
-        Allocate the internal named entities mapping from
-        the provided mapping, default to XML_NAME2CODEPOINT.
+        Allocate the internal named entities mapping from the provided
+        named_entities mapping, default to XML_NAME2CODEPOINT.
         """
         self.__prx_entity = re.compile(
             '&([{0}][{1}]+|{2});'.format(
@@ -134,7 +134,7 @@ class EntityResolver():
                                      source_text)
 
 
-class HTMLTagStripper(html.parser.HTMLParser):
+class HtmlTagStripper(html.parser.HTMLParser):
 
     """Return only the data, concatenated using constants.EMPTY,
     with whitespace squeezed together, but retaining line breaks.

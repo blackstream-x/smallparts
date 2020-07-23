@@ -80,7 +80,7 @@ class TestSimple(unittest.TestCase):
         self.assertEqual(
             conversion_table.reduce_text(
                 'Bérurier Noir – Hélène et le sang'),
-            'Berurier Noir - Helene et le sang')
+            'Berurier Noir -- Helene et le sang')
 
     def test_basic_latin(self):
         """Basic latin conversion results"""

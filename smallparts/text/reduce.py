@@ -86,14 +86,22 @@ PUNCTUATION = {
     '\u00ad': '(-)',
     # Hyphen bullet → hyphen
     '\u2043': '-',
-    # Dashes → single or double hyphen
-    '\u2010\u2011\u2012\u2013': '-',
-    '\u2014\u2015': '--',
+    # Dashes → single, double or triple hyphen
+    '\u2010\u2011': '-',
+    '\u2012\u2013': '--',
+    '\u2014\u2015': '---',
+    # Double vertical line → double pipe
+    '\u2016': '||',
+    # Double low line → underscore
+    '\u2017': '_',
     # Quotation marks → apostrophe, quotation mark, << or >>
     '\u2018\u2019\u201a\u201b': '\x27',
     '\u201c\u201d\u201e\u201f': '"',
     '«': '<<',
     '»': '>>',
+    # Daggers → plus sign(s)
+    '\u2020': '+',
+    '\u2021': '++',
     # Leader dots, ellipsis → dots
     '\u2024': '.',
     '\u2025': '..',
