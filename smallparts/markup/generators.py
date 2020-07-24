@@ -134,36 +134,18 @@ class XmlGenerator(Namespace):
         #
 
 
-class HtmlGenerator(XmlGenerator):
+class XhtmlGenerator(XmlGenerator):
 
-    """Generate HTML code """
+    """Generate XHTML code"""
+
+    element_factory = elements.XhtmlElement
+
+
+class HtmlGenerator(XhtmlGenerator):
+
+    """Generate HTML (5) code"""
 
     element_factory = elements.HtmlElement
-
-    def __init__(self):
-        """Define non-standard elements"""
-        super(HtmlGenerator, self).__init__()
-        cls = type(self)
-        self.br_ = cls.element_factory(
-            elements.TAG.br_, compact_empty=True)
-        self.hr_ = cls.element_factory(
-            elements.TAG.hr_, compact_empty=True)
-        self.img = cls.element_factory(
-            elements.TAG.img, compact_empty=True)
-        self.link = cls.element_factory(
-            elements.TAG.link, compact_empty=True)
-        self.meta = cls.element_factory(
-            elements.TAG.meta, compact_empty=True)
-        self.input_ = self.input = cls.element_factory(
-            elements.TAG.input, compact_empty=True)
-        #
-
-
-class Html5Generator(HtmlGenerator):
-
-    """Generate HTML5 code """
-
-    element_factory = elements.Html5Element
 
 
 # vim: fileencoding=utf-8 ts=4 sts=4 sw=4 autoindent expandtab syntax=python:

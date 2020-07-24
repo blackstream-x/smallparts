@@ -87,16 +87,12 @@ class DefaultNamespace(Namespace):
 
     def __getattribute__(self, name):
         """Access a visible attribute
-        or return an existing dict member
+        or return the default value (and cache it)
         """
         if name in type(self).visible_attributes:
             return object.__getattribute__(self, name)
         #
-        try:
-            return self[name]
-        except KeyError:
-            return dict.setdefault(self, name, self.default__value__)
-        #
+        return dict.setdefault(self, name, self.default__value__)
 
 
 class EnhancedNamespace(Namespace):
