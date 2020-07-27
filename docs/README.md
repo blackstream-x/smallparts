@@ -18,7 +18,11 @@
 
 ## smallparts.markup
 
-> HTML and XML generation.
+> HTML and XML generation subpackage.
+
+### [smallparts.markup.elements] (./smallparts.markup.elements)
+
+> HTML and XML element generation.
 
 ## smallparts.namespaces
 
