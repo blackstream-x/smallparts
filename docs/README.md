@@ -20,7 +20,7 @@
 
 > HTML and XML generation subpackage.
 
-### [smallparts.markup.elements] (./smallparts.markup.elements)
+### [smallparts.markup.elements](./smallparts.markup.elements.md)
 
 > HTML and XML element generation.
 
