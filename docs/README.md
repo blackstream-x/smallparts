@@ -22,7 +22,11 @@
 
 ### [smallparts.markup.elements](./smallparts.markup.elements.md)
 
-> HTML and XML element generation.
+> HTML and XML element generation: Element definitions.
+
+### [smallparts.markup.generators](./smallparts.markup.generators.md)
+
+> HTML and XML element generation: Generator functions and classes.
 
 ## smallparts.namespaces
 

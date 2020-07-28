@@ -42,7 +42,9 @@ with content and attributes provided when calling the instance.
 Instances are called like this:  
 _**Instance**_(_*_*content_fragments*, _**_*attributes*)  
 and return the element with the provided attributes, enclosing
-the content fragments _(tbc)_
+the content fragments
+
+_(tbc)_
 
 ## Usage examples
 

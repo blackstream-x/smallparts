@@ -25,8 +25,8 @@ class TestSimple(unittest.TestCase):
     def test_conversion_table_add_and_eq(self):
         """Addition of ConversionTables"""
         self.assertEqual(
-            reduce.ConversionTable({'ä': 'ae'}) + \
-                reduce.ConversionTable({'ü': 'ue'}),
+            reduce.ConversionTable({'ä': 'ae'})
+            + reduce.ConversionTable({'ü': 'ue'}),
             reduce.ConversionTable({'ä': 'ae', 'ü': 'ue'}))
 
     def test_invalid_conversion_table_addition(self):

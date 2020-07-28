@@ -210,7 +210,7 @@ class XmlElement():
     """Callable XML element"""
 
     fs_empty_element = \
-        '<{start_tag}{attributes} />'
+        '<{start_tag}{attributes}/>'
     fs_generic_element = \
         '<{start_tag}{attributes}>{content}</{end_tag}>'
     # Empty set: do not restrict element names
@@ -222,8 +222,7 @@ class XmlElement():
 
     def __init__(self, tag_name):
         """Set tag name"""
-        for translation_function in self.name_translations:
-            tag_name = translation_function(tag_name)
+        tag_name = self.translate_name(tag_name)
         #
         if self.restrict_elements_to and \
                 tag_name not in self.restrict_elements_to:
@@ -232,13 +231,23 @@ class XmlElement():
         #
         self.tag_name = tag_name
 
-    def single_attribute(self, attribute_name, attribute_value):
+    @classmethod
+    def translate_name(cls, name):
+        """Apply all functions in the name_translations sequence to name
+        and return the result
+        """
+        for translation_function in cls.name_translations:
+            name = translation_function(name)
+        #
+        return name
+
+    @classmethod
+    def single_attribute(cls, attribute_name, attribute_value):
         """Make an XML attribute from the given attr_name, attr_value pair"""
         if attribute_value is None or attribute_value is False:
             return constants.EMPTY
         #
-        for translation_function in self.name_translations:
-            attribute_name = translation_function(attribute_name)
+        attribute_name = cls.translate_name(attribute_name)
         #
         if attribute_value is True:
             attribute_value = attribute_name
@@ -247,12 +256,13 @@ class XmlElement():
             attribute_name,
             xml.sax.saxutils.quoteattr(str(attribute_value)))
 
-    def attributes_string(self, attributes):
+    @classmethod
+    def attributes_string(cls, attributes):
         """Make a single string from the 'attributes' (name, value) list.
         Attributes with None values are ignored.
         """
         tag_attributes = [
-            self.single_attribute(attribute_name, attribute_value)
+            cls.single_attribute(attribute_name, attribute_value)
             for (attribute_name, attribute_value) in attributes
             if attribute_value is not None]
         return constants.EMPTY.join(tag_attributes)
@@ -283,10 +293,12 @@ class XmlElement():
                             compact_empty=True)
 
 
-class GenericHtmlElement(XmlElement):
+class XmlBasedHtmlElement(XmlElement):
 
     """Callable HTML element (base class)"""
 
+    fs_empty_element = \
+        '<{start_tag}{attributes} />'
     # Always lowercase tag names
     name_translations = (
         translate.remove_trailing_underscores,
@@ -301,7 +313,7 @@ class GenericHtmlElement(XmlElement):
     def __init__(self,
                  tag_name):
         """Set tag name"""
-        super(GenericHtmlElement, self).__init__(tag_name)
+        super(XmlBasedHtmlElement, self).__init__(tag_name)
         self.is_empty = self.tag_name in self.empty_elements
 
     def __call__(self, *content_fragments, **attributes):
@@ -349,7 +361,7 @@ class GenericHtmlElement(XmlElement):
                             compact_empty=False)
 
 
-class XhtmlStrictElement(GenericHtmlElement):
+class XhtmlStrictElement(XmlBasedHtmlElement):
 
     """Callable XHTML 1.0 Strict element"""
 
@@ -364,7 +376,7 @@ class XhtmlTransitionalElement(XhtmlStrictElement):
     restrict_elements_to = XHTML_1_0_TRANSITIONAL
 
 
-class HtmlElement(GenericHtmlElement):
+class HtmlElement(XmlBasedHtmlElement):
 
     """Callable HTML (5) element"""
 
@@ -372,15 +384,13 @@ class HtmlElement(GenericHtmlElement):
     restrict_elements_to = HTML_5
     empty_elements = HTML_5_EMPTY_ELEMENTS
 
-    def single_attribute(self, attribute_name, attribute_value):
+    @classmethod
+    def single_attribute(cls, attribute_name, attribute_value):
         """Make an XML attribute from the given attr_name, attr_value pair"""
         if attribute_value is True:
-            for translation_function in self.name_translations:
-                attribute_name = translation_function(attribute_name)
-            #
-            return ' {0}'.format(attribute_name)
+            return ' {0}'.format(cls.translate_name(attribute_name))
         #
-        return super(HtmlElement, self).single_attribute(
+        return XmlElement.single_attribute(
             attribute_name,
             attribute_value)
 

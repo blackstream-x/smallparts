@@ -42,7 +42,7 @@ class TestSimple(unittest.TestCase):
             sequences.raw_join(source_list,
                                prefix='(',
                                joiner=' :: ',
-                               final_joiner = ' & ',
+                               final_joiner=' & ',
                                suffix=')'),
             '(1 :: 2 :: 3 & 4)')
 

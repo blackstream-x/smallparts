@@ -69,7 +69,6 @@ class TestSimple(unittest.TestCase):
                  ('selected', False))),
             ' value="option value"')
 
-
     def test_xml_element(self):
         """XML elements"""
         element_1 = elements.XmlElement('BIG_NAME__')
@@ -85,8 +84,7 @@ class TestSimple(unittest.TestCase):
             'Multi\nLine\nTag content</small-name>')
         self.assertEqual(
             element_1(),
-            '<BIG-NAME />')
-
+            '<BIG-NAME/>')
 
     def test_xhtml_strict_element(self):
         """XHTML strict elements"""
@@ -157,26 +155,6 @@ class TestSimple(unittest.TestCase):
             element_3('Another paragraph',
                       __classes__=('one', 'two', 'many')),
             '<p class="many one two">Another paragraph</p>')
-
-# XmlElement: .output(), .__call__()
-# GenericHtmlElement: .__call__()
-# XhtmlStrictElement: .__call__()
-# XhtmlTransitionalElement: .__call__()
-# HtmlElement: .__call__()
-
-# =============================================================================
-#     def test_underscores_to_dashes(self):
-#         """Text including a trailing newline"""
-#         self.assertEqual(
-#             translate.underscores_to_dashes('Snake_case_text_example'),
-#             'Snake-case-text-example')
-#
-#     def test_underscores_to_blanks(self):
-#         """Text including a trailing newline"""
-#         self.assertEqual(
-#             translate.underscores_to_blanks('Snake_case_text_example'),
-#             'Snake case text example')
-# =============================================================================
 
 
 if __name__ == '__main__':

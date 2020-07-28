@@ -17,19 +17,98 @@ from smallparts.text import join
 
 
 #
-# Functions
+# Constants
+#
+
+HTML_5 = 'HTML 5'
+XHTML_1_0_STRICT = 'XHTML 1.0 Strict'
+XHTML_1_0_TRANSITIONAL = 'XHTML 1.0 Transitional'
+
+
+#
+# Class definitions
 #
 
 
-def wrap_cdata(character_data):
-    """Wrap character_data in a CDATA section,
-    if necessary use multiple CDATA sections as suggested in
-    <https://en.wikipedia.org/wiki/CDATA#Nesting>
-    """
-    return join.directly(
-        '<![CDATA[',
-        character_data.replace(']]>', ']]]]><![CDATA[>'),
-        ']]>')
+# pylint: disable= too-few-public-methods ; Not required for the caches
+
+
+class XmlGenerator():
+
+    """Generate XML code: cache element factories"""
+
+    visible_attributes = ('_cached_elements_',)
+    element_type = elements.XmlElement
+
+    def __init__(self):
+        """Initialize the cache"""
+        self._cached_elements_ = {}
+
+    def __getattribute__(self, name):
+        """Return an existing cache member
+        or create a new member
+        """
+        if name in type(self).visible_attributes:
+            return object.__getattribute__(self, name)
+        #
+        name = type(self).element_type.translate_name(name)
+        try:
+            return self._cached_elements_[name]
+        except KeyError:
+            return self._cached_elements_.setdefault(
+                name,
+                type(self).element_type(name))
+
+
+class XhtmlStrictGenerator(XmlGenerator):
+
+    """Generate XHTML 1.0 Strict code"""
+
+    element_type = elements.XhtmlStrictElement
+
+
+class XhtmlTransitionalGenerator(XmlGenerator):
+
+    """Generate XHTML 1.0 Transitional code"""
+
+    element_type = elements.XhtmlTransitionalElement
+
+
+class HtmlGenerator(XmlGenerator):
+
+    """Generate HTML (5) code"""
+
+    element_type = elements.HtmlElement
+
+
+#
+# Supported HTML dialect definitions
+#
+
+
+SUPPORTED_HTML_DIALECTS = {
+    HTML_5: Namespace(
+        doctype='<!DOCTYPE html>',
+        factory=HtmlGenerator,
+        xmlns=None),
+    XHTML_1_0_STRICT: Namespace(
+        doctype='<!DOCTYPE html PUBLIC'
+        ' "-//W3C//DTD XHTML 1.0 Strict//EN"'
+        ' "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">',
+        factory=XhtmlStrictGenerator,
+        xmlns='http://www.w3.org/1999/xhtml'),
+    XHTML_1_0_TRANSITIONAL: Namespace(
+        doctype='<!DOCTYPE html PUBLIC'
+        ' "-//W3C//DTD XHTML 1.0 Transitional//EN"'
+        ' "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">',
+        factory=XhtmlTransitionalGenerator,
+        xmlns='http://www.w3.org/1999/xhtml'),
+}
+
+
+#
+# Functions
+#
 
 
 def css_property(property_name, property_value):
@@ -47,6 +126,50 @@ def css_important_property(property_name, property_value):
                         '{0} !important'.format(property_value))
 
 
+def html_document(dialect=HTML_5,
+                  lang='en',
+                  title='Untitled page',
+                  head='',
+                  body=''):
+    """Generate an HTML document"""
+    try:
+        html_dialect = SUPPORTED_HTML_DIALECTS[dialect]
+    except KeyError:
+        raise ValueError(
+            'Unsupported HTML dialect.'
+            ' Please specify one of {0}!'.format(
+                constants.COMMA_BLANK.join(
+                    repr(single_dialect) for single_dialect in
+                    SUPPORTED_HTML_DIALECTS)))
+    #
+    element = html_dialect.factory()
+    head_fragments = ['']
+    if dialect == HTML_5 and '<meta charset' not in head.lower():
+        head_fragments.append(element.meta(charset=constants.UTF_8))
+    #
+    if '<title' not in head.lower():
+        head_fragments.append(element.title(title))
+    #
+    head = head.strip()
+    if head:
+        head_fragments.append(head)
+    #
+    head_fragments.append('')
+    body = body.strip()
+    if body:
+        body = '\n{0}\n'.format(body)
+    return join.by_newlines(
+        html_dialect.doctype,
+        element.html(
+            join.by_newlines(
+                '',
+                element.head(constants.NEWLINE.join(head_fragments)),
+                element.body(body),
+                ''),
+            xmlns=html_dialect.xmlns,
+            lang=lang))
+
+
 def js_function_call(function_name, arguments):
     """Generate JavaScript code:
     function_name(*arguments)
@@ -54,7 +177,7 @@ def js_function_call(function_name, arguments):
     return '{0}({1})'.format(
         function_name,
         constants.COMMA_BLANK.join(
-            "'{0}'".format(single_arg)
+            "{0!r}".format(single_arg)
             for single_arg in arguments))
 
 
@@ -62,7 +185,19 @@ def js_return(function_name, *arguments):
     """Generate JavaScript code:
     return function_name(*arguments);
     """
-    return 'return {0};'.format(js_function_call(function_name, arguments))
+    return 'return {0};'.format(
+        js_function_call(function_name, arguments))
+
+
+def wrap_cdata(character_data):
+    """Wrap character_data in a CDATA section.
+    If necessary use multiple CDATA sections as suggested in
+    <https://en.wikipedia.org/wiki/CDATA#Nesting>
+    """
+    return join.directly(
+        '<![CDATA[',
+        character_data.replace(']]>', ']]]]><![CDATA[>'),
+        ']]>')
 
 
 def xml_declaration(version=constants.XML_1_0,
@@ -79,10 +214,10 @@ def xml_declaration(version=constants.XML_1_0,
         #
     #
     return '<?xml{0} ?>'.format(
-        elements.make_attributes_string(
-            version=version,
-            encoding=encoding,
-            standalone=standalone))
+        elements.XmlElement.attributes_string(
+            dict(version=version,
+                 encoding=encoding,
+                 standalone=standalone).items()))
 
 
 def xml_document(content,
@@ -90,62 +225,13 @@ def xml_document(content,
                  encoding=constants.UTF_8,
                  standalone=None):
     """Return a full XML document.
-    Strip trailing whitespace from the content
-    and end the document with a newline.
+    Strip trailing whitespace from the content.
     """
     return join.by_newlines(
         xml_declaration(version=version,
                         encoding=encoding,
                         standalone=standalone),
-        content.rstrip(),
-        constants.EMPTY)
-
-
-#
-# Class definitions
-#
-
-
-class XmlGenerator(Namespace):
-
-    """Generate XML code: cache generated elements"""
-
-    element_factory = elements.XmlElement
-
-    def __init__(self):
-        """Initialize the Namespace"""
-        # pylint: disable=useless-super-delegation ; do not accept arguments
-        super(XmlGenerator, self).__init__()
-
-    def __getattribute__(self, name):
-        """Access a visible attribute,
-        return an existing dict member
-        or create a new member
-        """
-        if name in type(self).visible_attributes:
-            return object.__getattribute__(self, name)
-        #
-        try:
-            return self[name]
-        except KeyError:
-            new_function = type(self).element_factory(name)
-            setattr(self, name, new_function)
-            return new_function
-        #
-
-
-class XhtmlGenerator(XmlGenerator):
-
-    """Generate XHTML code"""
-
-    element_factory = elements.XhtmlElement
-
-
-class HtmlGenerator(XhtmlGenerator):
-
-    """Generate HTML (5) code"""
-
-    element_factory = elements.HtmlElement
+        content.rstrip())
 
 
 # vim: fileencoding=utf-8 ts=4 sts=4 sw=4 autoindent expandtab syntax=python:
