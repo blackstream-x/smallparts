@@ -1,3 +1,5 @@
+[(smallparts docs home)](./) > 
+----
 # smallparts.sequences
 
 > Functions for sequences.  

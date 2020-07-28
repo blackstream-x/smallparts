@@ -2,7 +2,7 @@
 ----
 # smallparts.markup
 
-> HTML and XML generation subpackage.
+> HTML and XML subpackage.
 
 ## [smallparts.markup.elements](./smallparts.markup.elements.md)
 

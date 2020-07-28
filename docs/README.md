@@ -1,4 +1,4 @@
-# smallparts package documentation
+# smallparts package documentation home
 
 ## smallparts.constants
 
@@ -16,17 +16,17 @@
 
 > Translations of time indications.
 
-## smallparts.markup
+## [smallparts.markup](./smallparts.markup.md
 
-> HTML and XML generation subpackage.
+> HTML and XML subpackage.
 
 ### [smallparts.markup.elements](./smallparts.markup.elements.md)
 
-> HTML and XML element generation: Element definitions.
+> HTML and XML element definitions.
 
 ### [smallparts.markup.generators](./smallparts.markup.generators.md)
 
-> HTML and XML element generation: Generator functions and classes.
+> HTML and XML element generator functions and classes.
 
 ## smallparts.namespaces
 
