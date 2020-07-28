@@ -53,7 +53,42 @@ class TestSimple(unittest.TestCase):
             dir(test_object),
             ['roses', 'violets'])
 
-    # TODO: Test EnhancedNamespace objects
+    def test_enhanced_namespace(self):
+        """Build an EnhancedNamespace and test it"""
+        simple = namespaces.Namespace(roses='red',
+                                      violets='blue',
+                                      sugar='sweet')
+        enhanced_1 = namespaces.EnhancedNamespace.from_object(
+            simple)
+        self.assertEqual(
+            sorted(enhanced_1.items()),
+            [('roses', 'red'), ('sugar', 'sweet'), ('violets', 'blue')])
+        enhanced_2 = namespaces.EnhancedNamespace.from_object(
+            simple, names=('roses', 'violets'))
+        self.assertEqual(
+            sorted(enhanced_2.items()),
+            [('roses', 'red'), ('violets', 'blue')])
+        enhanced_3 = namespaces.EnhancedNamespace.from_mapping(
+            {'a': 1, 'b': 3, 'x': 27}, names=('x', 'a'))
+        self.assertEqual(
+            sorted(enhanced_3.items()),
+            [('a', 1), ('x', 27)])
+        enhanced_4 = namespaces.EnhancedNamespace.from_mapping(
+            {'a': 1, 'b': 3, 'x': 27})
+        self.assertEqual(
+            sorted(enhanced_4.items()),
+            [('a', 1), ('b', 3), ('x', 27)])
+        enhanced_5 = namespaces.EnhancedNamespace.from_sequence(
+            [('abc', 'xxx'), ('def', 'yyy'), ('ghi', 222), ('jkl', None)],
+            names=('def', 'jkl'))
+        self.assertEqual(
+            sorted(enhanced_5.items()),
+            [('def', 'yyy'), ('jkl', None)])
+        enhanced_6 = namespaces.EnhancedNamespace.from_sequence(
+            [('abc', 'xxx'), ('def', 'yyy'), ('ghi', 222), ('jkl', None)])
+        self.assertEqual(
+            sorted(enhanced_6.items()),
+            [('abc', 'xxx'), ('def', 'yyy'), ('ghi', 222), ('jkl', None)])
 
     def test_instant_namespace(self):
         """Build an InstantNames object and test it"""
