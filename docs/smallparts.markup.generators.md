@@ -1,6 +1,8 @@
+[(smallparts docs home)](./) > [(smallparts.markup)](./smallparts.markup.md) >
+----
 # smallparts.markup.generators
 
-> XML, XHTML 1.0 and HTML 5 element generation
+> XML, XHTML 1.0 and HTML 5 element generator functions and classes.  
 > Source: [smallparts/markup/generators.py](https://github.com/blackstream-x/smallparts/blob/master/smallparts/markup/generators.py)
 
 ## Module contents

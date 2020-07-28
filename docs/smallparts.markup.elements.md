@@ -1,6 +1,8 @@
+[(smallparts docs home)](./) > [(smallparts.markup)](./smallparts.markup.md) >
+----
 # smallparts.markup.elements
 
-> XML, XHTML 1.0 and HTML 5 element generation
+> XML, XHTML 1.0 and HTML 5 element definitions.  
 > Source: [smallparts/markup/elements.py](https://github.com/blackstream-x/smallparts/blob/master/smallparts/markup/elements.py)
 
 ## Module contents
@@ -40,9 +42,9 @@ with content and attributes provided when calling the instance.
 *   *tag_name* is the tag name of the XML element.
  
 Instances are called like this:  
-_**Instance**_(_*_*content_fragments*, _**_*attributes*)  
+generated_markup = _**Instance**_(_*_*content_fragments*, _**_*attributes*)  
 and return the element with the provided attributes, enclosing
-the content fragments
+the content fragments.
 
 _(tbc)_
 
