@@ -16,7 +16,7 @@
 
 > Translations of time indications.
 
-## [smallparts.markup](./smallparts.markup.md
+## [smallparts.markup](./smallparts.markup.md)
 
 > HTML and XML subpackage.
 
