@@ -14,16 +14,6 @@ import re
 
 from smallparts import constants
 
-from smallparts.markup import elements
-from smallparts.namespaces import Namespace
-
-
-#
-# Constants
-#
-
-# Named Entites, see <https://www.w3.org/TR/xml/#sec-predefined-ent>
-XML_NAME2CODEPOINT = {'lt': 60, 'gt': 62, 'amp': 38, 'apos': 39, 'quot': 34}
 
 #
 # Classes
@@ -34,6 +24,14 @@ class EntityResolver():
 
     """Resolve entities"""
 
+    # Map xml emtity names to codepoints
+    xml_name2codepoint = {
+        'lt': 60,
+        'gt': 62,
+        'amp': 38,
+        'apos': 39,
+        'quot': 34
+    }
     # Numeric character references:
     # <https://www.w3.org/TR/xml/#NT-CharRef>
     re_charref = r'#(?:[0-9]+|x[0-9a-fA-F]+)'
@@ -60,7 +58,7 @@ class EntityResolver():
         try:
             self.set_named_entities(named_entities)
         except TypeError:
-            self.set_named_entities(XML_NAME2CODEPOINT)
+            self.set_named_entities(self.xml_name2codepoint)
         #
 
     def set_named_entities(self, named_entities):
@@ -134,14 +132,81 @@ class EntityResolver():
                                      source_text)
 
 
+# pylint: disable=abstract-method ; The error method is not used
+
+
 class HtmlTagStripper(html.parser.HTMLParser):
 
     """Return only the data, concatenated using constants.EMPTY,
-    with whitespace squeezed together, but retaining line breaks.
+    with whitespace squeezed together, but preserving line breaks.
     """
 
     re_multiple_space = r'[ \t\r\f\v]{2,}'
     re_newline_and_whitespace = r'\s*\n\s*'
+
+    treated_as_block = {
+        'address',
+        'article',
+        'aside',
+        'bdi',
+        'blockquote',
+        'body',
+        'br',
+        'canvas',
+        'caption',
+        'datalist',
+        'details',
+        'dialog',
+        'dir',
+        'div',
+        'dl',
+        'dt',
+        'fieldset',
+        'figure',
+        'figcaption',
+        'footer',
+        'form',
+        'h1',
+        'h2',
+        'h3',
+        'h4',
+        'h5',
+        'h6',
+        'head',
+        'header',
+        'hr',
+        'html',
+        'iframe',
+        'legend',
+        'li',
+        'main',
+        'menu',
+        'nav',
+        'noscript',
+        'ol',
+        'option',
+        'output',
+        'p',
+        'picture',
+        'pre',
+        'ruby',
+        'rt',
+        'rb',
+        'script',
+        'section',
+        'select',
+        'slot',
+        'style',
+        'summary',
+        'table',
+        'tbody',
+        'template',
+        'tfoot',
+        'thead',
+        'title',
+        'tr',
+        'ul',
+    }
 
     def __init__(self):
         """Instantiate the base class and define instance variables"""
@@ -159,6 +224,17 @@ class HtmlTagStripper(html.parser.HTMLParser):
             self.__content_list.append(content)
         #
 
+    def __add_whitespace(self, tag):
+        """Add whitespace
+        (newline if the tag is treated as a block element,
+         else a blank)
+        """
+        if tag in self.treated_as_block:
+            self.__add_body_content(constants.NEWLINE)
+        else:
+            self.__add_body_content(constants.BLANK)
+        #
+
     @property
     def content(self):
         """Return the result"""
@@ -174,36 +250,25 @@ class HtmlTagStripper(html.parser.HTMLParser):
         """Return the saved image data"""
         return list(self.__images)
 
-    def error(self, message):
-        """override _markupbase.ParserBase abstract method"""
-        raise ValueError(message)
-
     def handle_data(self, data):
         """Collect content"""
         self.__add_body_content(data)
 
     def handle_starttag(self, tag, attrs):
         """Handle a start tag"""
-        if tag in elements.HTML_INLINE_ELEMENTS:
-            self.__add_body_content(constants.BLANK)
-        else:
-            self.__add_body_content(constants.NEWLINE)
-        #
-        if tag == elements.BODY:
+        self.__add_whitespace(tag)
+        if tag == 'body':
             self.__in_body = True
-        elif tag == elements.IMG:
+        elif tag == 'img':
             # save images' attributes
-            self.__images.append(Namespace(dict(attrs)))
+            self.__images.append(dict(attrs))
         #
 
     def handle_endtag(self, tag):
         """Handle an end tag"""
-        if tag == elements.BODY:
+        self.__add_whitespace(tag)
+        if tag == 'body':
             self.__in_body = False
-        if tag in elements.HTML_INLINE_ELEMENTS:
-            self.__add_body_content(constants.BLANK)
-        else:
-            self.__add_body_content(constants.NEWLINE)
         #
 
 
