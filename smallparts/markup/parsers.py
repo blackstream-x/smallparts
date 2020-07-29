@@ -16,6 +16,15 @@ from smallparts import constants
 
 
 #
+# Constants
+#
+
+# Keyword constants for the HtmlTagStripper class
+
+IMAGES_WITH_ALT_TEXT_ONLY = 'images with alt text only'
+
+
+#
 # Classes
 #
 
@@ -141,6 +150,9 @@ class HtmlTagStripper(html.parser.HTMLParser):
     with whitespace squeezed together, but preserving line breaks.
     """
 
+    image_placeholder_with_alt_text = '[image: {0[alt]}]'
+    image_placeholder_empty = '[image]'
+
     re_multiple_space = r'[ \t\r\f\v]{2,}'
     re_newline_and_whitespace = r'\s*\n\s*'
 
@@ -208,16 +220,15 @@ class HtmlTagStripper(html.parser.HTMLParser):
         'ul',
     }
 
-    def __init__(self, image_placeholders='only-with-alt-text'):
+    def __init__(self, image_placeholders=IMAGES_WITH_ALT_TEXT_ONLY):
         """Instantiate the base class and define instance variables"""
         html.parser.HTMLParser.__init__(self, convert_charrefs=True)
-        self.__image_placeholder = None
-        self.__image_placeholder_fallback = ''
-        if image_placeholders in ('only-with-alt-text', 'always'):
-            self.__image_placeholder = '[image: {0[alt]}]'
-        #
-        if image_placeholders == 'always':
-            self.__image_placeholder_fallback = '[image]'
+        if image_placeholders:
+            if image_placeholders == IMAGES_WITH_ALT_TEXT_ONLY:
+                self.image_placeholder_empty = ''
+            #
+        else:
+            self.image_placeholder_with_alt_text = ''
         #
         self.__content_list = []
         self.__images = []
@@ -274,9 +285,10 @@ class HtmlTagStripper(html.parser.HTMLParser):
             self.__images.append(current_image)
             try:
                 self.__add_body_content(
-                    self.__image_placeholder.format(current_image))
-            except (KeyError, AttributeError):
-                self.__add_body_content(self.__image_placeholder_fallback)
+                    self.image_placeholder_with_alt_text.format(
+                        current_image))
+            except KeyError:
+                self.__add_body_content(self.image_placeholder_empty)
             #
         #
 

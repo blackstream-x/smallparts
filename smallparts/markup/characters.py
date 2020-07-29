@@ -109,6 +109,13 @@ def defuse(source_text,
     return xml.sax.saxutils.escape(cleaned_up_source)
 
 
+def encode_to_charrefs(source_text):
+    """Replace non-ascii characters by numeric entities"""
+    ascii_bytes = source_text.encode('ascii',
+                                     errors='xmlcharrefreplace')
+    return ascii_bytes.decode()
+
+
 def entity(reference):
     """Return a numeric (&#reference;) or symbolic: (&reference;) entity,
     depending on the reference's type
@@ -120,7 +127,7 @@ def entity(reference):
     #
 
 
-def entity_from_name(unicode_character_name):
+def charref_from_name(unicode_character_name):
     """Return the numeric (&#reference;) entity
     for the given unicode character name
     """
@@ -137,13 +144,6 @@ def translate_to_charrefs(characters_sequence, source_text):
         charrefs[codepoint] = entity(codepoint)
     #
     return source_text.translate(charrefs)
-
-
-def encode_to_charrefs(source_text):
-    """Replace non-ascii characters by numeric entities"""
-    ascii_bytes = source_text.encode('ascii',
-                                     errors='xmlcharrefreplace')
-    return ascii_bytes.decode()
 
 
 # vim: fileencoding=utf-8 ts=4 sts=4 sw=4 autoindent expandtab syntax=python:

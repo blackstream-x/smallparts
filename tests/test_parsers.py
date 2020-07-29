@@ -82,14 +82,14 @@ class TestSimple(unittest.TestCase):
         self.assertDictEqual(
             tag_stripper.images[1],
             dict(src="logo.png"))
-        tag_stripper_2 = parsers.HtmlTagStripper(image_placeholders='always')
+        tag_stripper_2 = parsers.HtmlTagStripper(image_placeholders=True)
         tag_stripper_2.feed(html_document)
         self.assertEqual(
             tag_stripper_2.content,
             'HTML Images\n'
             'HTML images are defined with the img tag:\n'
             '[image: W3Schools.com] [image]')
-        tag_stripper_3 = parsers.HtmlTagStripper(image_placeholders='never')
+        tag_stripper_3 = parsers.HtmlTagStripper(image_placeholders=False)
         tag_stripper_3.feed(html_document)
         self.assertEqual(
             tag_stripper_3.content,
