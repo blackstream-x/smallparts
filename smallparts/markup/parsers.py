@@ -208,9 +208,17 @@ class HtmlTagStripper(html.parser.HTMLParser):
         'ul',
     }
 
-    def __init__(self):
+    def __init__(self, image_placeholders='only-with-alt-text'):
         """Instantiate the base class and define instance variables"""
         html.parser.HTMLParser.__init__(self, convert_charrefs=True)
+        self.__image_placeholder = None
+        self.__image_placeholder_fallback = ''
+        if image_placeholders in ('only-with-alt-text', 'always'):
+            self.__image_placeholder = '[image: {0[alt]}]'
+        #
+        if image_placeholders == 'always':
+            self.__image_placeholder_fallback = '[image]'
+        #
         self.__content_list = []
         self.__images = []
         self.__in_body = False
@@ -224,12 +232,12 @@ class HtmlTagStripper(html.parser.HTMLParser):
             self.__content_list.append(content)
         #
 
-    def __add_whitespace(self, tag):
+    def __add_whitespace(self, lowercased_tag):
         """Add whitespace
         (newline if the tag is treated as a block element,
          else a blank)
         """
-        if tag in self.treated_as_block:
+        if lowercased_tag in self.treated_as_block:
             self.__add_body_content(constants.NEWLINE)
         else:
             self.__add_body_content(constants.BLANK)
@@ -256,16 +264,26 @@ class HtmlTagStripper(html.parser.HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         """Handle a start tag"""
+        tag = tag.lower()
         self.__add_whitespace(tag)
         if tag == 'body':
             self.__in_body = True
         elif tag == 'img':
             # save images' attributes
-            self.__images.append(dict(attrs))
+            current_image = dict(attrs)
+            self.__images.append(current_image)
+            try:
+                self.__add_body_content(
+                    self.__image_placeholder.format(current_image))
+            except (KeyError, AttributeError):
+                self.__add_body_content(self.__image_placeholder_fallback)
+            #except AttributeError:
+                ...
         #
 
     def handle_endtag(self, tag):
         """Handle an end tag"""
+        tag = tag.lower()
         self.__add_whitespace(tag)
         if tag == 'body':
             self.__in_body = False

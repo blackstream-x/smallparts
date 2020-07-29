@@ -57,28 +57,46 @@ class TestSimple(unittest.TestCase):
     def test_tag_stripper(self):
         """Strip HTML tags"""
         html_document = (
-        '<!DOCTYPE html>\n'
-        '<html>\n'
-        '<body>\n'
-        '<h2>HTML Images</h2>\n'
-        '<p>HTML images are defined with the img tag:</p>\n'
-        '<img src="w3schools.jpg" alt="W3Schools.com"'
-        ' width="104" height="142">\n'
-        '</body>\n'
-        '</html>'
-        )
+            '<!DOCTYPE html>\n'
+            '<html>\n'
+            '<body>\n'
+            '<h2>HTML Images</h2>\n'
+            '<p>HTML images are defined with the img tag:</p>\n'
+            '<IMG src="w3schools.jpg" alt="W3Schools.com"'
+            ' width="104" height="142"> <img src="logo.png">\n'
+            '</body>\n'
+            '</html>')
         tag_stripper = parsers.HtmlTagStripper()
         tag_stripper.feed(html_document)
         self.assertEqual(
             tag_stripper.content,
             'HTML Images\n'
-            'HTML images are defined with the img tag:')
+            'HTML images are defined with the img tag:\n'
+            '[image: W3Schools.com]')
         self.assertDictEqual(
             tag_stripper.images[0],
             dict(src="w3schools.jpg",
                  alt="W3Schools.com",
                  width="104",
                  height="142"))
+        self.assertDictEqual(
+            tag_stripper.images[1],
+            dict(src="logo.png"))
+        tag_stripper_2 = parsers.HtmlTagStripper(image_placeholders='always')
+        tag_stripper_2.feed(html_document)
+        self.assertEqual(
+            tag_stripper_2.content,
+            'HTML Images\n'
+            'HTML images are defined with the img tag:\n'
+            '[image: W3Schools.com] [image]')
+        tag_stripper_3 = parsers.HtmlTagStripper(image_placeholders='never')
+        tag_stripper_3.feed(html_document)
+        self.assertEqual(
+            tag_stripper_3.content,
+            'HTML Images\n'
+            'HTML images are defined with the img tag:')
+
+
 
 
 if __name__ == '__main__':
