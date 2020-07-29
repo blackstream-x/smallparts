@@ -20,7 +20,7 @@ class TestSimple(unittest.TestCase):
     def test_entity_resolver(self):
         """Resolve entities"""
         source_text = '&lt; &amp; &gt; &ouml; &aacute;' \
-        ' &#x20ac; &#177; &special;'
+            ' &#x20ac; &#177; &special;'
         # Default: XML named entities only
         xml_resolver = parsers.EntityResolver()
         self.assertEqual(
@@ -95,8 +95,6 @@ class TestSimple(unittest.TestCase):
             tag_stripper_3.content,
             'HTML Images\n'
             'HTML images are defined with the img tag:')
-
-
 
 
 if __name__ == '__main__':

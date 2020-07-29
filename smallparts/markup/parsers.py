@@ -277,8 +277,7 @@ class HtmlTagStripper(html.parser.HTMLParser):
                     self.__image_placeholder.format(current_image))
             except (KeyError, AttributeError):
                 self.__add_body_content(self.__image_placeholder_fallback)
-            #except AttributeError:
-                ...
+            #
         #
 
     def handle_endtag(self, tag):
