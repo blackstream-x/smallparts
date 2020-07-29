@@ -1,3 +1,5 @@
+[(smallparts docs home)](./) > [(smallparts.text)](./smallparts.text.md) >
+----
 # smallparts.text.transcode
 
 > Universal text decoding and encoding functions,

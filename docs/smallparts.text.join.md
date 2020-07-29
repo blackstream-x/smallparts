@@ -1,6 +1,8 @@
+[(smallparts docs home)](./) > [(smallparts.text)](./smallparts.text.md) >
+----
 # smallparts.text.join
 
-> Text joining functions where the parts are given as positional arguments.
+> Text joining functions where the parts are given as positional arguments.  
 > Source: [smallparts/text/join.py](https://github.com/blackstream-x/smallparts/blob/master/smallparts/text/join.py)
 
 ## Module contents

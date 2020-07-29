@@ -36,7 +36,7 @@
 
 > Functions for sequences.
 
-## smallparts.text
+## [smallparts.text](./smallparts.text.md)
 
 > Text subpackage.
 
@@ -54,17 +54,17 @@
 
 > One wrapper function for str.splitlines() for preserving a trailing line break.
 
-### smallparts.text.templates
+### [smallparts.text.templates](./smallparts.text.templates.md)
 
-> One class enhancing the String.Template class.
+> One class enhancing the string.Template class.
 
 ### [smallparts.text.transcode](./smallparts.text.transcode.md)
 
 > Functions for transcoding text between various encodings.
 
-### smallparts.text.translate
+### [smallparts.text.translate](./smallparts.text.translate.md)
 
-> Functions and classes for text transliteration.
+> Simple text transliterations.
 
 ## smallparts.time_display
 

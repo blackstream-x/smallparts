@@ -1,3 +1,5 @@
+[(smallparts docs home)](./) > [(smallparts.text)](./smallparts.text.md) >
+----
 # smallparts.text.reduce
 
 > Classes, functions and rules for reducing unicode text to ASCII.  

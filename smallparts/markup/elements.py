@@ -361,21 +361,6 @@ class XmlBasedHtmlElement(XmlElement):
                             compact_empty=False)
 
 
-class XhtmlStrictElement(XmlBasedHtmlElement):
-
-    """Callable XHTML 1.0 Strict element"""
-
-    restrict_elements_to = XHTML_1_0_STRICT
-    attribute_duplications = {'lang': 'xml:lang'}
-
-
-class XhtmlTransitionalElement(XhtmlStrictElement):
-
-    """Callable XHTML 1.0 Transitional element"""
-
-    restrict_elements_to = XHTML_1_0_TRANSITIONAL
-
-
 class HtmlElement(XmlBasedHtmlElement):
 
     """Callable HTML (5) element"""
@@ -393,6 +378,21 @@ class HtmlElement(XmlBasedHtmlElement):
         return XmlElement.single_attribute(
             attribute_name,
             attribute_value)
+
+
+class XhtmlStrictElement(XmlBasedHtmlElement):
+
+    """Callable XHTML 1.0 Strict element"""
+
+    restrict_elements_to = XHTML_1_0_STRICT
+    attribute_duplications = {'lang': 'xml:lang'}
+
+
+class XhtmlTransitionalElement(XhtmlStrictElement):
+
+    """Callable XHTML 1.0 Transitional element"""
+
+    restrict_elements_to = XHTML_1_0_TRANSITIONAL
 
 
 # vim: fileencoding=utf-8 ts=4 sts=4 sw=4 autoindent expandtab syntax=python:

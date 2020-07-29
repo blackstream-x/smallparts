@@ -1,3 +1,5 @@
+[(smallparts docs home)](./) > [(smallparts.text)](./smallparts.text.md) >
+----
 # smallparts.text.split
 
 > Text splitting functions.  
