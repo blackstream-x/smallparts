@@ -69,6 +69,11 @@ class TestSimple(unittest.TestCase):
                 timedelta(seconds=180157),
                 lang='fr'),
             '2 jours et 2 heures')
+        self.assertEqual(
+            time_display.pretty_printed_timedelta(
+                timedelta(seconds=79542),
+                lang='de'),
+            '22 Stunden und 5 Minuten')
 
 
 if __name__ == '__main__':
