@@ -27,5 +27,4 @@ of variable names from the template.
 
 ----
 [(smallparts docs home)](./)
-----
 

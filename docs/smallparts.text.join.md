@@ -46,5 +46,4 @@ smallparts.text.join.**using**(*join_string,* _*parts_)
 
 ----
 [(smallparts docs home)](./)
-----
 

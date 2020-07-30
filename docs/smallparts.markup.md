@@ -12,5 +12,4 @@
 
 ----
 [(smallparts docs home)](./)
-----
 

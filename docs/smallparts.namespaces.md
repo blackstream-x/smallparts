@@ -55,5 +55,4 @@ AttributeError: 'Namespace' object has no attribute 'three'
 
 ----
 [(smallparts docs home)](./)
-----
 

@@ -146,5 +146,4 @@ smallparts.text.reduce.**latin_to_ascii**(*unicode_text,* _*_*additional_rules*)
 
 ----
 [(smallparts docs home)](./)
-----
 

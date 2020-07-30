@@ -35,5 +35,4 @@ smallparts.text.split.**lines_for_reconstruction**(*unicode_text*)
 
 ----
 [(smallparts docs home)](./)
-----
 

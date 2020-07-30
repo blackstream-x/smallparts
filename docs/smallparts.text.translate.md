@@ -34,5 +34,4 @@ smallparts.text.translate.**underscores_to_dashes**(_name_)
 
 ----
 [(smallparts docs home)](./)
-----
 

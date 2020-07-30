@@ -54,5 +54,4 @@ smallparts.sequences.**raw_join**(_iterable, prefix=None, joiner=_**DEFAULT_JOIN
 
 ----
 [(smallparts docs home)](./)
-----
 

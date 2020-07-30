@@ -74,5 +74,4 @@ smallparts.text.transcode.**fix_double_utf8_transformation**(*unicode_text*, *wr
 
 ----
 [(smallparts docs home)](./)
-----
 

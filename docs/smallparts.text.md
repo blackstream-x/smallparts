@@ -30,5 +30,4 @@
 
 ----
 [(smallparts docs home)](./)
-----
 
