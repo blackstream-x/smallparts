@@ -28,9 +28,9 @@
 
 > HTML and XML element generator functions and classes.
 
-## smallparts.namespaces
+## [smallparts.namespaces](./smallparts.namespaces.md)
 
-> Simple namespaces initialized like dicts (in fact, they are based on dicts).
+> Simple namespaces initialized like dicts.
 
 ## [smallparts.sequences](./smallparts.sequences.md)
 

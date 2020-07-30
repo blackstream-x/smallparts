@@ -37,25 +37,26 @@ class XmlGenerator():
 
     """Generate XML code: cache element factories"""
 
-    visible_attributes = ('_cached_elements_',)
+    # visible_attributes = ('_cached_elements_',)
+    _cached_elements_ = {}
     element_type = elements.XmlElement
 
     def __init__(self):
         """Initialize the cache"""
-        self._cached_elements_ = {}
+        ...
 
     def __getattribute__(self, name):
         """Return an existing cache member
         or create a new member
         """
-        if name in type(self).visible_attributes:
+        if name == '__class__':
             return object.__getattribute__(self, name)
         #
         name = type(self).element_type.translate_name(name)
         try:
-            return self._cached_elements_[name]
+            return type(self)._cached_elements_[name]
         except KeyError:
-            return self._cached_elements_.setdefault(
+            return type(self)._cached_elements_.setdefault(
                 name,
                 type(self).element_type(name))
 
@@ -64,6 +65,7 @@ class XhtmlStrictGenerator(XmlGenerator):
 
     """Generate XHTML 1.0 Strict code"""
 
+    _cached_elements_ = {}
     element_type = elements.XhtmlStrictElement
 
 
@@ -71,6 +73,7 @@ class XhtmlTransitionalGenerator(XmlGenerator):
 
     """Generate XHTML 1.0 Transitional code"""
 
+    _cached_elements_ = {}
     element_type = elements.XhtmlTransitionalElement
 
 
@@ -78,6 +81,7 @@ class HtmlGenerator(XmlGenerator):
 
     """Generate HTML (5) code"""
 
+    _cached_elements_ = {}
     element_type = elements.HtmlElement
 
 

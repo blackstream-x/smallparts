@@ -11,9 +11,8 @@ So one day I decided to put an end to that and transfer my frequently used
 helper modules to a single source of truth.  
 Here they are, in good hope that they might be useful to others as well.
 
-The package documentation can be found
-[here](https://blackstream-x.github.io/smallparts/ "on GitHub Pages"),
-installable releases are avalilable at <https://pypi.org/project/smallparts/>.
+* Package documentation: <https://blackstream-x.github.io/smallparts/>
+* Installable resources: <https://pypi.org/project/smallparts/>
 
 ----
 

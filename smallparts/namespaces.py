@@ -15,12 +15,6 @@ ActiveState Code » Recipes » A Simple Namespace Class (Python recipe)
 
 """
 
-COMMA_BLANK = ', '
-
-FS_ASSIGNMENT = '{0}={1!r}'
-FS_ATTRIBUTE_ERROR = '{0!r} object has no attribute {1!r}'
-FS_REPR = '{0}({1})'
-
 
 #
 # Classes
@@ -39,8 +33,9 @@ class Namespace(dict):
 
     def __repr__(self):
         """Object representation"""
-        return FS_REPR.format(type(self).__name__,
-                              super(Namespace, self).__repr__())
+        return '{0}({1})'.format(
+            type(self).__name__,
+            super(Namespace, self).__repr__())
 
     def __dir__(self):
         """Members sequence"""
@@ -57,7 +52,8 @@ class Namespace(dict):
             return self[name]
         except KeyError:
             raise AttributeError(
-                FS_ATTRIBUTE_ERROR.format(type(self).__name__, name))
+                '{0!r} object has no attribute {1!r}'.format(
+                    type(self).__name__, name))
         #
 
     def __setattr__(self, name, value):
@@ -153,9 +149,10 @@ class InstantNames(Namespace):
             repr(function) for function
             in object.__getattribute__(self, type(self).translations)]
         instance_attributes_list.extend(
-            FS_ASSIGNMENT.format(name, self[name]) for name in self)
-        return FS_REPR.format(type(self).__name__,
-                              COMMA_BLANK.join(instance_attributes_list))
+            '{0}={1!r}'.format(name, self[name]) for name in self)
+        return '{0}({1})'.format(
+            type(self).__name__,
+            ', '.join(instance_attributes_list))
 
     def __getattribute__(self, name):
         """Access an allowed internal attribute

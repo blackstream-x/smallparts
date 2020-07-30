@@ -9,7 +9,8 @@
 
 ### Constants
 
-This module defines the following sets:
+This module defines the following
+[sets](https://docs.python.org/3/library/stdtypes.html#set):
 
 smallparts.markup.elements.**XHTML_1_0_STRICT**
 
@@ -61,7 +62,7 @@ the content fragments.
 #### *class* smallparts.markup.elements.**XmlBasedHtmlElement**(*tag_name*)
 
 Subclass of **XmlElement** with the following differences:
-*   tag names and attribute names are transformed to lowercase
+*   tag names and attribute names are _additionally_ transformed to lowercase.
 *   empty elements are generated with a blank before the slash (e.g. ```<br />```).
 *   Elements are only treated as empty if they are defined as empty in
     **XHTML_1_0_EMPTY_ELEMENTS**, so **XmlBasedHtmlElement**('p')()
@@ -104,7 +105,7 @@ Differences from the parent class:
 *   Tag names are restricted to the ones listed in **XHTML_1_0_TRANSITIONAL**.
     All other tag names produce a ValueError.
 
-#### ***Please note:***
+#### *Please note:*
 *   Namespaces are not supported
 *   Attributes are not checked for validity
 

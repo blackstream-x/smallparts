@@ -137,6 +137,9 @@ class TestSimple(unittest.TestCase):
             xml_gen.outer_element(xml_gen.inner_element(),
                                   attr='value'),
             '<outer-element attr="value"><inner-element/></outer-element>')
+        self.assertEqual(
+                sorted(xml_gen.__class__._cached_elements_),
+                ['inner-element', 'outer-element'])
 
     def test_html_generator(self):
         """HTML elements generation"""
