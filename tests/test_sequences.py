@@ -13,7 +13,7 @@ from smallparts import sequences
 
 class TestSimple(unittest.TestCase):
 
-    """Check the module"""
+    """Test the module"""
 
     def test_flatten(self):
         """Flatten a list with unlimited recursion"""
