@@ -33,7 +33,7 @@ smallparts.markup.elements.**HTML_5_EMPTY_ELEMENTS**
 
 ### Classes
 
-*class* smallparts.markup.elements.**XmlElement**(*tag_name*)
+#### *class* smallparts.markup.elements.**XmlElement**(*tag_name*)
 
 Instances of this class act as a function generating an XML element
 with content and attributes provided when calling the instance.
@@ -58,7 +58,7 @@ the content fragments.
     like ```<empty/>```.
 
 
-*class* smallparts.markup.elements.**XmlBasedHtmlElement**(*tag_name*)
+#### *class* smallparts.markup.elements.**XmlBasedHtmlElement**(*tag_name*)
 
 Subclass of **XmlElement** with the following differences:
 *   tag names and attribute names are transformed to lowercase
@@ -75,7 +75,7 @@ Subclass of **XmlElement** with the following differences:
     into one string using blanks as separators, and the combined value
     is rendered as the value of the HTML **class** attribute.
 
-*class* smallparts.markup.elements.**HtmlElement**(*tag_name*)
+#### *class* smallparts.markup.elements.**HtmlElement**(*tag_name*)
 
 Subclass of **XmlBasedHtmlElement** for *HTML 5* generation.
 Differences from the parent class:
@@ -88,7 +88,7 @@ Differences from the parent class:
 *   If an attribute was provided with value **True**,
     only put its attribute name into the start tag.
 
-*class* smallparts.markup.elements.**XhtmlStrictElement**(*tag_name*)
+#### *class* smallparts.markup.elements.**XhtmlStrictElement**(*tag_name*)
 
 Subclass of **XmlBasedHtmlElement** for *XHTML 1.0 Strict* generation.
 Differences from the parent class:
@@ -97,14 +97,14 @@ Differences from the parent class:
 *   The **lang** attribute is duplicated as **xml:lang** with the same value
     (required by the specification).
 
-*class* smallparts.markup.elements.**XhtmlTransitionalElement**(*tag_name*)
+#### *class* smallparts.markup.elements.**XhtmlTransitionalElement**(*tag_name*)
 
 Subclass of **XhtmlStrictElement** for *XHTML 1.0 Transitional* generation.
 Differences from the parent class:
 *   Tag names are restricted to the ones listed in **XHTML_1_0_TRANSITIONAL**.
     All other tag names produce a ValueError.
 
-***Please note:***
+#### ***Please note:***
 *   Namespaces are not supported
 *   Attributes are not checked for validity
 
