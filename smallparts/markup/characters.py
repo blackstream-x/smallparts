@@ -19,94 +19,103 @@ from smallparts import constants
 # Constants
 #
 
-# Keyword constants for the defuse() function
+# Keyword constants for the Defuser class
 
-INVALID = 'invalid'
-RESTRICTED = 'restricted'
-DISCOURAGED = 'discouraged'
+REMOVE_INVALID = 0
+REMOVE_RESTRICTED = 1
+REMOVE_DISCOURAGED = 2
 
-# Supported values for the defuse() function's keyword arguments
 
-SUPPORTED_CHARACTER_REMOVALS = (INVALID, RESTRICTED, DISCOURAGED)
-SUPPORTED_XML_VERSIONS = (constants.XML_1_0, constants.XML_1_1)
+#
+# Classes
+#
 
-# Invalid, restricted and discouraged codepoints, see
-# <https://www.w3.org/TR/xml/#charsets> for XML 1.0 and
-# <https://www.w3.org/TR/xml11/#charsets> for XML 1.1
 
-INVALID_IN_XML_1_1 = \
-    (0x0,) + tuple(range(0xd800, 0xe000)) + (0xfffe, 0xffff)
-RESTRICTED_C0_CONTROLS = \
-    tuple(range(0x1, 0x9)) + (0xb, 0xc) + tuple(range(0xe, 0x20))
-RESTRICTED_IN_XML_1_0 = \
-    tuple(range(0x7f, 0x85)) + tuple(range(0x86, 0xa0))
+class Defuser():
 
-INVALID_CODEPOINTS = {
-    constants.XML_1_0: INVALID_IN_XML_1_1 + RESTRICTED_C0_CONTROLS,
-    constants.XML_1_1: INVALID_IN_XML_1_1}
-RESTRICTED_CODEPOINTS = {
-    constants.XML_1_0: RESTRICTED_IN_XML_1_0,
-    constants.XML_1_1: RESTRICTED_IN_XML_1_0 + RESTRICTED_C0_CONTROLS}
-DISCOURAGED_CODEPOINTS = tuple(range(0xfdd0, 0xfde0)) + (
-    0x1fffe, 0x1ffff, 0x2fffe, 0x2ffff, 0x3fffe, 0x3ffff,
-    0x4fffe, 0x4ffff, 0x5fffe, 0x5ffff, 0x6fffe, 0x6ffff,
-    0x7fffe, 0x7ffff, 0x8fffe, 0x8ffff, 0x9fffe, 0x9ffff,
-    0xafffe, 0xaffff, 0xbfffe, 0xbffff, 0xcfffe, 0xcffff,
-    0xdfffe, 0xdffff, 0xefffe, 0xeffff, 0xffffe, 0xfffff,
-    0x10fffe, 0x10ffff)
+    """Used to defuse a provided text:
+    remove invalid and/or restricted and/or discouraged codepoints
+    from the text and (XML-)escape the characters < > &
+    (the latter is delegated to xml.sax.saxutils.escape()).
+    """
+
+    supported_xml_versions = (constants.XML_1_0,
+                              constants.XML_1_1)
+    supported_removals = (REMOVE_INVALID,
+                          REMOVE_RESTRICTED,
+                          REMOVE_DISCOURAGED)
+    invalid_in_xml_1_1 = \
+        (0x0,) + tuple(range(0xd800, 0xe000)) + (0xfffe, 0xffff)
+    restricted_c0_controls = \
+        tuple(range(0x1, 0x9)) + (0xb, 0xc) + tuple(range(0xe, 0x20))
+    restricted_in_xml_1_0 = \
+        tuple(range(0x7f, 0x85)) + tuple(range(0x86, 0xa0))
+
+    codepoints = (
+        {constants.XML_1_0: invalid_in_xml_1_1 + restricted_c0_controls,
+         constants.XML_1_1: invalid_in_xml_1_1},
+        {constants.XML_1_0: restricted_in_xml_1_0,
+         constants.XML_1_1: restricted_in_xml_1_0 + restricted_c0_controls},
+        tuple(range(0xfdd0, 0xfde0)) + (
+            0x1fffe, 0x1ffff, 0x2fffe, 0x2ffff, 0x3fffe, 0x3ffff,
+            0x4fffe, 0x4ffff, 0x5fffe, 0x5ffff, 0x6fffe, 0x6ffff,
+            0x7fffe, 0x7ffff, 0x8fffe, 0x8ffff, 0x9fffe, 0x9ffff,
+            0xafffe, 0xaffff, 0xbfffe, 0xbffff, 0xcfffe, 0xcffff,
+            0xdfffe, 0xdffff, 0xefffe, 0xeffff, 0xffffe, 0xfffff,
+            0x10fffe, 0x10ffff))
+
+    def __init__(self,
+                 xml_version=constants.XML_1_0,
+                 remove=REMOVE_INVALID):
+        """Build the translation dict"""
+        if xml_version not in self.supported_xml_versions:
+            raise ValueError(
+                'xml_version must be one of {0!r}!'.format(
+                    self.supported_xml_versions))
+        #
+        if remove not in self.supported_removals:
+            if remove is None:
+                raise ValueError(
+                    'Please use the {0!r} class static method'
+                    ' .escape() if you do not want to remove'
+                    ' codepoints at all'.format(self.__class__.__name__))
+            #
+            raise ValueError(
+                'remove must be one of {0!r}!'.format(
+                    self.supported_removals))
+        #
+        self.__removable_codepoints = dict.fromkeys(
+            self.codepoints[REMOVE_INVALID][xml_version])
+        if remove >= REMOVE_RESTRICTED:
+            self.__removable_codepoints.update(
+                dict.fromkeys(
+                    self.codepoints[REMOVE_RESTRICTED][xml_version]))
+        #
+        if remove >= REMOVE_DISCOURAGED:
+            self.__removable_codepoints.update(
+                dict.fromkeys(
+                    self.codepoints[REMOVE_DISCOURAGED]))
+        #
+
+    @staticmethod
+    def escape(source_text):
+        """Wrap xml.sax.saxutils.escape()"""
+        return xml.sax.saxutils.escape(source_text)
+
+    def remove_codepoints(self, source_text):
+        """Remove codepoints as specified at instantiation time"""
+        return source_text.translate(self.__removable_codepoints)
+
+    def defuse(self, source_text):
+        """Remove codepoints as specified at instantiation time,
+        and escape the remaining characters
+        """
+        return self.escape(self.remove_codepoints(source_text))
 
 
 #
 # Functions
 #
-
-
-def defuse(source_text,
-           target_xml_version=constants.XML_1_0,
-           remove=INVALID):
-    """Defuse source_text in two steps for use as content of an XML element:
-    1.) clean up the text by removing the specified codepoints:
-        - None (requested explicitly by specifying remove=None)
-        - Invalid codepoints as defined in the
-          INVALID_CODEPOINTS[target_xml_version] tuple
-          (this is the default, but could also be
-           requested explicitly by specifying remove=INVALID)
-        - Invalid codepoints as above AND
-          restricted codepoints as defined in the
-          RESTRICTED_CODEPOINTS[target_xml_version] tuple
-          (requested explicitly by specifying remove=RESTRICTED)
-        - Invalid AND restricted codepoints as above AND
-          discouraged codepoints as defined in the
-          (not XML version dependent) DISCOURAGED_CODEPOINTS tuple
-          (requested explicitly by specifying remove=DISCOURAGED)
-    2.) Escape special characters (<, > and &).
-    """
-    if target_xml_version not in SUPPORTED_XML_VERSIONS:
-        raise ValueError(
-            'target_xml_version must be one of {0!r}!'.format(
-                SUPPORTED_XML_VERSIONS))
-    #
-    if remove is None:
-        cleaned_up_source = source_text
-    elif remove in SUPPORTED_CHARACTER_REMOVALS:
-        remove_codepoints = dict.fromkeys(
-            INVALID_CODEPOINTS[target_xml_version])
-        if remove in (RESTRICTED, DISCOURAGED):
-            remove_codepoints.update(
-                dict.fromkeys(
-                    RESTRICTED_CODEPOINTS[target_xml_version]))
-            if remove == DISCOURAGED:
-                remove_codepoints.update(
-                    dict.fromkeys(DISCOURAGED_CODEPOINTS))
-            #
-        #
-        cleaned_up_source = source_text.translate(remove_codepoints)
-    else:
-        raise ValueError(
-            'remove must be None or one of {0!r}!'.format(
-                SUPPORTED_CHARACTER_REMOVALS))
-    #
-    return xml.sax.saxutils.escape(cleaned_up_source)
 
 
 def encode_to_charrefs(source_text):
