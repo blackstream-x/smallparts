@@ -40,15 +40,12 @@ def flatten(iterable, depth=None):
 
 def raw_join(iterable,
              prefix=None,
-             joiner=None,
+             joiner=DEFAULT_JOINER,
              final_joiner=None,
              suffix=None):
     """Return a unicode string containing the list items
     joined together according to the provided parameters
     """
-    if joiner is None:
-        joiner = DEFAULT_JOINER
-    #
     final_joiner = final_joiner or joiner
     words_sequence = [str(item) for item in iterable]
     items_list = words_sequence[:-2]

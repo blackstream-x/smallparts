@@ -23,12 +23,11 @@ smallparts.sequences.**flatten**(*iterable, depth=None*)
 > bytes. You can limit recursion to *depth* levels by providing *depth* as a
 > positive number.
 
-smallparts.sequences.**raw_join**(*iterable, prefix=None, joiner=None, final_joiner=None, suffix=None*):
+smallparts.sequences.**raw_join**(_iterable, prefix=None, joiner=_**DEFAULT_JOINER**_,_ *final_joiner=None, suffix=None*):
 
 > Returns a unicode string containing the list items joined together according
 > to the provided parameters.  
-> *joiner* is the string joining all items except the next-to-last and last ones,
-> and defaults to **DEFAULT_JOINER**.  
+> *joiner* is the string joining all items except the next-to-last and last ones.
 > *final_joiner* is the string joining the next-to-last and last items, and
 > defaults to the value of *joiner*.  
 > *prefix*  and *suffix* default to empty strings.
