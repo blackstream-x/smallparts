@@ -1,5 +1,3 @@
-[(smallparts docs home)](./) > [(smallparts.markup)](./smallparts.markup.md) >
-----
 # smallparts.markup.generators
 
 > XML, XHTML 1.0 and HTML 5 element generator functions and classes.  
@@ -170,4 +168,8 @@ ValueError: Unsupported element name 'center'
 '<?xml version="1.0" encoding="utf-8" ?>\n<minimalistic-example/>'
 >>> 
 ```
+
+----
+[(smallparts docs home)](./)
+----
 

@@ -1,5 +1,3 @@
-[(smallparts docs home)](./) > [(smallparts.text)](./smallparts.text.md) >
-----
 # smallparts.text.split
 
 > Text splitting functions.  
@@ -34,4 +32,8 @@ smallparts.text.split.**lines_for_reconstruction**(*unicode_text*)
 ['first,', 'second and', 'third line']
 >>> 
 ```
+
+----
+[(smallparts docs home)](./)
+----
 

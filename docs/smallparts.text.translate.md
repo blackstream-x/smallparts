@@ -1,5 +1,3 @@
-[(smallparts docs home)](./) > [(smallparts.text)](./smallparts.text.md) >
-----
 # smallparts.text.translate
 
 > Simple text transliterations.  
@@ -33,4 +31,8 @@ smallparts.text.translate.**underscores_to_dashes**(_name_)
 'example-name--'
 >>> 
 ```
+
+----
+[(smallparts docs home)](./)
+----
 

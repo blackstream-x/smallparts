@@ -1,5 +1,3 @@
-[(smallparts docs home)](./) > 
-----
 # smallparts.namespaces
 
 > Simple namespaces initialized like dicts (in fact, they are based on dicts).  
@@ -54,4 +52,8 @@ AttributeError: 'Namespace' object has no attribute 'three'
 '{"one": 1, "two": 2, "owner": "me"}'
 >>> 
 ```
+
+----
+[(smallparts docs home)](./)
+----
 

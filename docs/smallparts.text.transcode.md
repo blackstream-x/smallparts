@@ -1,5 +1,3 @@
-[(smallparts docs home)](./) > [(smallparts.text)](./smallparts.text.md) >
-----
 # smallparts.text.transcode
 
 > Universal text decoding and encoding functions,
@@ -73,4 +71,8 @@ smallparts.text.transcode.**fix_double_utf8_transformation**(*unicode_text*, *wr
 'äöü'
 >>> 
 ```
+
+----
+[(smallparts docs home)](./)
+----
 

@@ -1,5 +1,3 @@
-[(smallparts docs home)](./) > [(smallparts.text)](./smallparts.text.md) >
-----
 # smallparts.text.templates
 
 > One class enhancing the string.Template class.  
@@ -9,7 +7,7 @@
 
 ### Classes
 
-*class* smallparts.markup.templates.**EnhancedStringTemplate**(template)
+#### *class* smallparts.markup.templates.**EnhancedStringTemplate**(template)
 
 This is a subclass of [string.Template](https://docs.python.org/library/string.html#string.Template)
 defining one additional property (**.variable_names**) containing the set
@@ -26,4 +24,8 @@ of variable names from the template.
 {'customer', 'delivery_date', 'salutation', 'order_data'}
 >>> 
 ```
+
+----
+[(smallparts docs home)](./)
+----
 

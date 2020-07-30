@@ -1,5 +1,3 @@
-[(smallparts docs home)](./) > 
-----
 # smallparts.text
 
 > Text subpackage.
@@ -30,4 +28,7 @@
 
 > Simple text transliterations.
 
+----
+[(smallparts docs home)](./)
+----
 

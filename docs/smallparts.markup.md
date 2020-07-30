@@ -1,5 +1,3 @@
-[(smallparts docs home)](./) > 
-----
 # smallparts.markup
 
 > HTML and XML subpackage.
@@ -12,4 +10,7 @@
 
 > HTML and XML element generator functions and classes.
 
+----
+[(smallparts docs home)](./)
+----
 

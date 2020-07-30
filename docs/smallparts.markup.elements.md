@@ -1,5 +1,3 @@
-[(smallparts docs home)](./) > [(smallparts.markup)](./smallparts.markup.md) >
-----
 # smallparts.markup.elements
 
 > XML, XHTML 1.0 and HTML 5 element definitions.  
@@ -150,4 +148,8 @@ ValueError: Unsupported element name 'tag-name'
 '<p></p>'
 >>> 
 ```
+
+----
+[(smallparts docs home)](./)
+----
 

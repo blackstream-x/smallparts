@@ -1,5 +1,3 @@
-[(smallparts docs home)](./) > [(smallparts.text)](./smallparts.text.md) >
-----
 # smallparts.text.reduce
 
 > Classes, functions and rules for reducing unicode text to ASCII.  
@@ -145,4 +143,8 @@ smallparts.text.reduce.**latin_to_ascii**(*unicode_text,* _*_*additional_rules*)
 'U'
 >>> 
 ```
+
+----
+[(smallparts docs home)](./)
+----
 

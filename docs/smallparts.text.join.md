@@ -1,5 +1,3 @@
-[(smallparts docs home)](./) > [(smallparts.text)](./smallparts.text.md) >
-----
 # smallparts.text.join
 
 > Text joining functions where the parts are given as positional arguments.  
@@ -45,4 +43,8 @@ smallparts.text.join.**using**(*join_string,* _*parts_)
 'one<->two<->four'
 >>> 
 ```
+
+----
+[(smallparts docs home)](./)
+----
 
