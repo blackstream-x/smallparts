@@ -48,11 +48,11 @@ smallparts.markup.characters.**translate_to_charrefs**(*characters_sequence, sou
 Instances of this dict can be used to defuse text for use as the content
 of an XML element.
 
-Methods:
+##### Methods:
 
 **.defuse**(*source_text*)
 
-Defuses *source_text**. This is done by applying the
+Defuses *source_text*. This is done by applying the
 **.remove_codepoints** method on *source_text* first, and then
 the **.escape** static method. 
 
@@ -65,7 +65,8 @@ Compare <https://www.w3.org/TR/xml/#charsets> for invalid, restricted and
 discouraged codepints in XML 1.0, and <https://www.w3.org/TR/xml11/#charsets>
 for the same in XML 1.1.
 
-*static* **.escape**(*source_text*)
+*static method:*  
+**.escape**(*source_text*)
 
 This static method escapes ```'&'```, ```'<'```, and ```'>'```
 in *source_text* using the standard library’s
