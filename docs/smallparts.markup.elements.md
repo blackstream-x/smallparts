@@ -120,9 +120,9 @@ Differences from the parent class:
 >>> html_example = elements.HtmlElement('tag_name')
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
-  File "/………/smallparts/markup/elements.py", line 316, in __init__
+  File "………/smallparts/markup/elements.py", line 316, in __init__
     super(XmlBasedHtmlElement, self).__init__(tag_name)
-  File "/………/smallparts/markup/elements.py", line 229, in __init__
+  File "………/smallparts/markup/elements.py", line 229, in __init__
     raise ValueError('Unsupported element name {0!r}'.format(
 ValueError: Unsupported element name 'tag-name'
 >>> html_example = elements.HtmlElement('div')

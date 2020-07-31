@@ -35,7 +35,7 @@ _(tbc)_
 2
 >>> simple_namespace.three
 Traceback (most recent call last):
-  File "/………/smallparts/namespaces.py", line 52, in __getattribute__
+  File "………/smallparts/namespaces.py", line 52, in __getattribute__
     return self[name]
 KeyError: 'three'
 
@@ -43,7 +43,7 @@ During handling of the above exception, another exception occurred:
 
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
-  File "/………/smallparts/namespaces.py", line 54, in __getattribute__
+  File "………/smallparts/namespaces.py", line 54, in __getattribute__
     raise AttributeError(
 AttributeError: 'Namespace' object has no attribute 'three'
 >>> simple_namespace.owner

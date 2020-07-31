@@ -29,7 +29,7 @@ smallparts.text.transcode.**DEFAULT_LINE_ENDING**
 
 smallparts.text.transcode.**DEFAULT_WRITE_MODE**
 
-> ```wb```
+> ```'wb'```
 
 ### Functions
 

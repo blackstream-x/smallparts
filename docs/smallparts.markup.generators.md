@@ -74,7 +74,7 @@ smallparts.markup.generators.**xml_declaration**(*version='1.0', encoding='utf-8
 > Returns an XML declaration with version and encoding as provided.
 > With defaults, this function returns ```<?xml version="1.0" encoding="utf-8" ?>```  
 > Adds ```standalone="yes"``` if *standalone* is defined als **True**, and
-> ```standalone="no"``` if *standalone* is defined as **False explicitly**.
+> ```standalone="no"``` if *standalone* is defined as **False** explicitly.
 
 smallparts.markup.generators.**xml_document**(*content, version='1.0', encoding='utf-8', standalone=None*)
 
@@ -96,7 +96,7 @@ for *dialect*. When any attribute other than **._dialect** (the dialect)
 or **._factory** (the element factory) is referenced, the instance returns
 an instance of the element factory with the attribute name (translated via
 **._factory.translate_name()**) as the tag name. These instances are cached
-*in the class* by dialect (implementing a partial [Borg pattern](http://www.aleax.it/Python/5ep.html)).
+*in the class* per dialect (implementing a partial [Borg pattern](http://www.aleax.it/Python/5ep.html)).
 
 ## Usage examples
 
