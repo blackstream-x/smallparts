@@ -2,6 +2,10 @@
 
 > HTML and XML subpackage.
 
+## [smallparts.markup.characters](./smallparts.markup.characters.md)
+
+> HTML and XML characters handling.
+
 ## [smallparts.markup.elements](./smallparts.markup.elements.md)
 
 > HTML and XML element definitions.

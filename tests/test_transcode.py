@@ -156,7 +156,7 @@ class TestSimple(unittest.TestCase):
             b'23')
 
     def test_fix_double_utf8_transformation(self):
-        """SFix douböe UTF-8 transformation"""
+        """Fix double UTF-8 transformation"""
         self.assertEqual(
             transcode.fix_double_utf8_transformation(
                 'Ã¤Ã¶Ã¼'),
@@ -171,6 +171,20 @@ class TestSimple(unittest.TestCase):
             transcode.fix_double_utf8_transformation,
             'Ã¤Ã¶Ã¼',
             wrong_encoding='utf-8')
+        # Specifying a wrong wrong_encoding
+        # might lead to a UnicodeEncodeError as shown here:
+        self.assertRaises(
+            UnicodeEncodeError,
+            transcode.fix_double_utf8_transformation,
+            'â\x82¬',
+            wrong_encoding='cp1252')
+        # Trying tou apply the function to already correct data
+        # will work in most cases because the internally calld
+        # to_unicode function falls back to the fallback encoding.
+        self.assertEqual(
+            transcode.fix_double_utf8_transformation(
+                'Ääöüß'),
+            'Ääöüß')
 
 
 if __name__ == '__main__':
