@@ -23,6 +23,27 @@ from smallparts.text import join
 HTML_5 = 'HTML 5'
 XHTML_1_0_STRICT = 'XHTML 1.0 Strict'
 XHTML_1_0_TRANSITIONAL = 'XHTML 1.0 Transitional'
+XML = 'XML'
+
+SUPPORTED_DIALECTS = {
+    HTML_5: Namespace(
+        doctype='<!DOCTYPE html>',
+        factory=elements.HtmlElement,
+        xmlns=None),
+    XHTML_1_0_STRICT: Namespace(
+        doctype='<!DOCTYPE html PUBLIC'
+        ' "-//W3C//DTD XHTML 1.0 Strict//EN"'
+        ' "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">',
+        factory=elements.XhtmlStrictElement,
+        xmlns='http://www.w3.org/1999/xhtml'),
+    XHTML_1_0_TRANSITIONAL: Namespace(
+        doctype='<!DOCTYPE html PUBLIC'
+        ' "-//W3C//DTD XHTML 1.0 Transitional//EN"'
+        ' "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">',
+        factory=elements.XhtmlTransitionalElement,
+        xmlns='http://www.w3.org/1999/xhtml'),
+    XML: Namespace(factory=elements.XmlElement),
+}
 
 
 #
@@ -30,84 +51,50 @@ XHTML_1_0_TRANSITIONAL = 'XHTML 1.0 Transitional'
 #
 
 
-# pylint: disable= too-few-public-methods ; Not required for the caches
+# pylint: disable= too-few-public-methods ; Not required for the cache
 
 
-class XmlGenerator():
+class ElementsCache():
 
-    """Generate XML code: cache element factories"""
+    """Cache for element factories"""
 
-    # visible_attributes = ('_cached_elements_',)
-    _cached_elements_ = {}
-    element_type = elements.XmlElement
+    accessible_attributes = ('__class__',
+                             '_dialect',
+                             '_factory',
+                             '__repr__')
+    _cached_elements = {
+        HTML_5: {},
+        XHTML_1_0_STRICT: {},
+        XHTML_1_0_TRANSITIONAL: {},
+        XML: {}}
 
-    def __init__(self):
+    def __init__(self, dialect):
         """Initialize the cache"""
-        ...
+        if dialect not in type(self)._cached_elements:
+            raise ValueError('Unsupported dialect.')
+        #
+        self._dialect = dialect
+        self._factory = SUPPORTED_DIALECTS[self._dialect].factory
+
+    def __repr__(self):
+        """Textual representation"""
+        return '{0}(dialect={1!r})'.format(
+            self.__class__.__name__, self._dialect)
 
     def __getattribute__(self, name):
         """Return an existing cache member
         or create a new member
         """
-        if name == '__class__':
+        if name in type(self).accessible_attributes:
             return object.__getattribute__(self, name)
         #
-        name = type(self).element_type.translate_name(name)
+        name = self._factory.translate_name(name)
         try:
-            return type(self)._cached_elements_[name]
+            return type(self)._cached_elements[self._dialect][name]
         except KeyError:
-            return type(self)._cached_elements_.setdefault(
+            return type(self)._cached_elements[self._dialect].setdefault(
                 name,
-                type(self).element_type(name))
-
-
-class XhtmlStrictGenerator(XmlGenerator):
-
-    """Generate XHTML 1.0 Strict code"""
-
-    _cached_elements_ = {}
-    element_type = elements.XhtmlStrictElement
-
-
-class XhtmlTransitionalGenerator(XmlGenerator):
-
-    """Generate XHTML 1.0 Transitional code"""
-
-    _cached_elements_ = {}
-    element_type = elements.XhtmlTransitionalElement
-
-
-class HtmlGenerator(XmlGenerator):
-
-    """Generate HTML (5) code"""
-
-    _cached_elements_ = {}
-    element_type = elements.HtmlElement
-
-
-#
-# Supported HTML dialect definitions
-#
-
-
-SUPPORTED_HTML_DIALECTS = {
-    HTML_5: Namespace(
-        doctype='<!DOCTYPE html>',
-        factory=HtmlGenerator,
-        xmlns=None),
-    XHTML_1_0_STRICT: Namespace(
-        doctype='<!DOCTYPE html PUBLIC'
-        ' "-//W3C//DTD XHTML 1.0 Strict//EN"'
-        ' "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">',
-        factory=XhtmlStrictGenerator,
-        xmlns='http://www.w3.org/1999/xhtml'),
-    XHTML_1_0_TRANSITIONAL: Namespace(
-        doctype='<!DOCTYPE html PUBLIC'
-        ' "-//W3C//DTD XHTML 1.0 Transitional//EN"'
-        ' "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">',
-        factory=XhtmlTransitionalGenerator,
-        xmlns='http://www.w3.org/1999/xhtml'),
-}
+                self._factory(name))
 
 
 #
@@ -136,17 +123,20 @@ def html_document(dialect=HTML_5,
                   head='',
                   body=''):
     """Generate an HTML document"""
+    if dialect == XML:
+        raise ValueError('This function can only generate HTML documents.')
+    #
     try:
-        html_dialect = SUPPORTED_HTML_DIALECTS[dialect]
+        html_dialect = SUPPORTED_DIALECTS[dialect]
     except KeyError:
         raise ValueError(
             'Unsupported HTML dialect.'
             ' Please specify one of {0}!'.format(
                 constants.COMMA_BLANK.join(
                     repr(single_dialect) for single_dialect in
-                    SUPPORTED_HTML_DIALECTS)))
+                    SUPPORTED_DIALECTS if 'HTML' in single_dialect)))
     #
-    element = html_dialect.factory()
+    element = ElementsCache(dialect)
     head_fragments = ['']
     if dialect == HTML_5 and '<meta charset' not in head.lower():
         head_fragments.append(element.meta(charset=constants.UTF_8))

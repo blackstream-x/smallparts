@@ -69,10 +69,16 @@ class TestSimple(unittest.TestCase):
             '</head>\n'
             '<body></body>\n'
             '</html>')
-        self.assertRaises(
+        self.assertRaisesRegex(
             ValueError,
+            '^Unsupported HTML dialect',
             generators.html_document,
             dialect='HTML 3.2')
+        self.assertRaisesRegex(
+            ValueError,
+            r'^This function can only generate HTML documents\.$',
+            generators.html_document,
+            dialect='XML')
 
     def test_js_function_call(self):
         """Javascript function call generation"""
@@ -130,20 +136,20 @@ class TestSimple(unittest.TestCase):
             '<?xml version="1.1" encoding="utf-8" standalone="yes" ?>\n'
             '<test-element/>')
 
-    def test_xml_generator(self):
+    def test_xml_cache(self):
         """XML elements generation"""
-        xml_gen = generators.XmlGenerator()
+        xml_gen = generators.ElementsCache(generators.XML)
         self.assertEqual(
             xml_gen.outer_element(xml_gen.inner_element(),
                                   attr='value'),
             '<outer-element attr="value"><inner-element/></outer-element>')
         self.assertEqual(
-                sorted(xml_gen.__class__._cached_elements_),
+                sorted(xml_gen.__class__._cached_elements[generators.XML]),
                 ['inner-element', 'outer-element'])
 
-    def test_html_generator(self):
+    def test_html_cache(self):
         """HTML elements generation"""
-        html_gen = generators.HtmlGenerator()
+        html_gen = generators.ElementsCache(generators.HTML_5)
         self.assertEqual(
             html_gen.p__(html_gen.strong('blind text:'),
                          ' lorem ',
@@ -152,6 +158,17 @@ class TestSimple(unittest.TestCase):
                          __class__='paragraph_style'),
             '<p class="paragraph_style"><strong>blind text:</strong>'
             ' lorem <span style="background: silver;">ipsum</span></p>')
+        self.assertEqual(
+            repr(html_gen),
+            "ElementsCache(dialect='HTML 5')")
+
+    def test_cache_unsupported(self):
+        """Unsupported dialect"""
+        self.assertRaisesRegex(
+            ValueError,
+            r'^Unsupported dialect\.$',
+            generators.ElementsCache,
+            'SGML')
 
 
 if __name__ == '__main__':
