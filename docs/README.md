@@ -1,6 +1,6 @@
 # smallparts package documentation home
 
-## smallparts.constants
+## [smallparts.constants](./smallparts.constants.md)
 
 > Constants commonly used throughout this package.
 

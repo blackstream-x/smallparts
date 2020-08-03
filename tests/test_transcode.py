@@ -179,11 +179,10 @@ class TestSimple(unittest.TestCase):
             'â\x82¬',
             wrong_encoding='cp1252')
         # Trying tou apply the function to already correct data
-        # will work in most cases because the internally calld
-        # to_unicode function falls back to the fallback encoding.
-        self.assertEqual(
-            transcode.fix_double_utf8_transformation(
-                'Ääöüß'),
+        # will raise a UnicodeDecodeError.
+        self.assertRaises(
+            UnicodeDecodeError,
+            transcode.fix_double_utf8_transformation,
             'Ääöüß')
 
 

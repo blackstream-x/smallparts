@@ -32,7 +32,6 @@ BOM_ASSIGNMENTS = (
 DEFAULT_TARGET_ENCODING = constants.UTF_8
 DEFAULT_FALLBACK_ENCODING = constants.CP1252
 DEFAULT_LINE_ENDING = constants.LF
-DEFAULT_WRITE_MODE = constants.MODE_WRITE_BINARY
 
 #
 # Functions
@@ -169,99 +168,52 @@ def fix_double_utf8_transformation(unicode_text,
     This function reverts the effect.
     """
     if wrong_encoding == constants.UTF_8:
-        raise ValueError('This would not have any effect!')
+        raise ValueError('This cannot have any effect!')
     #
-    return to_unicode(to_bytes(unicode_text, to_encoding=wrong_encoding))
+    return to_unicode(
+        to_bytes(
+            unicode_text,
+            to_encoding=wrong_encoding),
+        from_encoding=constants.UTF_8)
 
 
-def lines(input_object,
-          from_encoding=None,
-          fallback_encoding=DEFAULT_FALLBACK_ENCODING,
-          keepends=False):
-    """Iterate over the decoded input object's lines"""
-    for single_line in to_unicode(
-            input_object,
-            from_encoding=from_encoding,
-            fallback_encoding=fallback_encoding).splitlines(keepends=keepends):
-        yield single_line
-    #
-
-
-def read_from_file(input_file,
+def read_from_file(input_file_or_name,
                    from_encoding=None,
                    fallback_encoding=DEFAULT_FALLBACK_ENCODING):
-    """Read input file and return its content as unicode"""
+    """Read input file and return its contents as unicode"""
     try:
-        return to_unicode(input_file.read(),
-                          from_encoding=from_encoding,
-                          fallback_encoding=fallback_encoding)
+        file_contents = input_file_or_name.read()
     except AttributeError:
-        with open(input_file,
+        with open(input_file_or_name,
                   mode=constants.MODE_READ_BINARY) as real_input_file:
-            return read_from_file(real_input_file,
-                                  from_encoding=from_encoding,
-                                  fallback_encoding=fallback_encoding)
+            file_contents = real_input_file.read()
         #
     #
-
-
-def lines_from_file(input_file_or_name,
-                    from_encoding=None,
-                    fallback_encoding=DEFAULT_FALLBACK_ENCODING,
-                    keepends=False):
-    """Iterate over the decoded input file's lines"""
-    decoded_file_content = read_from_file(
-        input_file_or_name,
+    return to_unicode(
+        file_contents,
         from_encoding=from_encoding,
         fallback_encoding=fallback_encoding)
-    for single_line in decoded_file_content.splitlines(keepends=keepends):
-        yield single_line
-    #
 
 
-def prepare_file_output(input_object,
+def prepare_file_output(unicode_content,
                         to_encoding=DEFAULT_TARGET_ENCODING,
-                        from_encoding=None,
-                        fallback_encoding=DEFAULT_FALLBACK_ENCODING,
                         line_ending=DEFAULT_LINE_ENDING):
-    """Return a bytes representation of the input object
+    """Return a bytes representation of unicode_content,
+    with the provided line_ending,
     suitable for writing to a file using mode MODE_WRITE_BINARY.
     """
-    if isinstance(input_object, (tuple, list)):
-        lines_list = []
-        for line in input_object:
-            assert isinstance(line, str)
-            lines_list.append(line)
-        #
+    lines_list = []
+    if isinstance(unicode_content, str):
+        lines_list.extend(unicode_content.splitlines())
     else:
-        lines_list = list(lines(input_object,
-                                fallback_encoding=fallback_encoding))
+        lines_list.extend(unicode_content)
     #
-    return anything_to_bytes(line_ending.join(lines_list),
-                             to_encoding=to_encoding,
-                             from_encoding=from_encoding)
+    return to_bytes(
+        line_ending.join(lines_list),
+        to_encoding=to_encoding)
 
 
 # pylint: disable=too-many-arguments; required for versatility
-
-
-def write_to_file(file_name,
-                  input_object,
-                  to_encoding=DEFAULT_TARGET_ENCODING,
-                  from_encoding=None,
-                  fallback_encoding=DEFAULT_FALLBACK_ENCODING,
-                  line_ending=DEFAULT_LINE_ENDING,
-                  write_mode=DEFAULT_WRITE_MODE):
-    """Write the input object or list to the file specified by file_name"""
-    with open(file_name,
-              mode=write_mode) as output_file:
-        output_file.write(
-            prepare_file_output(input_object,
-                                to_encoding=to_encoding,
-                                from_encoding=from_encoding,
-                                fallback_encoding=fallback_encoding,
-                                line_ending=line_ending))
-    #
 
 
 def transcode_file(file_name,
