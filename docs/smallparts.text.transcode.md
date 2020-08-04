@@ -27,6 +27,12 @@ smallparts.text.transcode.**DEFAULT_LINE_ENDING**
 
 > ```'\n'``` as defined in [smallparts.constants](smallparts.constants.md).**LF**
 
+smallparts.text.transcode.**SUPPORTED_OUTPUT_LINE_ENDINGS**
+
+> A tuple containing ```'\n'``` and ```'\r\n'``` (as defined in
+> [smallparts.constants](smallparts.constants.md).**LF**) and
+> [smallparts.constants](smallparts.constants.md).**CRLF**)
+
 ### Functions
 
 This module defines the following functions:
@@ -88,14 +94,26 @@ smallparts.text.transcode.**fix_double_utf8_transformation**(*unicode_text, wron
 > This function reverts the effect by re-encoding *unicode_text* using
 > *wrong_encoding* and decoding it as UTF-8 again.
 
-smallparts.text.transcode.**read_from_file**(*input_file_or_name, from_encoding=None, fallback_encoding=**DEFAULT_FALLBACK_ENCODING***):
+smallparts.text.transcode.**read_from_file**(*input_file_or_name, from_encoding=None, fallback_encoding=**DEFAULT_FALLBACK_ENCODING***)
 
 > Read *input_file_or_name* contents and return its contents decoded to unicode.
 > As the argument name suggests, *input_file_or_name* may be either a file name
 > or a file object.
 
+smallparts.text.transcode.**prepare_file_output**(*unicode_content, to_encoding=**DEFAULT_TARGET_ENCODING**, line_ending=**DEFAULT_LINE_ENDING***)
 
-*(tbc)*
+> Return *unicode_content* prepared for binary output to a file
+> (i.e. as bytes, encoded as *to_encoding* and with *line_ending* as line ending).
+
+smallparts.text.transcode.**transcode_file**(*file_name, to_encoding=**DEFAULT_TARGET_ENCODING**, from_encoding=None, fallback_encoding=**DEFAULT_FALLBACK_ENCODING**, line_ending=None*)
+
+> Transcodes the file with the name *file_name* to *to_encoding*.  
+> Raises a ValueError if the file contents are already encoded in *to_encoding*.  
+> If *line_ending* is one of **SUPPORTED_OUTPUT_LINE_ENDINGS**,
+> changes the line endings in the file contnts to *line_ending*.  
+> Renames the original file to a file with the detected encoding appended to
+> the original file name, but before the extension.
+
 
 ## Usage examples
 

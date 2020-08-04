@@ -11,7 +11,6 @@ with additional functions to read and write text files.
 
 
 import codecs
-import logging
 import os.path
 import shutil
 
@@ -32,6 +31,10 @@ BOM_ASSIGNMENTS = (
 DEFAULT_TARGET_ENCODING = constants.UTF_8
 DEFAULT_FALLBACK_ENCODING = constants.CP1252
 DEFAULT_LINE_ENDING = constants.LF
+
+SUPPORTED_OUTPUT_LINE_ENDINGS = (
+    constants.LF,
+    constants.CRLF)
 
 #
 # Functions
@@ -202,6 +205,11 @@ def prepare_file_output(unicode_content,
     with the provided line_ending,
     suitable for writing to a file using mode MODE_WRITE_BINARY.
     """
+    if line_ending not in SUPPORTED_OUTPUT_LINE_ENDINGS:
+        raise ValueError(
+            'line_ending must be one of {0!r}!'.format(
+                SUPPORTED_OUTPUT_LINE_ENDINGS))
+    #
     lines_list = []
     if isinstance(unicode_content, str):
         lines_list.extend(unicode_content.splitlines())
@@ -213,18 +221,17 @@ def prepare_file_output(unicode_content,
         to_encoding=to_encoding)
 
 
-# pylint: disable=too-many-arguments; required for versatility
-
-
 def transcode_file(file_name,
                    to_encoding=DEFAULT_TARGET_ENCODING,
                    from_encoding=None,
                    fallback_encoding=DEFAULT_FALLBACK_ENCODING,
-                   line_ending=None,
-                   write_backup_file=True):
-    """Read the input file and transcode it to the specified encoding IN PLACE.
+                   line_ending=None):
+    """Read the input file and transcode it to the specified encoding in place.
+    Raise a ValueError if the detected encoding is the same as the
+    target encoding.
     Preserve original line endings except when specified explicitly.
-    Write a backup file unless explicitly told not to do that.
+    Rename the original file to the original name with the detected
+    encoding name attached.
     """
     with open(file_name,
               mode=constants.MODE_READ_BINARY) as input_file:
@@ -234,27 +241,36 @@ def transcode_file(file_name,
         bytes_content,
         from_encoding=from_encoding,
         fallback_encoding=fallback_encoding)
+    #
+    # Check detected encoding and raise a ValueError
     if detected_encoding == to_encoding:
-        logging.warning('File %r is already encoded in %r!',
-                        file_name,
-                        to_encoding)
-        return False
+        raise ValueError(
+            'File {0!r} is already encoded in {1!r}!'.format(
+                file_name,
+                to_encoding))
     #
-    if write_backup_file:
-        file_name_root, file_extension = os.path.splitext(file_name)
-        backup_file_name = '{0}.{1}{2}'.format(
-            file_name_root, detected_encoding, file_extension)
-        shutil.move(file_name, backup_file_name)
-    #
-    if line_ending in (constants.LF, constants.CRLF):
+    # Change line endings if requested
+    if line_ending in SUPPORTED_OUTPUT_LINE_ENDINGS:
         unicode_content = line_ending.join(
             split.lines_for_reconstruction(unicode_content))
+    elif line_ending is not None:
+        raise ValueError(
+            'line_ending – if provided – must be one of {0!r}!'.format(
+                SUPPORTED_OUTPUT_LINE_ENDINGS))
+    #
+    # rename the original file to the backup file name
+    file_name_root, file_extension = os.path.splitext(file_name)
+    backup_file_name = '{0}.{1}{2}'.format(
+        file_name_root, detected_encoding, file_extension)
+    shutil.move(file_name, backup_file_name)
     #
     with open(file_name,
               mode=constants.MODE_WRITE_BINARY) as output_file:
-        output_file.write(to_bytes(unicode_content, to_encoding=to_encoding))
+        output_file.write(
+            to_bytes(
+                unicode_content,
+                to_encoding=to_encoding))
     #
-    return True
 
 
 # vim:fileencoding=utf-8 autoindent ts=4 sw=4 sts=4 expandtab:
