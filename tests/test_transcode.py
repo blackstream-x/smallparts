@@ -6,6 +6,8 @@ test smallparts.text.transcode
 
 """
 
+import os.path
+import tempfile
 import unittest
 
 from smallparts.text import transcode
@@ -178,12 +180,45 @@ class TestSimple(unittest.TestCase):
             transcode.fix_double_utf8_transformation,
             'â\x82¬',
             wrong_encoding='cp1252')
-        # Trying tou apply the function to already correct data
+        # Trying to apply the function to already correct data
         # will raise a UnicodeDecodeError.
         self.assertRaises(
             UnicodeDecodeError,
             transcode.fix_double_utf8_transformation,
             'Ääöüß')
+
+    def test_read_from_file(self):
+        """Read text from a file"""
+        # transcode.read_from_file()
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            filename_1 = os.path.join(tmpdirname, 'test_rff_1.txt')
+            filename_2 = os.path.join(tmpdirname, 'test_rff_2.txt')
+            filename_3 = os.path.join(tmpdirname, 'test_rff_3.txt')
+            # CP-1252 autodetect
+            with open(filename_1, mode='wb') as file_1:
+                file_1.write(b'\xc4\xe4\xf6\xfc\xdf \x80')
+            #
+            self.assertEqual(
+                transcode.read_from_file(filename_1),
+                'Ääöüß €')
+            # UTF-8 autodetect
+            with open(filename_2, mode='wb') as file_2:
+                file_2.write(
+                    b'\xc3\x84\xc3\xa4\xc3\xb6\xc3\xbc\xc3\x9f \xe2\x82\xac')
+            #
+            self.assertEqual(
+                transcode.read_from_file(filename_2),
+                'Ääöüß €')
+            # UTF-16 Big endian with BOM autodetect
+            with open(filename_3, mode='wb') as file_3:
+                # UTF-16 Big endian with BOM
+                file_3.write(
+                    b'\xfe\xff\x00\xb5\x00 \x00\xa7\x00 \x1e\x9e')
+            #
+            self.assertEqual(
+                transcode.read_from_file(filename_3),
+                'µ § ẞ')
+        #
 
 
 if __name__ == '__main__':

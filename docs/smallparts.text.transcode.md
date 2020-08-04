@@ -31,21 +31,21 @@ smallparts.text.transcode.**DEFAULT_LINE_ENDING**
 
 This module defines the following functions:
 
-smallparts.text.transcode.**to_unicode_and_encoding_name**(*input_object, from_encoding=None, fallback_encoding=**DEFAULT_FALLBACK_ENCODING***)
+smallparts.text.transcode.**to_unicode_and_encoding_name**(*bytestring, from_encoding=None, fallback_encoding=**DEFAULT_FALLBACK_ENCODING***)
 
-> Tries to decode the input object to a unicode string.
+> Tries to decode *bytestring* to a unicode string.
 > Returns a tuple containing the conversion result and the source encoding name
 > when successful. Raises a UnicodeDecodeError if appropriate.  
-> *input_object* must be a **bytes** or **bytearray** instance, otherwise
+> If *bytestring* is neither a **bytes** nor a **bytearray** instance,
 > a TypeError is raised.  
 > If *from_encoding* is provided, the function explicitly uses that encoding.
 > Otherwise, it tries a simple form of encoding auto-detection by first trying
-> all known byte order marks, then UTF-8, and *fallback_encoding* as last resort.  
+> all known byte order marks, then UTF-8, and *fallback_encoding* as the last resort.  
 > All other functions in this module using these two keyword arguments
 > wrap this function directly or indirectly,
 > so these arguments have the same effect everywhere.
 
-smallparts.text.transcode.**to_unicode**(*input_object, from_encoding=None, fallback_encoding=**DEFAULT_FALLBACK_ENCODING***)
+smallparts.text.transcode.**to_unicode**(*bytestring, from_encoding=None, fallback_encoding=**DEFAULT_FALLBACK_ENCODING***)
 
 > Wrapper for the **to_unicode_and_encoding_name()** function returning only
 > the conversion result.
@@ -56,10 +56,10 @@ smallparts.text.transcode.**anything_to_unicode**(*input_object, from_encoding=N
 > raised if *input_object* is neither a **bytes** nor a **bytearray** instance,
 > and simply returning the string conversion of the input object.
 
-smallparts.text.transcode.**to_bytes**(*input_object, to_encoding=**DEFAULT_TARGET_ENCODING***)
+smallparts.text.transcode.**to_bytes**(*unicode_text, to_encoding=**DEFAULT_TARGET_ENCODING***)
 
-> Encode a unicode string to a bytes representation using *to_encoding*.
-> Raises a TypeError if *input_object* is not **str**.  
+> Encode *unicode_text* to a bytes representation using *to_encoding*.
+> Raises a TypeError if *unicode_text* is not **str**.  
 
 smallparts.text.transcode.**anything_to_bytes**(*input_object, to_encoding=**DEFAULT_TARGET_ENCODING**, from_encoding=None, fallback_encoding=**DEFAULT_FALLBACK_ENCODING***)
 
@@ -69,9 +69,9 @@ smallparts.text.transcode.**anything_to_bytes**(*input_object, to_encoding=**DEF
 > to *input_object* with the *from_encoding* and *fallback_encoding* arguments passed through.
 > Then, the result of that conversion is converted using **to_bytes()**.
 
-smallparts.text.transcode.**to_utf8**(*input_object*)
+smallparts.text.transcode.**to_utf8**(*unicode_text*)
 
-> Shortcut for the explicit **to_bytes**(*input_object, to_encoding='utf-8'*)
+> Shortcut for the explicit **to_bytes**(*unicode_text, to_encoding='utf-8'*)
 > call.
 
 smallparts.text.transcode.**anything_to_utf8**(*input_object, from_encoding=None, fallback_encoding=**DEFAULT_FALLBACK_ENCODING***)
@@ -87,6 +87,13 @@ smallparts.text.transcode.**fix_double_utf8_transformation**(*unicode_text, wron
 > resulting in character sequences like ```Ã¤Ã¶Ã¼```.  
 > This function reverts the effect by re-encoding *unicode_text* using
 > *wrong_encoding* and decoding it as UTF-8 again.
+
+smallparts.text.transcode.**read_from_file**(*input_file_or_name, from_encoding=None, fallback_encoding=**DEFAULT_FALLBACK_ENCODING***):
+
+> Read *input_file_or_name* contents and return its contents decoded to unicode.
+> As the argument name suggests, *input_file_or_name* may be either a file name
+> or a file object.
+
 
 *(tbc)*
 

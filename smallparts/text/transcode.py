@@ -39,14 +39,14 @@ DEFAULT_LINE_ENDING = constants.LF
 
 
 def to_unicode_and_encoding_name(
-        input_object,
+        bytestring,
         from_encoding=None,
         fallback_encoding=DEFAULT_FALLBACK_ENCODING):
-    """Try to decode the input object to a unicode string
+    """Try to decode bytestring to a unicode string
     and return a tuple containing the conversion result
     and the source encoding name.
 
-    If the input object is not a byte string, a TypeError is raised.
+    If bytestring is not a byte string, a TypeError is raised.
 
     Otherwise, the following algorithm is used:
         - If an explicit input codec was given, decode it using that codec.
@@ -57,36 +57,36 @@ def to_unicode_and_encoding_name(
           in the global DEFAULT_FALLBACK_ENCODING variable but can be
           overridden using the parameter fallback_encoding.
     """
-    if isinstance(input_object, (bytes, bytearray)):
+    if isinstance(bytestring, (bytes, bytearray)):
         if from_encoding:
-            return (input_object.decode(from_encoding),
+            return (bytestring.decode(from_encoding),
                     from_encoding)
         #
         for (bom, encoding) in BOM_ASSIGNMENTS:
-            if input_object.startswith(bom):
-                return (input_object[len(bom):].decode(encoding),
+            if bytestring.startswith(bom):
+                return (bytestring[len(bom):].decode(encoding),
                         encoding)
             #
         #
         try:
-            return (input_object.decode(constants.UTF_8),
+            return (bytestring.decode(constants.UTF_8),
                     constants.UTF_8)
         except UnicodeDecodeError:
-            return (input_object.decode(fallback_encoding),
+            return (bytestring.decode(fallback_encoding),
                     fallback_encoding)
         #
     #
     raise TypeError('This function requires bytes or bytearray as input,'
-                    ' not {0}.'.format(input_object.__class__.__name__))
+                    ' not {0}.'.format(bytestring.__class__.__name__))
 
 
-def to_unicode(input_object,
+def to_unicode(bytestring,
                from_encoding=None,
                fallback_encoding=DEFAULT_FALLBACK_ENCODING):
     """Wrap to_unicode_and_encoding_name(),
     but return the conversion result only."""
     return to_unicode_and_encoding_name(
-        input_object,
+        bytestring,
         from_encoding=from_encoding,
         fallback_encoding=fallback_encoding)[0]
 
@@ -109,16 +109,16 @@ def anything_to_unicode(
 
 
 def to_bytes(
-        input_object,
+        unicode_text,
         to_encoding=DEFAULT_TARGET_ENCODING):
-    """Encode a unicode string to a bytes representation
+    """Encode unicode_text to a bytes representation
     using the provided encoding
     """
-    if isinstance(input_object, str):
-        return input_object.encode(to_encoding)
+    if isinstance(unicode_text, str):
+        return unicode_text.encode(to_encoding)
     #
     raise TypeError('This function requires a unicode string as input,'
-                    ' not {0}.'.format(input_object.__class__.__name__))
+                    ' not {0}.'.format(unicode_text.__class__.__name__))
 
 
 def anything_to_bytes(
@@ -140,11 +140,11 @@ def anything_to_bytes(
     #
 
 
-def to_utf8(input_object):
-    """Encode the input object string to UTF-8
+def to_utf8(unicode_text):
+    """Encode unicode_text to UTF-8
     using this modules's to_bytes() function
     """
-    return to_bytes(input_object, to_encoding=constants.UTF_8)
+    return to_bytes(unicode_text, to_encoding=constants.UTF_8)
 
 
 def anything_to_utf8(
