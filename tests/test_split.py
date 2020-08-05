@@ -29,6 +29,13 @@ class TestSimple(unittest.TestCase):
                 'first,\nsecond and\nthird line'),
             ['first,', 'second and', 'third line'])
 
+    def test_unsupported_type(self):
+        """Unsuppoerted type (here: bytes)"""
+        self.assertRaises(
+            TypeError,
+            split.lines_for_reconstruction,
+            b'first,\nsecond and\nthird line')
+
 
 if __name__ == '__main__':
     unittest.main()

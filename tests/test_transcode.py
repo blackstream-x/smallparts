@@ -220,6 +220,151 @@ class TestSimple(unittest.TestCase):
                 'µ § ẞ')
         #
 
+    def test_prepare_file_output(self):
+        """Encode unicode to bytes"""
+        self.assertEqual(
+            transcode.prepare_file_output(
+                'Unicode Text with €'),
+            b'Unicode Text with \xe2\x82\xac')
+        self.assertEqual(
+            transcode.prepare_file_output(
+                'Unicode Text with €\n'
+                'and Umlauts (äöü,ÄÖÜ)\n'
+                'DOS style with trailing line break\n',
+                to_encoding='cp1252',
+                line_ending='\r\n'),
+            b'Unicode Text with \x80\r\n'
+            b'and Umlauts (\xe4\xf6\xfc,\xc4\xd6\xdc)\r\n'
+            b'DOS style with trailing line break\r\n')
+        self.assertEqual(
+            transcode.prepare_file_output(
+                ('Unicode Text with €',
+                 'and Umlauts (äöü,ÄÖÜ)',
+                 'Unix style from a sequence',
+                 'with trailing line break',
+                 ''),
+                to_encoding='iso8859-15'),
+            b'Unicode Text with \xa4\n'
+            b'and Umlauts (\xe4\xf6\xfc,\xc4\xd6\xdc)\n'
+            b'Unix style from a sequence\n'
+            b'with trailing line break\n')
+        # Unsupported line ending
+        self.assertRaises(
+            ValueError,
+            transcode.prepare_file_output,
+            'Unicode Text with €',
+            line_ending='\r')
+        # Non-iterable type argument
+        self.assertRaises(
+            TypeError,
+            transcode.prepare_file_output,
+            None)
+        # Bytestring argument
+        self.assertRaises(
+            TypeError,
+            transcode.prepare_file_output,
+            b'UTF-8 text with \xe2\x82\xac')
+        # sequence of bytestrings argument
+        self.assertRaises(
+            TypeError,
+            transcode.prepare_file_output,
+            [b'UTF-8 text with \xe2\x82\xac',
+             b'continuation line'])
+
+    def test_transcode_file_1(self):
+        """transcode files, test #1:
+        CP-1252 autodetect
+        """
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            original_filename = os.path.join(
+                tmpdirname, 'test_tf.txt')
+            renamed_filename = os.path.join(
+                tmpdirname, 'test_tf.cp1252.txt')
+            with open(original_filename,
+                      mode='wb') as original_file:
+                original_file.write(b'\xc4\xe4\xf6\xfc\xdf \x80')
+            #
+            transcode.transcode_file(original_filename)
+            self.assertTrue(os.path.isfile(renamed_filename))
+            self.assertTrue(os.path.isfile(original_filename))
+            with open(renamed_filename,
+                      mode='rb') as renamed_file:
+                self.assertEqual(
+                    renamed_file.read(),
+                    b'\xc4\xe4\xf6\xfc\xdf \x80')
+            #
+            with open(original_filename,
+                      mode='rb') as transcoded_file:
+                self.assertEqual(
+                    transcoded_file.read(),
+                    b'\xc3\x84\xc3\xa4\xc3\xb6\xc3\xbc\xc3\x9f \xe2\x82\xac')
+            #
+            # original_filename is now UTF-8 already
+            self.assertRaises(
+                ValueError,
+                transcode.transcode_file,
+                original_filename,
+                to_encoding='utf8')
+            #
+        #
+
+    def test_transcode_file_2(self):
+        """transcode files, test #2:
+        UTF-8 to CP-1252
+        """
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            original_filename = os.path.join(
+                tmpdirname, 'test_tf.txt')
+            renamed_filename = os.path.join(
+                tmpdirname, 'test_tf.utf-8.txt')
+            with open(original_filename,
+                      mode='wb') as original_file:
+                original_file.write(
+                    b'\xc3\x84\xc3\xa4\xc3\xb6\xc3\xbc\xc3\x9f'
+                    b' \xe2\x82\xac\n'
+                    b'\xc3\x84\xc3\xa4\xc3\xb6\xc3\xbc\xc3\x9f'
+                    b' \xe2\x82\xac\n\n\n')
+            #
+            # unsupported line ending
+            self.assertRaises(
+                ValueError,
+                transcode.transcode_file,
+                original_filename,
+                to_encoding='cp1252',
+                line_ending='\r')
+            #
+            transcode.transcode_file(
+                original_filename,
+                to_encoding='cp1252',
+                line_ending='\r\n')
+            self.assertTrue(os.path.isfile(renamed_filename))
+            self.assertTrue(os.path.isfile(original_filename))
+            with open(renamed_filename,
+                      mode='rb') as renamed_file:
+                self.assertEqual(
+                    renamed_file.read(),
+                    b'\xc3\x84\xc3\xa4\xc3\xb6\xc3\xbc\xc3\x9f'
+                    b' \xe2\x82\xac\n'
+                    b'\xc3\x84\xc3\xa4\xc3\xb6\xc3\xbc\xc3\x9f'
+                    b' \xe2\x82\xac\n\n\n')
+            #
+            with open(original_filename,
+                      mode='rb') as transcoded_file:
+                self.assertEqual(
+                    transcoded_file.read(),
+                    b'\xc4\xe4\xf6\xfc\xdf \x80\r\n'
+                    b'\xc4\xe4\xf6\xfc\xdf \x80\r\n\r\n\r\n')
+            #
+            # original_filename is now windows-1252
+            # (==cp1252) already
+            self.assertRaises(
+                ValueError,
+                transcode.transcode_file,
+                original_filename,
+                to_encoding='windows-1252')
+            #
+        #
+
 
 if __name__ == '__main__':
     unittest.main()

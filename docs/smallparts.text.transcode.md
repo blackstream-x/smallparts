@@ -30,7 +30,7 @@ smallparts.text.transcode.**DEFAULT_LINE_ENDING**
 smallparts.text.transcode.**SUPPORTED_OUTPUT_LINE_ENDINGS**
 
 > A tuple containing ```'\n'``` and ```'\r\n'``` (as defined in
-> [smallparts.constants](smallparts.constants.md).**LF**) and
+> [smallparts.constants](smallparts.constants.md).**LF** and
 > [smallparts.constants](smallparts.constants.md).**CRLF**)
 
 ### Functions
@@ -103,7 +103,10 @@ smallparts.text.transcode.**read_from_file**(*input_file_or_name, from_encoding=
 smallparts.text.transcode.**prepare_file_output**(*unicode_content, to_encoding=**DEFAULT_TARGET_ENCODING**, line_ending=**DEFAULT_LINE_ENDING***)
 
 > Return *unicode_content* prepared for binary output to a file
-> (i.e. as bytes, encoded as *to_encoding* and with *line_ending* as line ending).
+> (i.e. as bytes, encoded as *to_encoding* and with *line_ending* as line ending).  
+> Raises a ValueError if *line_ending* is not one of **SUPPORTED_OUTPUT_LINE_ENDINGS**,
+> or a TypeError if *unicode_content* is neither a unicode string
+> nor a sequence of unicode strings.
 
 smallparts.text.transcode.**transcode_file**(*file_name, to_encoding=**DEFAULT_TARGET_ENCODING**, from_encoding=None, fallback_encoding=**DEFAULT_FALLBACK_ENCODING**, line_ending=None*)
 

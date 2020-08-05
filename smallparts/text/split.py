@@ -18,8 +18,13 @@ def lines_for_reconstruction(unicode_text):
     The line break characters below were taken from
     <https://docs.python.org/3/library/stdtypes.html#str.splitlines>
     """
-    splitted_lines = unicode_text.splitlines()
-    if unicode_text[-1] in '\n\r\v\f\x1c\x1d\x1e\x85\u2028\u2029':
+    if isinstance(unicode_text, str):
+        splitted_lines = unicode_text.splitlines()
+    else:
+        raise TypeError('This function requires a unicode argument.')
+    #
+    if unicode_text and \
+            unicode_text[-1] in '\n\r\v\f\x1c\x1d\x1e\x85\u2028\u2029':
         splitted_lines.append('')
     #
     return splitted_lines

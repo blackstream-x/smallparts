@@ -11,11 +11,11 @@ smallparts.text.split.**lines_for_reconstruction**(*unicode_text*)
 
 > Splits *unicode_text* using the standard library’s **str.splitlines()** method,
 > and append an empty string at the end (only) if the last line
-> of the original text ends with a line break.
->
+> of the original text ends with a line break.  
 > That way, the splitted result can be joined back using a line break character
 > and keep a trailing line break which would be lost if only using
-> **str.splitlines()**.
+> **str.splitlines()**.  
+> Raises a TypeError if *unicode_text* is not a unicode string.
 
 ## Usage examples
 

@@ -212,9 +212,17 @@ def prepare_file_output(unicode_content,
     #
     lines_list = []
     if isinstance(unicode_content, str):
-        lines_list.extend(unicode_content.splitlines())
+        lines_list.extend(
+            split.lines_for_reconstruction(unicode_content))
     else:
-        lines_list.extend(unicode_content)
+        for text_block in unicode_content:
+            text_block_lines = split.lines_for_reconstruction(text_block)
+            if not text_block_lines:
+                lines_list.append('')
+                continue
+            #
+            lines_list.extend(text_block_lines)
+        #
     #
     return to_bytes(
         line_ending.join(lines_list),
@@ -242,8 +250,10 @@ def transcode_file(file_name,
         from_encoding=from_encoding,
         fallback_encoding=fallback_encoding)
     #
-    # Check detected encoding and raise a ValueError
-    if detected_encoding == to_encoding:
+    # Check content encoding and raise a ValueError
+    # if the original contents were already encoded
+    # as to_encoding
+    if bytes_content == to_bytes(unicode_content, to_encoding=to_encoding):
         raise ValueError(
             'File {0!r} is already encoded in {1!r}!'.format(
                 file_name,
