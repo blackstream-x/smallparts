@@ -7,6 +7,8 @@
 
 This module defines the following constants:
 
+### Single characters
+
 smallparts.constants.**AMPERSAND**
 
 > ```'&'```
@@ -25,81 +27,192 @@ smallparts.constants.**SP**
 
 > ```' '```
 
-_(tbc)_
+smallparts.constants.**BRACE_OPEN**
 
-```
-BRACE_OPEN = '{'
-BRACE_CLOSE = '}'
-COLON = ':'
-COMMA = ','
-CARRIAGE_RETURN = CR = '\r'
-DASH = '-'
-DOT = '.'
-DOUBLE_QUOTE = '"'
-EMPTY = ''
-EQUALS = '='
-HASH = POUND = '#'
-LINEFEED = LF = NEWLINE = NL = '\n'
-PERCENT = '%'
-PIPE = '|'
-PLUS_SIGN = '+'
-QUESTION_MARK = '?'
-SEMICOLON = ';'
-SINGLE_QUOTE = "'"
-SLASH = '/'
-TILDE = '~'
-UNDERSCORE = '_'
+> ```'{'```
 
-#
-# Compound constants
-#
+smallparts.constants.**BRACE_CLOSE**
 
-COLON_BLANK = COLON + BLANK
-COMMA_BLANK = COMMA + BLANK
-CRLF = CR + LF
+> ```'}'```
 
-#
-# Numeric constants
-#
+smallparts.constants.**COLON**
 
-ZERO = 0
-ONE = 1
-FIRST_INDEX = ZERO
-SECOND_INDEX = ONE
-LAST_INDEX = -1
+> ```':'```
 
-#
-# Encodings
-#
+smallparts.constants.**COMMA**
 
-ASCII = 'ascii'
-CP1252 = 'cp1252'
-UTF_8 = 'utf-8'
+> ```','```
 
-#
-# Functional constants
-#
+smallparts.constants.**CARRIAGE_RETURN**  
+smallparts.constants.**CR**
 
-MODE_APPEND = 'a+'
-MODE_APPEND_BINARY = 'a+b'
-MODE_READ = 'r'
-MODE_READ_BINARY = 'rb'
-MODE_WRITE = 'w'
-MODE_WRITE_BINARY = 'wb'
+> ```'\r'```
 
-YES = 'yes'
-NO = 'no'
+smallparts.constants.**DASH**
 
-XML_1_0 = '1.0'
-XML_1_1 = '1.1'
+> ```'-'```
 
-#
-# Return codes
-#
+smallparts.constants.**DOT**
 
-RC_ERROR = 1
-RC_OK = 0
-```
+> ```'.'```
+
+smallparts.constants.**DOUBLE_QUOTE**
+
+> ```'"'```
+
+smallparts.constants.**EMPTY**
+
+> ```''```
+
+smallparts.constants.**EQUALS**
+
+> ```'='```
+
+smallparts.constants.**HASH**  
+smallparts.constants.**POUND**
+
+> ```'#'```
+
+smallparts.constants.**LINEFEED**  
+smallparts.constants.**LF**  
+smallparts.constants.**NEWLINE**  
+smallparts.constants.**NL**
+
+> ```'\n'```
+
+smallparts.constants.**PERCENT**
+
+> ```'%'```
+
+smallparts.constants.**PIPE**
+
+> ```'|'```
+
+smallparts.constants.**PLUS_SIGN**
+
+> ```'+'```
+
+smallparts.constants.**QUESTION_MARK**
+
+> ```'?'```
+
+smallparts.constants.**SEMICOLON**
+
+> ```';'```
+
+smallparts.constants.**SINGLE_QUOTE**
+
+> ```"'"```
+
+smallparts.constants.**SLASH**
+
+> ```'/'```
+
+smallparts.constants.**TILDE**
+
+> ```'~'```
+
+smallparts.constants.**UNDERSCORE**
+
+> ```'_'```
+
+### Compound constants
+
+smallparts.constants.**COLON_BLANK**
+
+> ```': '``` (**COLON** + **BLANK**)
+
+smallparts.constants.**COMMA_BLANK**
+
+> ```', '``` (**COMMA** + **BLANK**)
+
+smallparts.constants.**CRLF**
+
+> ```'\r\n'``` (**CARRIAGE_RETURN** + **LINEFEED**)
+
+### Numbers
+
+smallparts.constants.**ZERO**
+smallparts.constants.**FIRST_INDEX**
+
+> ```0```
+
+smallparts.constants.**ONE**
+smallparts.constants.**SECOND_INDEX**
+
+> ```1```
+
+smallparts.constants.**LAST_INDEX**
+
+> ```-1```
+
+### Encodings
+
+smallparts.constants.**ASCII**
+
+> ```'ascii'```
+
+smallparts.constants.**CP1252**
+
+> ```'cp1252'```
+
+smallparts.constants.**UTF_8**
+
+> ```'utf-8'```
+
+### File access modes
+
+smallparts.constants.**MODE_APPEND**
+
+> ```'a+'```
+
+smallparts.constants.**MODE_APPEND_BINARY**
+
+> ```'a+b'```
+
+smallparts.constants.**MODE_READ**
+
+> ```'r'```
+
+smallparts.constants.**MODE_READ_BINARY**
+
+> ```'rb'```
+
+smallparts.constants.**MODE_WRITE**
+
+> ```'w'```
+
+smallparts.constants.**MODE_WRITE_BINARY**
+
+> ```'wb'```
+
+### Constants for XML generation and handling
+
+smallparts.constants.**YES**
+
+> ```'yes'```
+
+smallparts.constants.**NO**
+
+> ```'no'```
+
+smallparts.constants.**XML_1_0**
+
+> ```'1.0'```
+
+smallparts.constants.**XML_1_1**
+
+> ```'1.1'```
+
+### Returncode values
+
+smallparts.constants.**RC_ERROR**
+
+> ```1```
+
+smallparts.constants.**RC_OK**
+
+> ```0```
 
 ----
 [(smallparts docs home)](./)
