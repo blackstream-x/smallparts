@@ -112,8 +112,8 @@ smallparts.text.transcode.**transcode_file**(*file_name, to_encoding=**DEFAULT_T
 
 > Transcodes the file with the name *file_name* to *to_encoding*.  
 > Raises a ValueError if the file contents are already encoded in *to_encoding*.  
-> If *line_ending* is one of **SUPPORTED_OUTPUT_LINE_ENDINGS**,
-> changes the line endings in the file contnts to *line_ending*.  
+> Changes the line endings in the file contents to *line_ending*
+> if *line_ending* is one of **SUPPORTED_OUTPUT_LINE_ENDINGS**.  
 > Renames the original file to a file with the detected encoding appended to
 > the original file name, but before the extension.
 

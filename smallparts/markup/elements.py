@@ -21,6 +21,11 @@ from smallparts.text import translate
 # Constants
 #
 
+LABEL_HTML_5 = 'HTML 5'
+LABEL_XHTML_1_0_STRICT = 'XHTML 1.0 Strict'
+LABEL_XHTML_1_0_TRANSITIONAL = 'XHTML 1.0 Transitional'
+LABEL_XML = 'XML'
+
 # From the XHTML Strict DTD
 # <https://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd>
 XHTML_1_0_STRICT = {
@@ -393,6 +398,54 @@ class XhtmlTransitionalElement(XhtmlStrictElement):
     """Callable XHTML 1.0 Transitional element"""
 
     restrict_elements_to = XHTML_1_0_TRANSITIONAL
+
+
+class Cache():
+
+    """Cache for element factories"""
+
+    accessible_attributes = ('_dialect',)
+    cached_elements = {
+        LABEL_HTML_5: {},
+        LABEL_XHTML_1_0_STRICT: {},
+        LABEL_XHTML_1_0_TRANSITIONAL: {},
+        LABEL_XML: {}}
+    factories = {
+        LABEL_HTML_5: HtmlElement,
+        LABEL_XHTML_1_0_STRICT: XhtmlStrictElement,
+        LABEL_XHTML_1_0_TRANSITIONAL: XhtmlTransitionalElement,
+        LABEL_XML: XmlElement}
+
+    def __init__(self, dialect):
+        """Initialize the cache"""
+        if dialect not in type(self).cached_elements:
+            raise ValueError('Unsupported dialect.')
+        #
+        self._dialect = dialect
+
+    def __dir__(self):
+        """Sorted list of generated elements"""
+        return sorted(type(self).cached_elements[self._dialect])
+
+    def __repr__(self):
+        """Textual representation"""
+        return '{0}(dialect={1!r})'.format(
+            type(self).__name__, self._dialect)
+
+    def __getattribute__(self, name):
+        """Return an existing cache member
+        or create a new member
+        """
+        if name in type(self).accessible_attributes:
+            return object.__getattribute__(self, name)
+        #
+        dialect_cache = type(self).cached_elements[self._dialect]
+        factory = type(self).factories[self._dialect]
+        name = factory.translate_name(name)
+        try:
+            return dialect_cache[name]
+        except KeyError:
+            return dialect_cache.setdefault(name, factory(name))
 
 
 # vim: fileencoding=utf-8 ts=4 sts=4 sw=4 autoindent expandtab syntax=python:

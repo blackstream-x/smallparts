@@ -7,28 +7,44 @@
 
 ### Constants
 
-This module defines the following
-[sets](https://docs.python.org/3/library/stdtypes.html#set):
+This module defines the following constants:
+
+smallparts.markup.elements.**LABEL_HTML_5**
+
+> ```'HTML 5'```
+
+smallparts.markup.elements.**LABEL_XHTML_1_0_STRICT**
+
+> ```'XHTML 1.0 Strict'```
+
+smallparts.markup.elements.**LABEL_XHTML_1_0_TRANSITIONAL**
+
+> ```'XHTML 1.0 Transitional'```
+
+smallparts.markup.elements.**LABEL_XML**
+
+> ```'XML'```
 
 smallparts.markup.elements.**XHTML_1_0_STRICT**
 
-> XHTML 1.0 Strict element names
+> [Set](https://docs.python.org/3/library/stdtypes.html#set)
+> of XHTML 1.0 Strict element names
 
 smallparts.markup.elements.**XHTML_1_0_TRANSITIONAL**
 
-> XHTML 1.0 Transitional element names
+> Set of XHTML 1.0 Transitional element names
 
 smallparts.markup.elements.**HTML_5**
 
-> HTML 5 element names
+> Set of HTML 5 element names
 
 smallparts.markup.elements.**XHTML_1_0_EMPTY_ELEMENTS**
 
-> Names of XHTML 1.0 empty elements
+> Set of XHTML 1.0 empty element names
 
 smallparts.markup.elements.**HTML_5_EMPTY_ELEMENTS**
 
-> Names of HTML 5 empty elements
+> Set of HTML 5 empty element names
 
 ### Classes
 
@@ -54,17 +70,17 @@ the content fragments.
 *   If an attribute was provided with value **True**,
     set its value to the attribute name.
 *   If no or empty content was provided, generate an empty element
-    like ```<empty/>```.
+    like ```'<empty/>'```.
 
 
 #### *class* smallparts.markup.elements.**XmlBasedHtmlElement**(*tag_name*)
 
 Subclass of **XmlElement** with the following differences:
 *   tag names and attribute names are _additionally_ transformed to lowercase.
-*   empty elements are generated with a blank before the slash (e.g. ```<br />```).
+*   empty elements are generated with a blank before the slash (e.g. ```'<br />'```).
 *   Elements are only treated as empty if they are defined as empty in
     **XHTML_1_0_EMPTY_ELEMENTS**, so **XmlBasedHtmlElement**('p')()
-    generates ```<p></p>``` instead of ```<p />```.
+    generates ```'<p></p>'``` instead of ```'<p />'```.
 *   If an element is defined as empty, it will always be displayed as empty,
     regardless of provided content.
 *   There are two special attributes: **__class__** and **__classes__**.
@@ -78,12 +94,12 @@ Subclass of **XmlElement** with the following differences:
 
 Subclass of **XmlBasedHtmlElement** for *HTML 5* generation.
 Differences from the parent class:
-*   empty elements are generated without a slash (e.g. ```<br>```).
+*   empty elements are generated without a slash (e.g. ```'<br>'```).
 *   Tag names are restricted to the ones listed in **HTML_5**.
     All other tag names produce a ValueError.
 *   Elements are only treated as empty if they are defined as empty in
     **HTML_5_EMPTY_ELEMENTS**, so **HtmlElement**('iframe')()
-    generates ```<iframe></iframe>``` instead of ```<iframe>```.
+    generates ```'<iframe></iframe>'``` instead of ```'<iframe>'```.
 *   If an attribute was provided with value **True**,
     only put its attribute name into the start tag.
 
@@ -103,6 +119,38 @@ Differences from the parent class:
 *   Tag names are restricted to the ones listed in **XHTML_1_0_TRANSITIONAL**.
     All other tag names produce a ValueError.
 
+#### *class* smallparts.markup.elements.**Cache**(*dialect*)
+
+Provides an element factories cache.
+
+Instances of this class store the given *dialect* (which may be one of
+this module’s __LABEL_*__ constants) in the **._dialect** attribute.  
+They can be used to generate XML or HTML elements
+by calling the matching **\*Element()** instance for the dialect.
+The **\*Element()** instances are generated *on the fly* using the attribute name,
+and cached in the *class attribute **.cached_elements***.
+You can call **dir()** on the instance to get a list of cached elements
+for the instance dialect only.
+
+See the following examples:
+
+```python
+>>> xml_gen = elements.Cache(elements.LABEL_XML)
+>>> xml_gen.example_element()
+'<example-element/>'
+>>> html_gen = elements.Cache(elements.LABEL_HTML_5)
+>>> html_gen.p__('paragraph with an ', html_gen.strong('emphasized part'))
+'<p>paragraph with an <strong>emphasized part</strong></p>'
+>>> 
+>>> elements.Cache.cached_elements
+{'HTML 5': {'p': <smallparts.markup.elements.HtmlElement object at 0x7f358459bc40>, 'strong': <smallparts.markup.elements.HtmlElement object at 0x7f358431c9d0>}, 'XHTML 1.0 Strict': {}, 'XHTML 1.0 Transitional': {}, 'XML': {'example-element': <smallparts.markup.elements.XmlElement object at 0x7f358437d0a0>}}
+>>> dir(xml_gen)
+['example-element']
+>>> dir(html_gen)
+['p', 'strong']
+>>>
+```
+
 #### *Please note:*
 *   Namespaces are not supported
 *   Attributes are not checked for validity
@@ -111,41 +159,58 @@ Differences from the parent class:
 
 ```python
 >>> from smallparts.markup import elements
+>>> 
+>>> # XML example: Note the different treatment of attributes
+>>> # depending on their value (None, scalar value or True)
 >>> xml_example = elements.XmlElement('tag_name')
 >>> xml_example()
 '<tag-name/>'
 >>> xml_example('content', attribute_1=None, attribute_2='value', attribute_3=True)
 '<tag-name attribute-2="value" attribute-3="attribute-3">content</tag-name>'
 >>> 
+>>> # invalid HTML example: tag name not in the set of allowed element names
 >>> html_example = elements.HtmlElement('tag_name')
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
-  File "………/smallparts/markup/elements.py", line 316, in __init__
+  File "………/smallparts/markup/elements.py", line 321, in __init__
     super(XmlBasedHtmlElement, self).__init__(tag_name)
-  File "………/smallparts/markup/elements.py", line 229, in __init__
+  File "………/smallparts/markup/elements.py", line 234, in __init__
     raise ValueError('Unsupported element name {0!r}'.format(
 ValueError: Unsupported element name 'tag-name'
->>> html_example = elements.HtmlElement('div')
->>> html_example('content', __class__='blue')
+>>> 
+>>> # valid HTML example: Note the treatment of the special attributes
+>>> # __class__ (for a single class) and __classes__ (for a sequence of classes).
+>>> html_div = elements.HtmlElement('div')
+>>> html_div('content', __class__='blue')
 '<div class="blue">content</div>'
->>> html_example('content', __classes__=('with-border', 'bold'), id_='annotation')
+>>> html_div('content', __classes__=('with-border', 'bold'), id_='annotation')
 '<div id="annotation" class="bold with-border">content</div>'
 >>> 
+>>> # empty elements ignore the provided content
 >>> html_br = elements.HtmlElement('br')
 >>> html_br()
 '<br>'
 >>> html_br('content')
 '<br>'
 >>> 
+>>> # empty attributes in HTML 5:
 >>> html_option = elements.HtmlElement('option')
 >>> html_option('display value', value='submit_value', selected=True)
 '<option value="submit_value" selected>display value</option>'
 >>> 
->>> xhtml_example = elements.XhtmlStrictElement('p')
->>> xhtml_example('text in paragraph', lang='en')
+>>> # lang= duplicated as xml:lang= in XHTML:
+>>> xhtml_p = elements.XhtmlStrictElement('p')
+>>> xhtml_p('text in paragraph', lang='en')
 '<p lang="en" xml:lang="en">text in paragraph</p>'
->>> xhtml_example()
+>>> xhtml_p()
 '<p></p>'
+>>> 
+>>> # Cache examples
+>>> XHTML = elements.Cache(elements.LABEL_XHTML_1_0_STRICT)
+>>> XHTML.fieldset(XHTML.legend('Task details', lang='en'), '\n', XHTML.label('Please select the due date: ', XHTML.input(type='date', name='due_date')))
+'<fieldset><legend lang="en" xml:lang="en">Task details</legend>\n<label>Please select the due date: <input type="date" name="due_date" /></label></fieldset>'
+>>> dir(XHTML)
+['fieldset', 'input', 'label', 'legend']
 >>> 
 ```
 

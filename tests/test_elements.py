@@ -156,6 +156,40 @@ class TestSimple(unittest.TestCase):
                       __classes__=('one', 'two', 'many')),
             '<p class="many one two">Another paragraph</p>')
 
+    def test_xml_cache(self):
+        """XML elements generation"""
+        xml_gen = elements.Cache(elements.LABEL_XML)
+        self.assertEqual(
+            xml_gen.outer_element(xml_gen.inner_element(),
+                                  attr='value'),
+            '<outer-element attr="value"><inner-element/></outer-element>')
+        self.assertEqual(
+                dir(xml_gen),
+                ['inner-element', 'outer-element'])
+
+    def test_html_cache(self):
+        """HTML elements generation"""
+        html_gen = elements.Cache(elements.LABEL_HTML_5)
+        self.assertEqual(
+            html_gen.p__(html_gen.strong('blind text:'),
+                         ' lorem ',
+                         html_gen.span('ipsum',
+                                       style='background: silver;'),
+                         __class__='paragraph_style'),
+            '<p class="paragraph_style"><strong>blind text:</strong>'
+            ' lorem <span style="background: silver;">ipsum</span></p>')
+        self.assertEqual(
+            repr(html_gen),
+            "Cache(dialect='HTML 5')")
+
+    def test_cache_unsupported(self):
+        """Unsupported dialect"""
+        self.assertRaisesRegex(
+            ValueError,
+            r'^Unsupported dialect\.$',
+            elements.Cache,
+            'SGML')
+
 
 if __name__ == '__main__':
     unittest.main()
