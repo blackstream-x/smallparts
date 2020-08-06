@@ -13,15 +13,7 @@ import html.parser
 import re
 
 from smallparts import constants
-
-
-#
-# Constants
-#
-
-# Keyword constants for the HtmlTagStripper class
-
-IMAGES_WITH_ALT_TEXT_ONLY = 'images with alt text only'
+from smallparts import namespaces
 
 
 #
@@ -141,16 +133,13 @@ class EntityResolver():
                                      source_text)
 
 
-# pylint: disable=abstract-method ; The error method is not used
-
-
 class HtmlTagStripper(html.parser.HTMLParser):
 
     """Return only the data, concatenated using constants.EMPTY,
     with whitespace squeezed together, but preserving line breaks.
     """
 
-    image_placeholder_with_alt_text = '[image: {0[alt]}]'
+    image_placeholder_with_alt_text = '[image: {0.alt}]'
     image_placeholder_empty = '[image]'
 
     re_multiple_space = r'[ \t\r\f\v]{2,}'
@@ -220,27 +209,33 @@ class HtmlTagStripper(html.parser.HTMLParser):
         'ul',
     }
 
-    def __init__(self, image_placeholders=IMAGES_WITH_ALT_TEXT_ONLY):
+    def __init__(self,
+                 image_placeholders='with alt text only',
+                 body_reqired=True):
         """Instantiate the base class and define instance variables"""
-        html.parser.HTMLParser.__init__(self, convert_charrefs=True)
         if image_placeholders:
-            if image_placeholders == IMAGES_WITH_ALT_TEXT_ONLY:
+            if image_placeholders == 'with alt text only':
                 self.image_placeholder_empty = ''
             #
         else:
             self.image_placeholder_with_alt_text = ''
         #
-        self.__content_list = []
-        self.__images = []
-        self.__in_body = False
-        self.__prx_multiple_space = re.compile(self.re_multiple_space)
-        self.__prx_newline_and_whitespace = re.compile(
-            self.re_newline_and_whitespace, re.DOTALL)
+        self.__body_not_reqired = not body_reqired
+        self.__prx = namespaces.Namespace(
+            multiple_space=re.compile(
+                self.re_multiple_space),
+            newline_and_whitespace=re.compile(
+                self.re_newline_and_whitespace,
+                re.DOTALL))
+        self.__variables = namespaces.Namespace()
+        super(HtmlTagStripper, self).__init__(convert_charrefs=True)
 
-    def __add_body_content(self, content):
-        """Add content if self.__in_body"""
-        if self.__in_body:
-            self.__content_list.append(content)
+    def __add_content(self, content):
+        """Add content if we are inside of a <body> tag
+        or if body_required=False was specified at ibstantiation
+        """
+        if self.__variables.in_body or self.__body_not_reqired:
+            self.__variables.content_list.append(content)
         #
 
     def __add_whitespace(self, lowercased_tag):
@@ -249,56 +244,66 @@ class HtmlTagStripper(html.parser.HTMLParser):
          else a blank)
         """
         if lowercased_tag in self.treated_as_block:
-            self.__add_body_content(constants.NEWLINE)
+            self.__add_content(constants.NEWLINE)
         else:
-            self.__add_body_content(constants.BLANK)
+            self.__add_content(constants.BLANK)
         #
 
     @property
     def content(self):
         """Return the result"""
-        collected_content = self.__prx_multiple_space.sub(
+        collected_content = self.__prx.multiple_space.sub(
             constants.BLANK,
-            constants.EMPTY.join(self.__content_list))
-        return self.__prx_newline_and_whitespace.sub(
+            constants.EMPTY.join(self.__variables.content_list))
+        return self.__prx.newline_and_whitespace.sub(
             constants.NEWLINE,
             collected_content).strip()
 
     @property
     def images(self):
         """Return the saved image data"""
-        return list(self.__images)
+        return list(self.__variables.images)
+
+    def error(self, message):
+        """override _markupbase.ParserBase abstract method"""
+        raise ValueError(message)
 
     def handle_data(self, data):
         """Collect content"""
-        self.__add_body_content(data)
+        self.__add_content(data)
 
     def handle_starttag(self, tag, attrs):
         """Handle a start tag"""
-        tag = tag.lower()
         self.__add_whitespace(tag)
         if tag == 'body':
-            self.__in_body = True
+            self.__variables.in_body = True
         elif tag == 'img':
             # save images' attributes
-            current_image = dict(attrs)
-            self.__images.append(current_image)
+            current_image = namespaces.Namespace(attrs)
+            self.__variables.images.append(current_image)
             try:
-                self.__add_body_content(
+                self.__add_content(
                     self.image_placeholder_with_alt_text.format(
                         current_image))
-            except KeyError:
-                self.__add_body_content(self.image_placeholder_empty)
+            except AttributeError:
+                self.__add_content(self.image_placeholder_empty)
             #
         #
 
     def handle_endtag(self, tag):
         """Handle an end tag"""
-        tag = tag.lower()
         self.__add_whitespace(tag)
         if tag == 'body':
-            self.__in_body = False
+            self.__variables.in_body = False
         #
+
+    def reset(self):
+        """Reset the parser"""
+        self.__variables = namespaces.Namespace(
+            content_list=[],
+            images=[],
+            in_body=False)
+        super(HtmlTagStripper, self).reset()
 
 
 # vim: fileencoding=utf-8 ts=4 sts=4 sw=4 autoindent expandtab syntax=python:
