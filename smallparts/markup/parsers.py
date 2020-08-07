@@ -213,12 +213,11 @@ class HtmlTagStripper(html.parser.HTMLParser):
                  image_placeholders='with alt text only',
                  body_reqired=True):
         """Instantiate the base class and define instance variables"""
-        if image_placeholders:
-            if image_placeholders == 'with alt text only':
-                self.image_placeholder_empty = ''
-            #
-        else:
+        # Shadow the class attributes for the image placeholder strings
+        if not image_placeholders:
             self.image_placeholder_with_alt_text = ''
+        elif image_placeholders == 'with alt text only':
+            self.image_placeholder_empty = ''
         #
         self.__body_not_reqired = not body_reqired
         self.__prx = namespaces.Namespace(
@@ -249,24 +248,44 @@ class HtmlTagStripper(html.parser.HTMLParser):
             self.__add_content(constants.BLANK)
         #
 
-    @property
-    def content(self):
-        """Return the result"""
+    def get_snapshot(self):
+        """Return a Namespace with the currently collected content
+        and the list of collected images
+        """
         collected_content = self.__prx.multiple_space.sub(
             constants.BLANK,
             constants.EMPTY.join(self.__variables.content_list))
-        return self.__prx.newline_and_whitespace.sub(
-            constants.NEWLINE,
-            collected_content).strip()
+        return namespaces.Namespace(
+            content=self.__prx.newline_and_whitespace.sub(
+                constants.NEWLINE,
+                collected_content).strip(),
+            images=list(self.__variables.images))
 
-    @property
-    def images(self):
-        """Return the saved image data"""
-        return list(self.__variables.images)
+    def __call__(self, html_document):
+        """Parse the given document and return the result
+        (a Namespace as returned by .get_snapshot()).
+        Reset the parser before and close it after parsing.
+        """
+        self.reset()
+        self.feed(html_document)
+        self.close()
+        return self.get_snapshot()
+
+    def close(self):
+        """close the parser"""
+        self.__variables.closed = True
+        super(HtmlTagStripper, self).close()
 
     def error(self, message):
         """override _markupbase.ParserBase abstract method"""
         raise ValueError(message)
+
+    def feed(self, data):
+        """feed data to the parser"""
+        if self.__variables.closed:
+            raise ValueError('Parser already closed. Please call .reset()'
+                             ' before feeding new data.')
+        super(HtmlTagStripper, self).feed(data)
 
     def handle_data(self, data):
         """Collect content"""
@@ -302,7 +321,8 @@ class HtmlTagStripper(html.parser.HTMLParser):
         self.__variables = namespaces.Namespace(
             content_list=[],
             images=[],
-            in_body=False)
+            in_body=False,
+            closed=False)
         super(HtmlTagStripper, self).reset()
 
 

@@ -56,6 +56,13 @@ class TestSimple(unittest.TestCase):
 
     def test_tag_stripper(self):
         """Strip HTML tags"""
+        tag_stripper = parsers.HtmlTagStripper()
+        # Invalid HTML
+        self.assertRaises(
+            ValueError,
+            tag_stripper.feed,
+            '<![\n')
+        tag_stripper.reset()
         html_document = (
             '<!DOCTYPE html>\n'
             '<html>\n'
@@ -66,33 +73,38 @@ class TestSimple(unittest.TestCase):
             ' width="104" height="142"> <img src="logo.png">\n'
             '</body>\n'
             '</html>')
-        tag_stripper = parsers.HtmlTagStripper()
-        tag_stripper.feed(html_document)
+        result = tag_stripper(html_document)
         self.assertEqual(
-            tag_stripper.content,
+            result.content,
             'HTML Images\n'
             'HTML images are defined with the img tag:\n'
             '[image: W3Schools.com]')
         self.assertDictEqual(
-            tag_stripper.images[0],
+            result.images[0],
             dict(src="w3schools.jpg",
                  alt="W3Schools.com",
                  width="104",
                  height="142"))
         self.assertDictEqual(
-            tag_stripper.images[1],
+            result.images[1],
             dict(src="logo.png"))
-        tag_stripper_2 = parsers.HtmlTagStripper(image_placeholders=True)
-        tag_stripper_2.feed(html_document)
+        self.assertRaisesRegex(
+            ValueError,
+            '^Parser already closed',
+            tag_stripper.feed,
+            'additional data after (implicit) close() call')
+        tag_stripper_2 = parsers.HtmlTagStripper(
+            image_placeholders=True)
+        result = tag_stripper_2(html_document)
         self.assertEqual(
-            tag_stripper_2.content,
+            result.content,
             'HTML Images\n'
             'HTML images are defined with the img tag:\n'
             '[image: W3Schools.com] [image]')
         tag_stripper_3 = parsers.HtmlTagStripper(image_placeholders=False)
-        tag_stripper_3.feed(html_document)
+        result = tag_stripper_3(html_document)
         self.assertEqual(
-            tag_stripper_3.content,
+            result.content,
             'HTML Images\n'
             'HTML images are defined with the img tag:')
 

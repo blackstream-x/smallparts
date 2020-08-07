@@ -6,4 +6,4 @@ smallparts - A collection of convenience modules for Python 3
 
 """
 
-__version__ = '0.4.5'
+__version__ = '0.5.0'
