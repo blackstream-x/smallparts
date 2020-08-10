@@ -92,7 +92,10 @@ smallparts.text.transcode.**fix_double_utf8_transformation**(*unicode_text, wron
 > UTF-8 encoded text as Latin encoded (CP-1252, ISO-8859-1 or similar),
 > resulting in character sequences like ```Ã¤Ã¶Ã¼```.  
 > This function reverts the effect by re-encoding *unicode_text* using
-> *wrong_encoding* and decoding it as UTF-8 again.
+> *wrong_encoding* and decoding it as UTF-8 again.  
+> Specifying a wrong value for *wrong_encoding* can either produce unexpected
+> results or raise a UnicodeEncodeError, while trying to fix an already
+> correct text will raise a UnicodeDecodeError.
 
 smallparts.text.transcode.**read_from_file**(*input_file_or_name, from_encoding=None, fallback_encoding=**DEFAULT_FALLBACK_ENCODING***)
 

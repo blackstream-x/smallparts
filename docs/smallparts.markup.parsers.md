@@ -79,13 +79,62 @@ with all attributes is kept separately.
   3. When set to ```False``` or ```None```, no placeholders for images are put
      into the resulting text at all.
 
-_(tbc)_
+##### Methods:
 
+In addition to the methods inherited or redefined from the base class
+[html.parser.HTMLParser](https://docs.python.org/3/library/html.parser.html#html.parser.HTMLParser),
+instances of this class provide the method
+
+**.get_snapshot**()
+
+Returns a [namespaces.Namespace()](./smallparts.namespaces.md#class-smallpartsnamespacesnamespace)
+instance with two attributes:
+
+1. **content**: parsed contents so far since the last **.reset()** call, as a single string.
+2. **images**: a list of namespaces with attributes for each image since the last **.reset()** call.
+
+##### Parsing an HTML document
+
+To strip tags from an HTML document, you can simply call an **HtmlTagStripper**
+instance like a functon, with the document as the only argument.
+This call resets the parsere, parses the document
+and then returns the **.get_snapshot**() result.
 
 ## Usage examples
 
 ```python
 >>> from smallparts.markup import parsers
+>>> xml_resolver = parsers.EntityResolver()
+>>> xml_resolver.resolve_all_entities('&lt; &amp; &gt; &ouml; &aacute; &#x20ac; &#177; &special;')
+'< & > &ouml; &aacute; € ± &special;'
+>>> 
+>>> html_document = """<!DOCTYPE html>
+... <html>
+... <body>
+... <h2>HTML Images</h2>
+... <p>HTML images are defined with the img tag:</p>
+... <IMG src="w3schools.jpg" alt="W3Schools.com"
+...  width="104" height="142"> <img src="logo.png">
+... </body>
+... </html>"""
+>>> tag_stripper = parsers.HtmlTagStripper()
+>>> result = tag_stripper(html_document)
+>>> print(result.content)
+HTML Images
+HTML images are defined with the img tag:
+[image: W3Schools.com]
+>>> result.images
+[Namespace({'src': 'w3schools.jpg', 'alt': 'W3Schools.com', 'width': '104', 'height': '142'}), Namespace({'src': 'logo.png'})]
+>>> 
+>>> tag_stripper_2 = parsers.HtmlTagStripper(image_placeholders=None)
+>>> result_2 = tag_stripper_2(html_document)
+>>> # Note how image placeholders are left out of the content;
+>>> # however, image data is saved in the list in any case.
+>>> print(result_2.content)
+HTML Images
+HTML images are defined with the img tag:
+>>> result_2.images
+[Namespace({'src': 'w3schools.jpg', 'alt': 'W3Schools.com', 'width': '104', 'height': '142'}), Namespace({'src': 'logo.png'})]
 >>> 
 ```
 
