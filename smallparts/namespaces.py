@@ -125,7 +125,7 @@ class EnhancedNamespace(Namespace):
         return cls(sequence)
 
 
-class InstantNames(Namespace):
+class InstantNames(dict):
 
     """Namespace object where instance attributes are defined
     on access, derived from the given name with the translation
@@ -138,10 +138,12 @@ class InstantNames(Namespace):
         """Register translation functions
         and set the given values directly
         """
-        object.__setattr__(self,
-                           type(self).translations,
-                           translation_functions)
+        self.translation_functions = translation_functions
         super(InstantNames, self).__init__(set_values_directly)
+
+    def __dir__(self):
+        """Members sequence"""
+        return tuple(self)
 
     def __repr__(self):
         """Object representation"""
