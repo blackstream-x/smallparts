@@ -4,11 +4,15 @@
 
 > Constants commonly used throughout this package.
 
-## smallparts.l10n
+## [smallparts.l10n](./smallparts.l10n.md)
 
 > Localization subpackage.
 
-### smallparts.l10n.languages
+### smallparts.l10n.enumerations
+
+> Natural-language enumerations.
+
+### [smallparts.l10n.languages](./smallparts.l10n.languages.md)
 
 > Definitions of supported languages.
 
