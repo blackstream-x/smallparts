@@ -97,8 +97,6 @@ class EnhancedNamespace(Namespace):
     for using only selected names
     """
 
-    visible_attributes = ('values', 'items')
-
     @classmethod
     def from_object(cls, object_, names=None):
         """Try to construct a Namespace object from an arbitrary object"""
