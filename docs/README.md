@@ -16,7 +16,7 @@
 
 > Definitions of supported languages.
 
-### smallparts.l10n.time_indications
+### [smallparts.l10n.time_indications](./smallparts.l10n.time_indications.md)
 
 > Translations of time indications.
 

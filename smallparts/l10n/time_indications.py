@@ -44,9 +44,18 @@ NUMBER_CATEGORIES = {
         MONTHS: ('Monat', 'Monate'),
         YEARS: ('Jahr', 'Jahre')
     },
+    languages.ES: {
+        SECONDS: ('segundo', 'segundos'),
+        MINUTES: ('minuto', 'minutos'),
+        HOURS: ('hora', 'horas'),
+        DAYS: ('día', 'dias'),
+        WEEKS: ('semana', 'semanas'),
+        MONTHS: ('mes', 'meses'),
+        YEARS: ('año', 'años')
+    },
     languages.FR: {
         SECONDS: ('seconde', 'secondes'),
-        MINUTES: ('minute', 'Minutes'),
+        MINUTES: ('minute', 'minutes'),
         HOURS: ('heure', 'heures'),
         DAYS: ('jour', 'jours'),
         WEEKS: ('semaine', 'semaines'),
@@ -61,12 +70,11 @@ NUMBER_CATEGORIES = {
 #
 
 
-def pretty_print_component(**kwargs):
+def pretty_print_component(lang=languages.DEFAULT, **kwargs):
     """Return the time component,
     pretty printed in singular or plural form
     in the language selected by lang=...
     """
-    lang = kwargs.get('lang') or languages.DEFAULT
     try:
         number_category = NUMBER_CATEGORIES[lang]
     except KeyError:
