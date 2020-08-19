@@ -23,15 +23,14 @@ OR = 'or'
 EITHER = 'either'
 NEITHER = 'neither'
 
-DEFAULT = 'default'
-EXCEPTIONS = 'exceptions'
-
 BEFORE = 'before'
 AFTER = 'after'
 
+WITHOUT_EXCEPTION = frozenset()
+
 SUPPORTED_ENUMS = (AND, OR, EITHER, NEITHER)
 
-# (prefix, separator, last separator)
+# Separators for enumerations: (prefix, separator, last separator)
 ENUM_SEPARATORS = {
     languages.EN: {
         AND: (None, COMMA, AND),
@@ -60,30 +59,30 @@ ENUM_SEPARATORS = {
     '__test__': {AND: (None, None, None)}
 }
 
-# Spacing rules: (before, after)
+# Spacing rules: BEFORE|AFTER: (generic rule, exceptions)
 SPACING_RULES = {
     languages.EN: {
-        DEFAULT: (True, True),
-        EXCEPTIONS: {BEFORE: {',;.:!?/': False},
-                     AFTER: {'/': False}}
+        BEFORE: (True, ',;.:!?/'),
+        AFTER: (True, '/')
     },
     languages.DE: {
-        DEFAULT: (True, True),
-        EXCEPTIONS: {BEFORE: {',;.:!?': False}}
+        BEFORE: (True, ',;.:!?'),
+        AFTER: (True, WITHOUT_EXCEPTION)
     },
     languages.ES: {
-        DEFAULT: (True, True),
-        EXCEPTIONS: {BEFORE: {',;.:!?': False}}
+        BEFORE: (True, ',;.:!?'),
+        AFTER: (True, WITHOUT_EXCEPTION)
     },
     languages.FR: {
-        DEFAULT: (True, True),
-        EXCEPTIONS: {}
+        BEFORE: (True, WITHOUT_EXCEPTION),
+        AFTER: (True, WITHOUT_EXCEPTION)
     },
     '__test__': {
-        DEFAULT: (False, False),
-        EXCEPTIONS: {}
+        BEFORE: (False, WITHOUT_EXCEPTION),
+        AFTER: (False, WITHOUT_EXCEPTION)
     }
 }
+
 
 #
 # Functions
@@ -106,32 +105,16 @@ def apply_spacing_rules(separator, lang=None):
                 message='No spacing rules available yet'
                 'for {0!r}!'.format(lang)))
     #
-    for (characters, rule_before) in spacing_rules[EXCEPTIONS].get(
-            BEFORE, {}).items():
-        if stripped_separator[0] in characters:
-            space_before = rule_before
-            break
+    space = {}
+    for character_index, position in ((0, BEFORE), (-1, AFTER)):
+        generic_rule, exceptions = spacing_rules[position]
+        if stripped_separator[character_index] in exceptions:
+            space[position] = EMPTY if generic_rule else BLANK
+        else:
+            space[position] = BLANK if generic_rule else EMPTY
         #
-    else:
-        space_before = spacing_rules[DEFAULT][0]
     #
-    for (characters, rule_after) in spacing_rules[EXCEPTIONS].get(
-            AFTER, {}).items():
-        if stripped_separator[-1] in characters:
-            space_after = rule_after
-            break
-        #
-    else:
-        space_after = spacing_rules[DEFAULT][-1]
-    #
-    prefix = suffix = EMPTY
-    if space_before:
-        prefix = BLANK
-    #
-    if space_after:
-        suffix = BLANK
-    #
-    return EMPTY.join((prefix, stripped_separator, suffix))
+    return EMPTY.join((space[BEFORE], stripped_separator, space[AFTER]))
 
 
 def enumeration(sequence, enum_type, lang=None):
