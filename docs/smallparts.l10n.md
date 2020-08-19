@@ -2,7 +2,7 @@
 
 > Localization subpackage.
 
-## smallparts.l10n.enumerations
+## [smallparts.l10n.enumerations](./smallparts.l10n.enumerations.md)
 
 > Natural-language enumerations.
 

@@ -89,13 +89,12 @@ SPACING_RULES = {
 #
 
 
-def apply_spacing_rules(separator, lang=None):
+def apply_spacing_rules(separator, lang=languages.DEFAULT):
     """Apply language-specific spacing rules"""
     stripped_separator = separator.strip()
     if not stripped_separator:
         return separator
     #
-    lang = lang or languages.DEFAULT
     try:
         spacing_rules = SPACING_RULES[lang]
     except KeyError:
@@ -117,11 +116,10 @@ def apply_spacing_rules(separator, lang=None):
     return EMPTY.join((space[BEFORE], stripped_separator, space[AFTER]))
 
 
-def enumeration(sequence, enum_type, lang=None):
+def enumeration(sequence, enum_type, lang=languages.DEFAULT):
     """Return the sequence enumerated according to the
     given enum_type and language
     """
-    lang = lang or languages.DEFAULT
     try:
         enum_separators = ENUM_SEPARATORS[lang]
     except KeyError:

@@ -50,7 +50,7 @@ smallparts.l10n.time\_indications.**pretty\_print\_component**(*lang='en', \*\*k
 
 > Returns the time component given as a keyword argument, pretty printed
 > in the language *lang* as defined in **NUMBER_CATEGORIES**.
-> If multiple time component are given, only the smallest unit is processed.  
+> If multiple time components are given, only the smallest unit is processed.  
 > Raises a ValueError if no time component was given.
 
 ## Usage examples
