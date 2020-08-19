@@ -31,8 +31,8 @@ AFTER = 'after'
 
 SUPPORTED_ENUMS = (AND, OR, EITHER, NEITHER)
 
-# (prefix, joiner, last joiner)
-ENUM_JOINERS = {
+# (prefix, separator, last separator)
+ENUM_SEPARATORS = {
     languages.EN: {
         AND: (None, COMMA, AND),
         OR: (None, COMMA, OR),
@@ -90,11 +90,11 @@ SPACING_RULES = {
 #
 
 
-def apply_spacing_rules(joiner, lang=None):
+def apply_spacing_rules(separator, lang=None):
     """Apply language-specific spacing rules"""
-    stripped_joiner = joiner.strip()
-    if not stripped_joiner:
-        return joiner
+    stripped_separator = separator.strip()
+    if not stripped_separator:
+        return separator
     #
     lang = lang or languages.DEFAULT
     try:
@@ -108,7 +108,7 @@ def apply_spacing_rules(joiner, lang=None):
     #
     for (characters, rule_before) in spacing_rules[EXCEPTIONS].get(
             BEFORE, {}).items():
-        if stripped_joiner[0] in characters:
+        if stripped_separator[0] in characters:
             space_before = rule_before
             break
         #
@@ -117,7 +117,7 @@ def apply_spacing_rules(joiner, lang=None):
     #
     for (characters, rule_after) in spacing_rules[EXCEPTIONS].get(
             AFTER, {}).items():
-        if stripped_joiner[-1] in characters:
+        if stripped_separator[-1] in characters:
             space_after = rule_after
             break
         #
@@ -131,7 +131,7 @@ def apply_spacing_rules(joiner, lang=None):
     if space_after:
         suffix = BLANK
     #
-    return EMPTY.join((prefix, stripped_joiner, suffix))
+    return EMPTY.join((prefix, stripped_separator, suffix))
 
 
 def enumeration(sequence, enum_type, lang=None):
@@ -140,23 +140,23 @@ def enumeration(sequence, enum_type, lang=None):
     """
     lang = lang or languages.DEFAULT
     try:
-        enum_joiners = ENUM_JOINERS[lang]
+        enum_separators = ENUM_SEPARATORS[lang]
     except KeyError:
         raise ValueError(languages.missing_translation(lang))
     else:
         try:
-            prefix, joiner, final_joiner = enum_joiners[enum_type]
+            prefix, separator, final_separator = enum_separators[enum_type]
         except KeyError:
             raise ValueError(
                 'No {0!r} translation available for {1!r}!'.format(
                     lang, enum_type))
         #
     #
-    if joiner is None:
-        joiner = COMMA
+    if separator is None:
+        separator = COMMA
     #
-    if final_joiner is None:
-        final_joiner = joiner
+    if final_separator is None:
+        final_separator = separator
     #
     if prefix:
         prefix = prefix.strip() + BLANK
@@ -164,8 +164,8 @@ def enumeration(sequence, enum_type, lang=None):
     return raw_join(
         sequence,
         prefix=prefix,
-        joiner=apply_spacing_rules(joiner, lang=lang),
-        final_joiner=apply_spacing_rules(final_joiner, lang=lang))
+        separator=apply_spacing_rules(separator, lang=lang),
+        final_separator=apply_spacing_rules(final_separator, lang=lang))
 
 
 # vim:fileencoding=utf-8 autoindent ts=4 sw=4 sts=4 expandtab:

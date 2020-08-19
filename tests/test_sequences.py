@@ -41,8 +41,8 @@ class TestSimple(unittest.TestCase):
         self.assertEqual(
             sequences.raw_join(source_list,
                                prefix='(',
-                               joiner=' :: ',
-                               final_joiner=' & ',
+                               separator=' :: ',
+                               final_separator=' & ',
                                suffix=')'),
             '(1 :: 2 :: 3 & 4)')
 

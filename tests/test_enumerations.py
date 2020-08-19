@@ -71,7 +71,7 @@ class TestSimple(unittest.TestCase):
             'ni dieu ni maître')
 
     def test_defaults(self):
-        """Default values for joiners"""
+        """Default values for separators"""
         source_list = [1, 2, 3, 4, 5, 6]
         self.assertEqual(
             enumerations.enumeration(

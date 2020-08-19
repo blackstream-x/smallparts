@@ -7,7 +7,7 @@
 
 This module defines the constant
 
-smallparts.sequences.**DEFAULT_JOINER**
+smallparts.sequences.**DEFAULT_SEPARATOR**
 
 > simply ```,``` (an ASCII comma)
 
@@ -21,13 +21,14 @@ smallparts.sequences.**flatten**(*iterable, depth=None*)
 > bytes. You can limit recursion to *depth* levels by providing *depth* as a
 > positive number.
 
-smallparts.sequences.**raw_join**(_iterable, prefix=None, joiner=_**DEFAULT_JOINER**_,_ *final_joiner=None, suffix=None*):
+smallparts.sequences.**raw_join**(_iterable, prefix=None, separator=_**DEFAULT_SEPARATOR**_,_ *final_separator=None, suffix=None*):
 
 > Returns a unicode string containing the list items joined together according
 > to the provided parameters.  
-> *joiner* is the string joining all items except the next-to-last and last ones.
-> *final_joiner* is the string joining the next-to-last and last items, and
-> defaults to the value of *joiner*.  
+> *separator* is the string separating all items except the next-to-last and
+> last ones in the returned string,
+> *final_separator* is the string separating the next-to-last and last items,
+> and defaults to the value of *separator*.  
 > *prefix*  and *suffix* default to empty strings.
 
 ## Usage examples
@@ -44,9 +45,9 @@ smallparts.sequences.**raw_join**(_iterable, prefix=None, joiner=_**DEFAULT_JOIN
 >>> 
 >>> sequences.raw_join(['a', 'b', 'c', 'd'])
 'a,b,c,d'
->>> sequences.raw_join(['a', 'b', 'c', 'd'], joiner=', ', final_joiner=' and ')
+>>> sequences.raw_join(['a', 'b', 'c', 'd'], separator=', ', final_separator=' and ')
 'a, b, c and d'
->>> sequences.raw_join(['a', 'b', 'c', 'd'], joiner='|', prefix='(', suffix=')')
+>>> sequences.raw_join(['a', 'b', 'c', 'd'], separator='|', prefix='(', suffix=')')
 '(a|b|c|d)'
 >>> 
 

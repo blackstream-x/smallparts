@@ -9,8 +9,7 @@ Utility functions for sequences
 """
 
 
-DEFAULT_JOINER = ','
-EMPTY = ''
+DEFAULT_SEPARATOR = ','
 
 
 def flatten(iterable, depth=None):
@@ -40,19 +39,19 @@ def flatten(iterable, depth=None):
 
 def raw_join(iterable,
              prefix=None,
-             joiner=DEFAULT_JOINER,
-             final_joiner=None,
+             separator=DEFAULT_SEPARATOR,
+             final_separator=None,
              suffix=None):
     """Return a unicode string containing the list items
     joined together according to the provided parameters
     """
-    final_joiner = final_joiner or joiner
+    final_separator = final_separator or separator
     words_sequence = [str(item) for item in iterable]
     items_list = words_sequence[:-2]
-    items_list.append(final_joiner. join(words_sequence[-2:]))
-    return EMPTY.join((prefix or EMPTY,
-                       joiner.join(items_list),
-                       suffix or EMPTY))
+    items_list.append(final_separator. join(words_sequence[-2:]))
+    return ''.join((prefix or '',
+                    separator.join(items_list),
+                    suffix or ''))
 
 
 # vim:fileencoding=utf-8 autoindent ts=4 sw=4 sts=4 expandtab:
