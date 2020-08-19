@@ -9,7 +9,7 @@ This module defines the constant
 
 smallparts.sequences.**DEFAULT_SEPARATOR**
 
-> simply ```,``` (an ASCII comma)
+> simply ```','``` (an ASCII comma)
 
 and the following functions:
 
