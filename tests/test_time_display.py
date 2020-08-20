@@ -21,16 +21,19 @@ class TestSimple(unittest.TestCase):
         """Datetime display as specified"""
         self.assertEqual(
             time_display._as_specified(
-                datetime(2020, 7, 31, 23, 59, 30, 357921)),
+                datetime(2020, 7, 31, 23, 59, 30, 357921),
+                '%Y-%m-%d %H:%M:%S'),
             '2020-07-31 23:59:30')
         self.assertEqual(
             time_display._as_specified(
                 datetime(2020, 7, 31, 23, 59, 30, 357921),
+                '%Y-%m-%d %H:%M:%S',
                 with_msec=True),
             '2020-07-31 23:59:30.357')
         self.assertEqual(
             time_display._as_specified(
                 datetime(2020, 7, 31, 23, 59, 30, 357921),
+                '%Y-%m-%d %H:%M:%S',
                 with_usec=True),
             '2020-07-31 23:59:30.357921')
 
@@ -59,21 +62,23 @@ class TestSimple(unittest.TestCase):
 
     def test_pretty_printed_timedelta(self):
         """Pretty printed timedelta"""
+        tdpp = time_display.TimedeltaPrettyPrinter()
         self.assertEqual(
-            time_display.pretty_printed_timedelta(
+            tdpp(
                 timedelta(seconds=1800000),
                 lang='en'),
             '2 weeks and 6 days')
+        tdpp_no_limits = time_display.TimedeltaPrettyPrinter(seconds=None)
         self.assertEqual(
-            time_display.pretty_printed_timedelta(
+            tdpp_no_limits(
                 timedelta(seconds=180157),
                 lang='fr'),
-            '2 jours et 2 heures')
+            '2 jours , 2 heures , 2 minutes et 37 secondes')
         self.assertEqual(
-            time_display.pretty_printed_timedelta(
+            tdpp_no_limits(
                 timedelta(seconds=79542),
                 lang='de'),
-            '22 Stunden und 5 Minuten')
+            '22 Stunden, 5 Minuten und 42 Sekunden')
 
 
 if __name__ == '__main__':

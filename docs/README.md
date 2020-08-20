@@ -78,7 +78,7 @@
 
 > Simple text transliterations.
 
-## smallparts.time_display
+## [smallparts.time_display](./smallparts.time_display.md)
 
 > Functions for displaying time
 
