@@ -70,9 +70,8 @@ NUMBER_CATEGORIES = {
 #
 
 
-def pretty_print_component(lang=languages.DEFAULT, **kwargs):
-    """Return the time component,
-    pretty printed in singular or plural form
+def format_component(lang=languages.DEFAULT, **kwargs):
+    """Format the time component in singular or plural form
     in the language selected by lang=...
     """
     try:

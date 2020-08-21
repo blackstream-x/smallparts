@@ -28,9 +28,9 @@ smallparts.time\_display.**as\_time**(*datetime\_object, with\_msec=False, with\
 
 ### Class:
 
-*class* smallparts.time\_display.**TimedeltaPrettyPrinter**(*seconds=3600, minutes=1440, hours=168, days=70*)
+*class* smallparts.time\_display.**LooseTimedeltaFormatter**(*seconds=3600, minutes=1440, hours=168, days=70*)
 
-Instances of this class can be used to pretty print time deltas
+Instances of this class can be used to format print time deltas
 while "forgetting" to mention components when the total value of that component
 is bigger than the given limit.  
 With the default settings, this means: 
@@ -41,19 +41,27 @@ when the time delta is more than 10 weeks.
 By setting the limit for a component to ```None``` or ```0```, the limits
 for that component and all bigger components are removed.
 
-Calling an instance is done as
+Example for creating an instance and formatting *timedelta\_object* in french:
 
-result = timedelta\_pretty\_printer\_instance(*timedelta\_object, lang='en'*)
+```python
+ltdf_instance = LooseTimedeltaFormatter()
+formatted_timedelta = ltdf_instance(timedelta_object, lang='fr')
+```
 
-*timedelta\_object* is a [datetime.timedelta](https://docs.python.org/3/library/datetime.html#timedelta-objects) instance,
-and *lang* can be any language defined in [smallparts.l10n.languages](./smallparts.l10n.languages.md).
+* *timedelta\_object* must be a
+  [datetime.timedelta](https://docs.python.org/3/library/datetime.html#timedelta-objects) instance.
+* *lang* can be any language defined in
+  [smallparts.l10n.languages](./smallparts.l10n.languages.md).**SUPPORTED**.  
+  When omitted, it defaults
+  to ```'en'``` as defined in [smallparts.l10n.languages](./smallparts.l10n.languages.md).**DEFAULT**.
+
 The function uses the [smallparts.l10n.enumerations](./smallparts.l10n.enumerations.md).enumeration()
-and [smallparts.l10n.time_indications](./smallparts.l10n.time_indications.md).pretty_print_component()
+and [smallparts.l10n.time_indications](./smallparts.l10n.time_indications.md).format_component()
 functions internally.
 
 #### Class method:
 
-TimedeltaPrettyPrinter**.get_components**(*timedelta\_object*)
+LooseTimedeltaFormatter**.get_components**(*timedelta\_object*)
 
 > Returns a tuple of two dicts: totals and values for each component
 > (weeks, days, hurs, minutes and seconds)
@@ -73,11 +81,8 @@ TimedeltaPrettyPrinter**.get_components**(*timedelta\_object*)
 '2020-07-03 22:05:59.023678'
 >>> time_display.as_time(datetime.datetime(2020, 7, 3, 22, 5, 59, 23678), with_msec=True)
 '22:05:59.023'
->>> tdpp = time_display.
-time_display.TimedeltaPrettyPrinter(  time_display.as_time(
-time_display.as_date(                 time_display.enumerations
-time_display.as_datetime(             time_display.time_indications
->>> tdpp = time_display.TimedeltaPrettyPrinter()
+>>> 
+>>> ltdf_defaults = time_display.LooseTimedeltaFormatter()
 >>> date_1 = datetime.datetime(2020, 8, 1)
 >>> date_2 = datetime.datetime(2020, 8, 7, 14, 30, 7)
 >>> date_3 = datetime.datetime(2020, 8, 20, 17, 12)
@@ -87,14 +92,15 @@ time_display.as_datetime(             time_display.time_indications
 '2020-08-07 14:30:07'
 >>> time_display.as_datetime(date_3)
 '2020-08-20 17:12:00'
->>> tdpp(date_2 - date_1)
+>>> ltdf_defaults(date_2 - date_1)
 '6 days and 14 hours'
->>> tdpp(date_3 - date_1, lang='es')
+>>> ltdf_defaults(date_3 - date_1, lang='es')
 '2 semanas y 5 dias'
->>> tdpp_with_minutes = time_display.TimedeltaPrettyPrinter(minutes=None)
->>> tdpp_with_minutes(date_2 - date_1)
+>>> 
+>>> ltdf_with_minutes = time_display.LooseTimedeltaFormatter(minutes=None)
+>>> ltdf_with_minutes(date_2 - date_1)
 '6 days, 14 hours and 30 minutes'
->>> tdpp_with_minutes(date_3 - date_1)
+>>> ltdf_with_minutes(date_3 - date_1)
 '2 weeks, 5 days, 17 hours and 12 minutes'
 >>> 
 ```

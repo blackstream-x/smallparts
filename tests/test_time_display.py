@@ -60,22 +60,22 @@ class TestSimple(unittest.TestCase):
                 with_msec=True),
             '23:59:30.357')
 
-    def test_pretty_printed_timedelta(self):
-        """Pretty printed timedelta"""
-        tdpp = time_display.TimedeltaPrettyPrinter()
+    def test_timedelta_formatter(self):
+        """Formatted timedeltas"""
+        ltdf = time_display.LooseTimedeltaFormatter()
         self.assertEqual(
-            tdpp(
+            ltdf(
                 timedelta(seconds=1800000),
                 lang='en'),
             '2 weeks and 6 days')
-        tdpp_no_limits = time_display.TimedeltaPrettyPrinter(seconds=None)
+        ltdf_no_limits = time_display.LooseTimedeltaFormatter(seconds=None)
         self.assertEqual(
-            tdpp_no_limits(
+            ltdf_no_limits(
                 timedelta(seconds=180157),
                 lang='fr'),
             '2 jours , 2 heures , 2 minutes et 37 secondes')
         self.assertEqual(
-            tdpp_no_limits(
+            ltdf_no_limits(
                 timedelta(seconds=79542),
                 lang='de'),
             '22 Stunden, 5 Minuten und 42 Sekunden')

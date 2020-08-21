@@ -46,9 +46,9 @@ smallparts.l10n.time\_indications.**NUMBER_CATEGORIES**
 
 ### Function
 
-smallparts.l10n.time\_indications.**pretty\_print\_component**(*lang='en', \*\*kwargs*)
+smallparts.l10n.time\_indications.**format\_component**(*lang='en', \*\*kwargs*)
 
-> Returns the time component given as a keyword argument, pretty printed
+> Format the time component given as a keyword argument
 > in the language *lang* as defined in **NUMBER_CATEGORIES**.
 > If multiple time components are given, only the smallest unit is processed.  
 > Raises a ValueError if no time component was given.
@@ -57,13 +57,13 @@ smallparts.l10n.time\_indications.**pretty\_print\_component**(*lang='en', \*\*k
 
 ```python
 >>> from smallparts.l10n import time_indications
->>> time_indications.pretty_print_component(seconds=1)
+>>> time_indications.format_component(seconds=1)
 '1 second'
->>> time_indications.pretty_print_component(seconds=5)
+>>> time_indications.format_component(seconds=5)
 '5 seconds'
->>> time_indications.pretty_print_component(seconds=7, minutes=1, lang='fr')
+>>> time_indications.format_component(seconds=7, minutes=1, lang='fr')
 '7 secondes'
->>> time_indications.pretty_print_component(minutes=1, lang='fr')
+>>> time_indications.format_component(minutes=1, lang='fr')
 '1 minute'
 >>> 
 ```

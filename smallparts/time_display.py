@@ -54,9 +54,11 @@ def as_time(datetime_object, with_msec=False, with_usec=False):
                          with_usec=with_usec)
 
 
-class TimedeltaPrettyPrinter():
+class LooseTimedeltaFormatter():
 
-    """Create a function to pretty print timedeltas"""
+    """Create a function to format timedeltas,
+    leaving out small components on big timedeltas
+    """
 
     units = (
         time_indications.WEEKS,
@@ -105,7 +107,7 @@ class TimedeltaPrettyPrinter():
         return (totals, values)
 
     def __call__(self, timedelta_object, lang='en'):
-        """Pretty print the given timedelta object in the
+        """Format the given timedelta object in the
         given language, regarding the limits.
         """
         totals, values = self.get_components(timedelta_object)
@@ -118,7 +120,7 @@ class TimedeltaPrettyPrinter():
                     #
                 #
                 printed_components.append(
-                    time_indications.pretty_print_component(
+                    time_indications.format_component(
                         **{current_unit: values[current_unit],
                            'lang': lang}))
             #

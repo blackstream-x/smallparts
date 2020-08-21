@@ -21,7 +21,7 @@ class TestSimple(unittest.TestCase):
         self.assertRaisesRegex(
             ValueError,
             r"^Language \'.+?\' not supported!$",
-            time_indications.pretty_print_component,
+            time_indications.format_component,
             seconds=7,
             lang='UNSUPPORTED')
 
@@ -29,26 +29,26 @@ class TestSimple(unittest.TestCase):
         """Missing time component"""
         self.assertRaises(
             ValueError,
-            time_indications.pretty_print_component)
+            time_indications.format_component)
 
     def test_default_language(self):
         """Default (english) time components"""
         self.assertEqual(
-            time_indications.pretty_print_component(seconds=7),
+            time_indications.format_component(seconds=7),
             '7 seconds')
 
     def test_german(self):
         """German time components"""
         self.assertEqual(
-            time_indications.pretty_print_component(hours=19,
-                                                    lang=languages.DE),
+            time_indications.format_component(hours=19,
+                                              lang=languages.DE),
             '19 Stunden')
 
     def test_pardon_my_french(self):
         """French time components"""
         self.assertEqual(
-            time_indications.pretty_print_component(weeks=1,
-                                                    lang=languages.FR),
+            time_indications.format_component(weeks=1,
+                                              lang=languages.FR),
             '1 semaine')
 
 
