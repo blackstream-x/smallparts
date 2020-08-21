@@ -68,16 +68,23 @@ with all attributes is kept separately.
 
 ##### Parameters:
 
-* *image_placeholders* is used for distinguishing between three ways of
+* *image\_placeholders* is used for distinguishing between three ways of
   treating inline images:
   1. When left at the default value ```'with alt text only'```,
      a placeholder '\[image: \<text from the alt attribute\>\]'
      is placed into the resulting text only for images having an *alt* attribute.
   2. When set to ```True```, images havin an *alt* attribute are treated as above,
-     and a placeholder \[image\] is placed into the resulting text for each
+     and a placeholder '\[image\]' is placed into the resulting text for each
      image lacking the *alt* attribute.
   3. When set to ```False``` or ```None```, no placeholders for images are put
      into the resulting text at all.
+* *body\_reqired*:
+  * when set to ```True``` (the default), the parser collects
+    content only inside the ```<body>``` element. This is suitable for parsing
+    entire HTML documents.
+  * When set to ```False```, all content is collected. This is suitable for
+    HTML body fragments.
+
 
 ##### Methods:
 
