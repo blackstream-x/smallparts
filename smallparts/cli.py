@@ -12,7 +12,6 @@ Command line interface (subprocess) wrapper
 import shlex
 import subprocess
 
-# from smallparts import constants
 from smallparts import namespaces
 
 # "Proxy" subprocess constants
@@ -28,7 +27,7 @@ STDOUT = subprocess.STDOUT
 
 class IllegalStateException(Exception):
 
-    """Raised when a Subprocess is run twice"""
+    """Raised when a ProcessPipeline is run twice"""
 
     ...
 
@@ -38,10 +37,22 @@ class IllegalStateException(Exception):
 #
 
 
-class Subprocess():
+class ProcessPipeline():
 
     """Wrapper for a subprocess.Popen() object
     also storing the result
+
+    Supports keyword arguments for the subprocess.Popen() objects as defined in
+    https://docs.python.org/3.6/library/subprocess.html#popen-constructor
+    with the exception of the deprecated preexec_fn argument.
+    Default values are the same as documented there, except stderr and stdout
+    (both defaulting to subprocess.PIPE).
+
+    Additional keyword arguments:
+        run_immediately (default: False)
+        intermediate_stderr (default: None)
+        input (default: None)
+        timeout (default: None)
     """
 
     # States
@@ -59,15 +70,14 @@ class Subprocess():
         shell=False,
         cwd=None,
         env=None,
-        universal_newlines=None,
+        universal_newlines=False,
         startupinfo=None,
         creationflags=0,
         restore_signals=True,
         start_new_session=False,
         pass_fds=(),
         encoding=None,
-        errors=None,
-        text=None)
+        errors=None)
 
     def __init__(self, *commands, **kwargs):
         """Prepare subprocess(es)"""
@@ -96,7 +106,7 @@ class Subprocess():
         self.__repeatable = namespaces.Namespace(
             commands=commands,
             kwargs=kwargs.copy())
-        self.__parameters = namespaces.Namespace(
+        self.__arguments = namespaces.Namespace(
             input=None,
             intermediate_stderr=self.__kwargs.pop(
                 'intermediate_stderr', None),
@@ -104,7 +114,7 @@ class Subprocess():
         self.__state = self.states.ready
         #
         if len(self.__commands) == 1:
-            self.__parameters.input = self.__kwargs.pop('input', None)
+            self.__arguments.input = self.__kwargs.pop('input', None)
             self.__kwargs['stdin'] = PIPE
         else:
             self.__kwargs['stdin'] = None
@@ -122,13 +132,13 @@ class Subprocess():
         return self.__class__(*self.__repeatable.commands,
                               **self.__repeatable.kwargs)
 
-    def __get_process_parameters(self):
-        """Return a dict containing a fully usable parameters set
+    def __get_process_arguments(self):
+        """Return a dict containing a fully usable arguments set
         for subprocess.Popen()
         """
-        parameters = self.defaults.copy()
-        parameters.update(self.__kwargs)
-        return parameters
+        arguments = dict(self.defaults)
+        arguments.update(self.__kwargs)
+        return arguments
 
     def run(self):
         """Start the subprocess(es) and set the result"""
@@ -138,38 +148,38 @@ class Subprocess():
         #
         self.__state = self.states.running
         processes = []
+        process_arguments = self.__get_process_arguments()
         number_of_commands = len(self.__commands)
         last_command_index = number_of_commands - 1
         for current_index in range(number_of_commands):
-            cpp = namespaces.Namespace(self.__get_process_parameters())
+            current_arguments = namespaces.Namespace(process_arguments)
             if current_index > 0:
-                cpp.stdin = processes[current_index - 1].stdout
+                current_arguments.stdin = processes[current_index - 1].stdout
             #
             if current_index < last_command_index:
-                cpp.stdout = PIPE
-                cpp.stderr = self.__parameters.intermediate_stderr
+                current_arguments.stdout = PIPE
+                current_arguments.stderr = self.__arguments.intermediate_stderr
             #
             try:
                 current_process = subprocess.Popen(
                     self.__commands[current_index],
-                    bufsize=cpp.bufsize,
-                    executable=cpp.executable,
-                    stdin=cpp.stdin,
-                    stdout=cpp.stdout,
-                    stderr=cpp.stderr,
-                    close_fds=cpp.close_fds,
-                    shell=cpp.shell,
-                    cwd=cpp.cwd,
-                    env=cpp.env,
-                    universal_newlines=cpp.universal_newlines,
-                    startupinfo=cpp.startupinfo,
-                    creationflags=cpp.creationflags,
-                    restore_signals=cpp.restore_signals,
-                    start_new_session=cpp.start_new_session,
-                    pass_fds=cpp.pass_fds,
-                    encoding=cpp.encoding,
-                    errors=cpp.errors,
-                    text=cpp.text)
+                    bufsize=current_arguments.bufsize,
+                    executable=current_arguments.executable,
+                    stdin=current_arguments.stdin,
+                    stdout=current_arguments.stdout,
+                    stderr=current_arguments.stderr,
+                    close_fds=current_arguments.close_fds,
+                    shell=current_arguments.shell,
+                    cwd=current_arguments.cwd,
+                    env=current_arguments.env,
+                    universal_newlines=current_arguments.universal_newlines,
+                    startupinfo=current_arguments.startupinfo,
+                    creationflags=current_arguments.creationflags,
+                    restore_signals=current_arguments.restore_signals,
+                    start_new_session=current_arguments.start_new_session,
+                    pass_fds=current_arguments.pass_fds,
+                    encoding=current_arguments.encoding,
+                    errors=current_arguments.errors)
             except (OSError, ValueError):
                 self.__state = self.states.finished
                 raise
@@ -177,14 +187,15 @@ class Subprocess():
             processes.append(current_process)
         #
         # Close stdout to allow processes to receive SIGPIPE, see
-        # https://docs.python.org/3/library/subprocess.html#replacing-shell-pipeline
+        # <https://docs.python.org/3.6/library/
+        #  subprocess.html#replacing-shell-pipeline>
         for current_index in range(last_command_index):
             processes[current_index].stdout.close()
         #
         # Communicate with the last process in the pipeline
         stdout, stderr = processes[last_command_index].communicate(
-            input=self.__parameters.input,
-            timeout=self.__parameters.timeout)
+            input=self.__arguments.input,
+            timeout=self.__arguments.timeout)
         self.result = namespaces.Namespace(
             stdout=stdout,
             stderr=stderr,
@@ -193,6 +204,7 @@ class Subprocess():
         for current_index in range(last_command_index):
             processes[current_index].wait()
         #
+        self.__state = self.states.finished
 
 
 # vim:fileencoding=utf-8 autoindent ts=4 sw=4 sts=4 expandtab:

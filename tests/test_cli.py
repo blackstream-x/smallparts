@@ -17,7 +17,7 @@ class TestSimple(unittest.TestCase):
 
     def test_single_command(self):
         """Single command call"""
-        ls_call = cli.Subprocess(['ls', '-1d'])
+        ls_call = cli.ProcessPipeline(['ls', '-1d'])
         self.assertEqual(
             ls_call.result.stdout,
             b'.\n')
@@ -28,25 +28,25 @@ class TestSimple(unittest.TestCase):
             ls_call.repeat().result.stdout,
             b'.\n')
         self.assertEqual(
-            cli.Subprocess('ls -1d').result.stdout,
+            cli.ProcessPipeline('ls -1d').result.stdout,
             b'.\n')
         self.assertRaises(
             OSError,
-            cli.Subprocess,
+            cli.ProcessPipeline,
             ['non-existent-command'])
         self.assertRaisesRegex(
             ValueError,
             '^Invalid command',
-            cli.Subprocess,
+            cli.ProcessPipeline,
             None)
         self.assertRaisesRegex(
             ValueError,
             '^Please provide at least one command.',
-            cli.Subprocess)
+            cli.ProcessPipeline)
 
     def test_pipeline(self):
         """Shell pipeline call"""
-        pipeline_call = cli.Subprocess(
+        pipeline_call = cli.ProcessPipeline(
             ['ls', '-1d'],
             ['tr', '.', 'x'],
             ['tr', 'x', '-'],
