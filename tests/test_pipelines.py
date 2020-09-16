@@ -2,13 +2,13 @@
 
 """
 
-test smallparts.sequences
+test smallparts.pipelines
 
 """
 
 import unittest
 
-from smallparts import cli
+from smallparts import pipelines
 
 
 class TestSimple(unittest.TestCase):
@@ -17,36 +17,36 @@ class TestSimple(unittest.TestCase):
 
     def test_single_command(self):
         """Single command call"""
-        ls_call = cli.ProcessPipeline(['ls', '-1d'])
+        ls_call = pipelines.ProcessPipeline(['ls', '-1d'])
         self.assertEqual(
             ls_call.result.stdout,
             b'.\n')
         self.assertRaises(
-            cli.IllegalStateException,
+            pipelines.IllegalStateException,
             ls_call.run)
         self.assertEqual(
             ls_call.repeat().result.stdout,
             b'.\n')
         self.assertEqual(
-            cli.ProcessPipeline('ls -1d').result.stdout,
+            pipelines.ProcessPipeline('ls -1d').result.stdout,
             b'.\n')
         self.assertRaises(
             OSError,
-            cli.ProcessPipeline,
+            pipelines.ProcessPipeline,
             ['non-existent-command'])
         self.assertRaisesRegex(
             ValueError,
             '^Invalid command',
-            cli.ProcessPipeline,
+            pipelines.ProcessPipeline,
             None)
         self.assertRaisesRegex(
             ValueError,
             '^Please provide at least one command.',
-            cli.ProcessPipeline)
+            pipelines.ProcessPipeline)
 
     def test_pipeline(self):
         """Shell pipeline call"""
-        pipeline_call = cli.ProcessPipeline(
+        pipeline_call = pipelines.ProcessPipeline(
             ['ls', '-1d'],
             ['tr', '.', 'x'],
             ['tr', 'x', '-'],

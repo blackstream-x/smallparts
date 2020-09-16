@@ -2,9 +2,9 @@
 
 """
 
-smallparts.cli
+smallparts.pipelines
 
-Command line interface (subprocess) wrapper
+Command line interface (subprocess) pipelines wrapper
 
 """
 
@@ -14,11 +14,13 @@ import subprocess
 
 from smallparts import namespaces
 
+
 # "Proxy" subprocess constants
 
 DEVNULL = subprocess.DEVNULL
 PIPE = subprocess.PIPE
 STDOUT = subprocess.STDOUT
+
 
 #
 # Exceptions
@@ -140,7 +142,7 @@ class ProcessPipeline():
         arguments.update(self.__kwargs)
         return arguments
 
-    def run(self):
+    def run(self, input=None, timeout=None, check=False):
         """Start the subprocess(es) and set the result"""
         if self.__state != self.states.ready:
             raise IllegalStateException('Please create a new instance'
@@ -192,14 +194,39 @@ class ProcessPipeline():
         for current_index in range(last_command_index):
             processes[current_index].stdout.close()
         #
-        # Communicate with the last process in the pipeline
-        stdout, stderr = processes[last_command_index].communicate(
-            input=self.__arguments.input,
-            timeout=self.__arguments.timeout)
-        self.result = namespaces.Namespace(
+        # Communicate with the last process in the pipeline.
+        # Mimick subprocess.run() behaviour as in
+        # https://github.com/python/cpython/blob/3.6/Lib/subprocess.py#L424
+        last_process = processes[last_command_index]
+        try:
+            stdout, stderr = last_process.communicate(
+                input=input or self.__arguments.input,
+                timeout=timeout or self.__arguments.timeout)
+        except subprocess.TimeoutExpired:
+            last_process.kill()
+            stdout, stderr = last_process.communicate()
+            raise subprocess.TimeoutExpired(
+                last_process.args,
+                timeout,
+                output=stdout,
+                stderr=stderr)
+        except:
+            last_process.kill()
+            last_process.wait()
+            raise
+        returncode = last_process.poll()
+        if check and returncode:
+            raise subprocess.CalledProcessError(
+                returncode,
+                last_process.args,
+                output=stdout,
+                stderr=stderr)
+        #
+        self.result = subprocess.CompletedProcess(
+            last_process.args,
+            returncode,
             stdout=stdout,
-            stderr=stderr,
-            returncode=processes[last_command_index].returncode)
+            stderr=stderr)
         # processes cleanup; avoid ResourceWarnings
         for current_index in range(last_command_index):
             processes[current_index].wait()
