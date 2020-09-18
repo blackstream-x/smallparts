@@ -6,6 +6,7 @@ test smallparts.pipelines
 
 """
 
+import subprocess
 import unittest
 
 from smallparts import pipelines
@@ -15,7 +16,14 @@ class TestSimple(unittest.TestCase):
 
     """Test the module"""
 
-    def test_single_command(self):
+    def test_acstract_pipeline(self):
+        """Abstract class"""
+        self.assertRaises(
+            NotImplementedError,
+            pipelines.AbstractPipeline,
+            ['ls', '-1d'])
+
+    def test_single_command_pipeline(self):
         """Single command call"""
         ls_call = pipelines.ProcessPipeline(['ls', '-1d'])
         self.assertEqual(
@@ -23,7 +31,7 @@ class TestSimple(unittest.TestCase):
             b'.\n')
         self.assertRaises(
             pipelines.IllegalStateException,
-            ls_call.run)
+            ls_call.execute)
         self.assertEqual(
             ls_call.repeat().result.stdout,
             b'.\n')
@@ -43,6 +51,16 @@ class TestSimple(unittest.TestCase):
             ValueError,
             '^Please provide at least one command.',
             pipelines.ProcessPipeline)
+        self.assertRaises(
+            subprocess.TimeoutExpired,
+            pipelines.ProcessPipeline,
+            'sleep 10',
+            timeout=1)
+        self.assertRaises(
+            subprocess.CalledProcessError,
+            pipelines.ProcessPipeline,
+            'mkdir .',
+            check=True)
 
     def test_pipeline(self):
         """Shell pipeline call"""
@@ -54,6 +72,58 @@ class TestSimple(unittest.TestCase):
         self.assertEqual(
             pipeline_call.result.stdout,
             b'u\n')
+        self.assertWarns(
+            UserWarning,
+            pipelines.ProcessPipeline,
+            ['echo', 'x'],
+            ['tr', '-', 'u'],
+            input=b'a x b x c')
+
+    def test_single_command_chain(self):
+        """Single command call"""
+        ls_call = pipelines.ProcessChain(['ls', '-1d'])
+        self.assertEqual(
+            ls_call.result.stdout,
+            b'.\n')
+        self.assertRaises(
+            pipelines.IllegalStateException,
+            ls_call.execute)
+        self.assertEqual(
+            ls_call.repeat().result.stdout,
+            b'.\n')
+        self.assertEqual(
+            pipelines.ProcessChain('ls -1d').result.stdout,
+            b'.\n')
+        self.assertRaises(
+            OSError,
+            pipelines.ProcessChain,
+            ['non-existent-command'])
+        self.assertRaisesRegex(
+            ValueError,
+            '^Invalid command',
+            pipelines.ProcessChain,
+            None)
+        self.assertRaisesRegex(
+            ValueError,
+            '^Please provide at least one command.',
+            pipelines.ProcessChain)
+
+    def test_chain(self):
+        """Shell ProcessChain call"""
+        pipeline_call = pipelines.ProcessChain(
+            ['ls', '-1d'],
+            ['tr', '.', 'x'],
+            ['tr', 'x', '-'],
+            ['tr', '-', 'u'])
+        self.assertEqual(
+            pipeline_call.result.stdout,
+            b'u\n')
+        self.assertEqual(
+            pipelines.ProcessChain.run(
+                ['tr', 'x', '-'],
+                ['tr', '-', 'u'],
+                input=b'a x b x c').stdout,
+            b'a u b u c')
 
 
 if __name__ == '__main__':
