@@ -40,7 +40,7 @@ class IllegalStateException(Exception):
 #
 
 
-class AbstractPipeline():
+class _AbstractPipeline():
 
     """Wrapper for a subprocess.Popen() object
     also storing the result
@@ -171,7 +171,7 @@ class AbstractPipeline():
         return pipeline.result
 
 
-class ProcessChain(AbstractPipeline):
+class ProcessChain(_AbstractPipeline):
 
     """Pseudo pipeline using sequential subprocesses with subprocess.run()
     """
@@ -179,7 +179,7 @@ class ProcessChain(AbstractPipeline):
     def __init__(self, *commands, **kwargs):
         """Initialize the super class"""
         self.all_results = []
-        super(ProcessChain, self).__init__(*commands, **kwargs)
+        super().__init__(*commands, **kwargs)
 
     def execute(self, **kwargs):
         """Start the subprocess(es) and set the result"""
@@ -229,7 +229,7 @@ class ProcessChain(AbstractPipeline):
         self.result = self.all_results[last_command_index]
 
 
-class ProcessPipeline(AbstractPipeline):
+class ProcessPipeline(_AbstractPipeline):
 
     """Pipeline using parallel subprocesses as described in
     https://docs.python.org/3/library/subprocess.html#replacing-shell-pipeline
@@ -300,14 +300,14 @@ class ProcessPipeline(AbstractPipeline):
             stdout, stderr = last_process.communicate(
                 input=self.call_arguments.input,
                 timeout=self.call_arguments.timeout)
-        except subprocess.TimeoutExpired:
+        except subprocess.TimeoutExpired as timeout_expired:
             last_process.kill()
             stdout, stderr = last_process.communicate()
             raise subprocess.TimeoutExpired(
                 last_process.args,
                 self.call_arguments.timeout,
                 output=stdout,
-                stderr=stderr)
+                stderr=stderr) from timeout_expired
         #
         returncode = last_process.poll()
         if self.call_arguments.check and returncode:

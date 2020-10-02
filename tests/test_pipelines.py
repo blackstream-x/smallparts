@@ -20,7 +20,7 @@ class TestSimple(unittest.TestCase):
         """Abstract class"""
         self.assertRaises(
             NotImplementedError,
-            pipelines.AbstractPipeline,
+            pipelines._AbstractPipeline,
             ['ls', '-1d'])
 
     def test_single_command_pipeline(self):
