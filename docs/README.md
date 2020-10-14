@@ -44,6 +44,11 @@
 
 > Simple namespaces initialized like dicts.
 
+## [smallparts.pipelines](./smallparts.pipelines.md)
+
+> Wrappers for command line interface pipelines with semantics from
+> [subprocess.run()](https://docs.python.org/3/library/subprocess.html#subprocess.run).
+
 ## [smallparts.sequences](./smallparts.sequences.md)
 
 > Functions for sequences.

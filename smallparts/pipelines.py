@@ -143,18 +143,16 @@ class _AbstractPipeline():
         """Start the subprocess(es) and set the result"""
         raise NotImplementedError
 
-    def set_state_running(self):
+    def prepare_execution(self, mapping):
         """Check if self.state is ready, set self.state to running
-        or raise an exception
+        or raise an exception.
+        Update self.call_arguments from the provided mapping.
         """
         if self.current_state != self.states.ready:
             raise IllegalStateException('Please create a new instance'
                                         ' using the .repeat() method!')
         #
         self.current_state = self.states.running
-
-    def update_call_arguments(self, mapping):
-        """Update self.call_arguments from the provided mapping"""
         for item in ('check', 'input', 'timeout'):
             try:
                 self.call_arguments[item] = mapping[item]
@@ -164,10 +162,10 @@ class _AbstractPipeline():
         #
 
     @classmethod
-    def run(cls, *args, **kwargs):
+    def run(cls, *commands, **kwargs):
         """Create an instance, run it immediately and return its result"""
         kwargs['execute_immediately'] = True
-        pipeline = cls(*args, **kwargs)
+        pipeline = cls(*commands, **kwargs)
         return pipeline.result
 
 
@@ -183,10 +181,8 @@ class ProcessChain(_AbstractPipeline):
 
     def execute(self, **kwargs):
         """Start the subprocess(es) and set the result"""
-        self.set_state_running()
-        self.update_call_arguments(kwargs)
+        self.prepare_execution(kwargs)
         self.all_results.clear()
-        # processes = []
         number_of_commands = len(self.commands)
         last_command_index = number_of_commands - 1
         for current_index in range(number_of_commands):
@@ -237,8 +233,7 @@ class ProcessPipeline(_AbstractPipeline):
 
     def execute(self, **kwargs):
         """Start the subprocess(es) and set the result"""
-        self.set_state_running()
-        self.update_call_arguments(kwargs)
+        self.prepare_execution(kwargs)
         processes = []
         number_of_commands = len(self.commands)
         last_command_index = number_of_commands - 1
