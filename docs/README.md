@@ -46,8 +46,7 @@
 
 ## [smallparts.pipelines](./smallparts.pipelines.md)
 
-> Wrappers for command line interface pipelines with semantics from
-> [subprocess.run()](https://docs.python.org/3/library/subprocess.html#subprocess.run).
+> Wrappers for command line interface pipelines.
 
 ## [smallparts.sequences](./smallparts.sequences.md)
 

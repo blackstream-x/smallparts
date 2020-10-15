@@ -78,6 +78,12 @@ class TestSimple(unittest.TestCase):
             ['echo', 'x'],
             ['tr', '-', 'u'],
             input=b'a x b x c')
+        self.assertWarns(
+            UserWarning,
+            pipelines.ProcessPipeline,
+            ['echo', 'x'],
+            ['tr', '-', 'u'],
+            intermediate_stderr=pipelines.PIPE)
 
     def test_single_command_chain(self):
         """Single command call"""

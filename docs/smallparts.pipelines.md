@@ -1,8 +1,12 @@
 # smallparts.pipelines
 
-> Wrappers for command line interface pipelines with semantics from
-> [subprocess.run()](https://docs.python.org/3/library/subprocess.html#subprocess.run).  
+> Wrappers for command line interface pipelines.  
 > Source: [smallparts/pipelines.py](https://github.com/blackstream-x/smallparts/blob/master/smallparts/pipelines.py)
+
+> Please note: You can also use this module to just run a single command,
+> but in that case the
+> [subprocess.run()](https://docs.python.org/3/library/subprocess.html#subprocess.run).
+> function is simpler and more suitable.
 
 ## Module contents
 
@@ -55,7 +59,8 @@ is used for this purpose.
   is raised if the last command exceeds the specified timeout in seconds.
 * if _intermediate\_stderr_ is set to **STDOUT**, standard error from any command but the last
   is redirected to the same command’s standard output stream (which is consumed by the next process’
-  standartd input).
+  standard input). If set to **DEVNULL**, standard error is suppressed.
+  **PIPE** does not make sense here.
   
 **Pipelines are run immediately unless _execute\_immediately_ is set to ```False```!**,
 
@@ -70,13 +75,13 @@ default to **PIPE**.
 
 Returns a fresh copy of the current instance. That way, pipelines can be repeated.
 
-**.execute**(_check=False, input=None, timeout=None_):
+**.execute**(_\*\*kwargs_):
 
 Executes the pipeline and sets the instance’s **.result** attribute to a
 [subprocess.CompletedProcess](https://docs.python.org/3/library/subprocess.html#subprocess.CompletedProcess)
 instance matching the result of the last command in the pipeline.
 
-_check_, _input_ and _timeout_ may be given here to override the values from instantiation.
+_check_, _input_ and _timeout_ may be given as keyword arguments here to override the values from instantiation.
 
 *classmethod:*  
 **.run**(_\*commands, \*\*kwargs_)
@@ -94,8 +99,7 @@ but the single commands are run sequentially, and all results
 instances) are collected in the **.all_results** attribute unique to this class.
 
 Another significant difference  is that _input_ - if provided - is always sent
-to standard input of the first command
-regardless of how many commands there are in the pipeline.
+to standard input of the first command, regardless of how many commands there are in the pipeline.
 
 The methods are the same as **ProcessPipeline** instance and class methods.
 
@@ -107,14 +111,16 @@ The methods are the same as **ProcessPipeline** instance and class methods.
 >>> echo_pipeline = pipelines.ProcessPipeline('echo "x"', ['tr', 'x', 'u'])
 >>> echo_pipeline.result
 CompletedProcess(args=['tr', 'x', 'u'], returncode=0, stdout=b'u\n', stderr=b'')
+>>> 
+>>> # Repeated execution causes an IllegalStateException:
 >>> echo_pipeline.execute()
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
-  File "/home/rainer/projects/github/smallparts/smallparts/pipelines.py", line 236, in execute
-    self.prepare_execution(kwargs)
-  File "/home/rainer/projects/github/smallparts/smallparts/pipelines.py", line 152, in prepare_execution
+  File "/home/rainer/projects/github/smallparts/smallparts/pipelines.py", line 163, in execute
     raise IllegalStateException('Please create a new instance'
 smallparts.pipelines.IllegalStateException: Please create a new instance using the .repeat() method!
+>>> 
+>>> # Use the .repeat() method to "clone" the pipeline instead:
 >>> echo_pipeline_2 = echo_pipeline.repeat()
 >>> echo_pipeline_2.result
 CompletedProcess(args=['tr', 'x', 'u'], returncode=0, stdout=b'u\n', stderr=b'')

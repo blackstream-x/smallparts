@@ -128,6 +128,29 @@ smallparts.text.transcode.**transcode_file**(*file_name, to_encoding=**DEFAULT_T
 >>> transcode.fix_double_utf8_transformation('Ã¤Ã¶Ã¼')
 'äöü'
 >>> 
+>>> source_text = '« Sacré-Cœur »'
+>>> utf8_text = transcode.to_bytes(source_text)
+>>> utf8_text
+b'\xc2\xab Sacr\xc3\xa9-C\xc5\x93ur \xc2\xbb'
+>>> transcode.to_unicode(utf8_text)
+'« Sacré-Cœur »'
+>>> 
+>>> source_text_2 = 'äöü'
+>>> latin_text = transcode.to_bytes(source_text_2, to_encoding='iso-8859-1')
+>>> latin_text
+b'\xe4\xf6\xfc'
+>>> utf_text_2 = transcode.to_bytes(source_text_2)
+>>> utf_text_2
+b'\xc3\xa4\xc3\xb6\xc3\xbc'
+>>> 
+>>> # Encoding auto-detection (falls back to cp1252 for non-UTF8 encoded
+>>> # byte sequences without a byte order mark)
+>>> transcode.to_unicode_and_encoding_name(latin_text)
+('äöü', 'cp1252')
+>>> transcode.to_unicode_and_encoding_name(utf_text_2)
+('äöü', 'utf-8')
+>>> 
+
 ```
 
 ----

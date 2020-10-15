@@ -58,11 +58,6 @@ class _AbstractPipeline():
         timeout (default: None)
     """
 
-    # States
-    states = namespaces.Namespace(
-        ready=0,
-        running=1,
-        finished=2)
     defaults = dict(
         bufsize=-1,
         executable=None,
@@ -81,6 +76,11 @@ class _AbstractPipeline():
         pass_fds=(),
         encoding=None,
         errors=None)
+    states = namespaces.Namespace(
+        ready=0,
+        running=1,
+        finished=2)
+    supported_intermediate_stderr = (None, DEVNULL, STDOUT)
 
     def __init__(self, *commands, **kwargs):
         """Prepare subprocess(es)"""
@@ -114,6 +114,13 @@ class _AbstractPipeline():
         execute_immediately = kwargs.pop('execute_immediately', True)
         input_ = kwargs.pop('input', None)
         intermediate_stderr = kwargs.pop('intermediate_stderr', None)
+        if intermediate_stderr not in self.supported_intermediate_stderr:
+            warnings.warn(
+                'Supported values for intermediate_stderr:'
+                ' None, DEVNULL or STDOUT. {0!r} has been ignored and'
+                ' substituted by None.'.format(intermediate_stderr))
+            intermediate_stderr = None
+        #
         timeout = kwargs.pop('timeout', None)
         self.call_arguments = namespaces.Namespace(
             check=check,
@@ -139,14 +146,18 @@ class _AbstractPipeline():
         return self.__class__(*self.__repeatable.commands,
                               **self.__repeatable.kwargs)
 
-    def execute(self, **kwargs):
-        """Start the subprocess(es) and set the result"""
+    def _execution_implementation(self):
+        """Override this method in child classes with the implementation
+        of the pipeline call: Start the subprocess(es) and set the result
+        """
         raise NotImplementedError
 
-    def prepare_execution(self, mapping):
+    def execute(self, **kwargs):
         """Check if self.state is ready, set self.state to running
         or raise an exception.
-        Update self.call_arguments from the provided mapping.
+        Update self.call_arguments from the keyword arguments
+        check, input, and timeout (each if provided)
+        Execute the concrete implementation of
         """
         if self.current_state != self.states.ready:
             raise IllegalStateException('Please create a new instance'
@@ -155,11 +166,12 @@ class _AbstractPipeline():
         self.current_state = self.states.running
         for item in ('check', 'input', 'timeout'):
             try:
-                self.call_arguments[item] = mapping[item]
+                self.call_arguments[item] = kwargs[item]
             except KeyError:
                 continue
             #
         #
+        self._execution_implementation()
 
     @classmethod
     def run(cls, *commands, **kwargs):
@@ -179,13 +191,11 @@ class ProcessChain(_AbstractPipeline):
         self.all_results = []
         super().__init__(*commands, **kwargs)
 
-    def execute(self, **kwargs):
+    def _execution_implementation(self):
         """Start the subprocess(es) and set the result"""
-        self.prepare_execution(kwargs)
         self.all_results.clear()
-        number_of_commands = len(self.commands)
-        last_command_index = number_of_commands - 1
-        for current_index in range(number_of_commands):
+        last_command_index = len(self.commands) - 1
+        for current_index, current_command in enumerate(self.commands):
             current_arguments = namespaces.Namespace(self.process_arguments)
             if current_index > 0:
                 current_input = self.all_results[current_index - 1].stdout
@@ -199,7 +209,7 @@ class ProcessChain(_AbstractPipeline):
             #
             self.all_results.append(
                 subprocess.run(
-                    self.commands[current_index],
+                    current_command,
                     input=current_input,
                     check=self.call_arguments.check,
                     timeout=self.call_arguments.timeout,
@@ -231,23 +241,22 @@ class ProcessPipeline(_AbstractPipeline):
     https://docs.python.org/3/library/subprocess.html#replacing-shell-pipeline
     """
 
-    def execute(self, **kwargs):
+    def _execution_implementation(self):
         """Start the subprocess(es) and set the result"""
-        self.prepare_execution(kwargs)
         processes = []
-        number_of_commands = len(self.commands)
-        last_command_index = number_of_commands - 1
-        if number_of_commands > 1:
+        last_command_index = len(self.commands) - 1
+        if last_command_index > 0:
             # We communicate() only with the last process in the pipeline.
             # If there is more than one process, input is ignored,
             # and a warning is issued.
             if self.call_arguments.input is not None:
-                warnings.warn('Input {0!r} has been ignored.'
-                              ' Use the ProcessChain class to avoid this.')
+                warnings.warn(
+                    'Input {0.call_arguments.input!r} has been ignored.'
+                    ' Use the ProcessChain class to avoid this.'.format(self))
             self.call_arguments.input = None
             self.process_arguments['stdin'] = None
         #
-        for current_index in range(number_of_commands):
+        for current_index, current_command in enumerate(self.commands):
             current_arguments = namespaces.Namespace(self.process_arguments)
             if current_index > 0:
                 current_arguments.stdin = processes[current_index - 1].stdout
@@ -259,7 +268,7 @@ class ProcessPipeline(_AbstractPipeline):
             #
             try:
                 current_process = subprocess.Popen(
-                    self.commands[current_index],
+                    current_command,
                     bufsize=current_arguments.bufsize,
                     executable=current_arguments.executable,
                     stdin=current_arguments.stdin,
